@@ -7,31 +7,16 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-
   return (
     <div className="relative flex h-screen overflow-hidden">
 
       {/* 🌈 Global Conic Gradient */}
       <div className="conic-gradient-bg" />
       <div className="glass-layout"/>
-<div className="glass-surface"/>
+      <div className="glass-surface"/>
 
-
-      {/* Mobile Overlay */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/60 md:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div
-        className={`fixed inset-y-0 left-0 z-40 transform transition-transform md:static md:z-0 md:transform-none ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
+      {/* Sidebar - Now always visible with collapsible behavior */}
+      <div className="z-40">
         <Sidebar />
       </div>
 

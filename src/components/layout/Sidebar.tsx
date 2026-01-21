@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import {
   Home,
@@ -15,7 +16,8 @@ import {
   LayoutDashboard,
   CalendarCheck,
   MapPinned,
-  SquareGanttChart
+  SquareGanttChart,
+  ChevronRight
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 
@@ -46,6 +48,7 @@ const navItems = [
 export function Sidebar() {
   const { logout } = useAuth()
   const navigate = useNavigate()
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const handleLogout = () => {
     logout()
@@ -53,42 +56,46 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="w-[260px] h-screen bg-white flex flex-col sticky top-0 border-r border-gray-200 shadow-sm">
+    <aside
+      className="h-screen bg-white flex flex-col sticky top-0 border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out"
+      style={{
+        width: isExpanded ? "240px" : "70px",
+      }}
+      onMouseEnter={() => setIsExpanded(true)}
+      onMouseLeave={() => setIsExpanded(false)}
+    >
       {/* Header with Logo and Menu */}
-      <div className="p-4">
-        <div className="flex items-center gap-2 ">
-          <Menu size={24} className="text-gray-700" />
-          <div className="flex-1">
-            <div className="flex items-center gap-1.5">
+      <div className="p-4 flex items-center justify-center border-b border-gray-200">
+        <div className="flex items-center gap-3 w-full">
+          <Menu size={24} className="text-gray-700 flex-shrink-0" />
+          {/* Logo and Text - Hidden when collapsed */}
+          <div
+            className="flex-1 overflow-hidden transition-all duration-300"
+            style={{
+              opacity: isExpanded ? 1 : 0,
+              pointerEvents: isExpanded ? "auto" : "none",
+            }}
+          >
+            <div className="flex items-center gap-2">
               <img
                 src="/images/logo.jpeg"
-                height="60px"
-                width="60px"
+                height="40px"
+                width="40px"
+                className="rounded"
               />
               <div>
-                <h1 className="font-bold text-base text-gray-900 leading-tight">Right Step</h1>
-                <p className="text-xs text-gray-600 leading-tight">Flooring</p>
+                <h1 className="font-bold text-sm text-gray-900 leading-tight whitespace-nowrap">
+                  Right Step
+                </h1>
+                <p className="text-xs text-gray-600 leading-tight whitespace-nowrap">Flooring</p>
               </div>
             </div>
           </div>
         </div>
-
-
-        {/* <button className="w-full flex items-center justify-center gap-2 border-2 bg-primary  text-white  font-semibold py-2.5 px-4 rounded-xl transition-colors mb-3">
-          <Plus size={20} className="bg-secondary text-primary rounded-xl p-0.5 " />
-          <span>Create new</span>
-        </button>
-
-     
-        <button className="w-full flex items-center border border-gray-400 rounded-xl gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50  transition-colors relative">
-          <Sparkles size={20} className="text-primary" />
-          <span className="font-medium flex-1 text-left">Genius AI</span>
-          <span className="ml-auto bg-secondary text-primary text-xs font-semibold px-2.5 py-1 rounded-full">NEW</span>
-        </button> */}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 overflow-y-auto">
+      <nav className="flex-1 px-2 py-4 overflow-y-auto">
         {navItems.map((item, index) => {
           const previousItem = navItems[index - 1]
           const isNewSection = previousItem?.section !== item.section
@@ -97,37 +104,61 @@ export function Sidebar() {
             <div key={item.name}>
               {/* Section Divider */}
               {isNewSection && (
-                <div className="mt-4 mb-2">
-                  <div className="mt-2 border-t border-gray-200" />
+                <div
+                  className="my-3 transition-all duration-300"
+                  style={{
+                    opacity: isExpanded ? 1 : 0.3,
+                  }}
+                >
+                  <div className="border-t border-gray-200" />
                 </div>
               )}
 
               <NavLink
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center gap-4 px-4 py-3 mt-1 text-sm font-medium rounded-lg transition-all ${isActive
-                    ? "bg-[#fcf76d52] text-primary border-r-4 border-secondary"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-black"
+                  `flex items-center gap-4 px-3 py-3 my-1 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
+                    isActive
+                      ? "bg-[#fcf76d52] text-primary border-r-4 border-secondary"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-black"
                   }`
                 }
+                title={!isExpanded ? item.name : undefined}
               >
                 <item.icon size={20} className="flex-shrink-0" />
-                <span className="flex-1">{item.name}</span>
+                {/* Text label - Hidden when collapsed */}
+                <span
+                  className="flex-1 overflow-hidden transition-all duration-300"
+                  style={{
+                    opacity: isExpanded ? 1 : 0,
+                    width: isExpanded ? "auto" : "0",
+                  }}
+                >
+                  {item.name}
+                </span>
               </NavLink>
             </div>
           )
         })}
       </nav>
 
-
       {/* Footer */}
-      <div className="p-3 border-t border-gray-200 space-y-2 bg-white">
+      <div className="p-2 border-t border-gray-200 space-y-2 bg-white">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-4 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+          className="w-full flex items-center gap-4 px-3 py-3 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all whitespace-nowrap"
+          title="Logout"
         >
-          <LogOut size={20} />
-          <span>Logout</span>
+          <LogOut size={20} className="flex-shrink-0" />
+          <span
+            className="flex-1 overflow-hidden transition-all duration-300"
+            style={{
+              opacity: isExpanded ? 1 : 0,
+              width: isExpanded ? "auto" : "0",
+            }}
+          >
+            Logout
+          </span>
         </button>
       </div>
     </aside>

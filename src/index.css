@@ -424,3 +424,68 @@ tr:hover {
   background-color: #94a3b8;
   border-radius: 9999px;
 }
+/* ===============================
+   COLLAPSIBLE SIDEBAR STYLES
+================================ */
+
+aside {
+  /* Default collapsed state */
+  width: 70px;
+}
+
+/* Smooth transition for width */
+aside {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Navigation items - text hiding on collapse */
+aside a,
+aside button {
+  /* Ensure proper spacing regardless of expansion */
+  gap: 1rem;
+}
+
+/* Icon stays visible, text fades */
+aside .flex-shrink-0 {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Container for text content - smooth opacity transition */
+aside [style*="pointer-events"] {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Active nav link styling */
+aside a.active-link {
+  position: relative;
+}
+
+/* Sidebar on small screens - stays collapsed by default */
+@media (max-width: 768px) {
+  aside {
+    width: 70px !important;
+  }
+  
+  /* Hide text on mobile to save space */
+  aside a span,
+  aside button span {
+    display: none !important;
+  }
+}
+
+/* Tablet and up - allow hover expansion */
+@media (min-width: 769px) {
+  aside {
+    width: 70px;
+  }
+  
+  aside:hover {
+    width: 240px;
+  }
+}
+
+/* Ensure scrollbar doesn't cause layout shift */
+aside nav {
+  @apply thin-scrollbar;
+  scrollbar-gutter: stable;
+}
