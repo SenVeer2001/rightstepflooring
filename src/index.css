@@ -1,0 +1,426 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+   --color-primary: #387d22;
+  --color-secondary: #fdf76d;
+  --primarySoft: "#f7fbf4";
+  --primaryDark: "#2c621b";
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-gray-50: #f9fafb;
+  --color-gray-900: #111827;
+   --theme-accent: #8317e8;
+   --theme-primary: #47c51c;
+  --theme-secondary: #a5a118;
+ 
+ 
+  
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  color: #1f2937;
+  /* background: #ffffff; */
+  line-height: 1.6;
+  letter-spacing: 0.5px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+
+/* ===============================
+   CONIC GRADIENT BACKGROUND
+================================ */
+
+.conic-gradient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.conic-gradient-bg::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 820px;
+  height: 720px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: conic-gradient(
+    from 180deg,
+    var(--theme-primary),
+    var(--theme-secondary),
+    #567a04,
+    var(--theme-primary)
+  );
+  filter: blur(140px);
+  opacity: 0.80;
+}
+
+/* ===============================
+   GLASS LAYOUT EFFECT
+================================ */
+
+.glass-layout {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.glass-surface {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+}
+
+@keyframes rotateConicGradient {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.conic-gradient-bg::before {
+  animation: rotateConicGradient 20s linear infinite;
+}
+
+
+
+
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply text-gray-900 antialiased;
+  min-height: 100vh;
+
+
+}
+
+/* Input Styles */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+  @apply w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-white text-gray-900 placeholder-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  font-family: inherit;
+}
+
+textarea {
+  @apply resize-none;
+}
+
+/* Button Styles */
+button {
+  @apply font-medium transition-all duration-200 cursor-pointer focus:outline-none;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2.5 font-medium rounded-lg transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-primary {
+  @apply bg-gradient-primary text-white hover:shadow-lg hover:shadow-blue-500/30 focus:ring-blue-500 active:scale-95;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 30px rgba(14, 165, 233, 0.3);
+}
+
+.btn-secondary {
+  @apply bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 active:scale-95;
+}
+
+.btn-success {
+  @apply bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
+}
+
+.btn-sm {
+  @apply px-3 py-1.5 text-sm;
+}
+
+.btn-lg {
+  @apply px-6 py-3 text-lg;
+}
+
+/* Card Styles */
+.card {
+  @apply bg-white rounded-xl border border-gray-200 shadow-soft hover:shadow-medium transition-all duration-300 p-6;
+}
+
+.card-hover {
+  @apply hover:border-blue-200 hover:shadow-lg-glow;
+}
+
+.card-elevated {
+  @apply bg-white rounded-xl shadow-medium border border-gray-200/50 p-6;
+}
+
+/* Badge Styles */
+.badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.badge-primary {
+  @apply bg-blue-100 text-blue-700;
+}
+
+.badge-success {
+  @apply bg-green-100 text-green-700;
+}
+
+.badge-warning {
+  @apply bg-yellow-100 text-yellow-700;
+}
+
+.badge-danger {
+  @apply bg-red-100 text-red-700;
+}
+
+.badge-secondary {
+  @apply bg-gray-100 text-gray-700;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  @apply w-2 h-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full hover:bg-gray-400;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.4s ease-out;
+}
+
+.animate-slide-left {
+  animation: slideLeft 0.4s ease-out;
+}
+
+/* Loading Spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  @apply inline-block w-5 h-5 border-2 border-blue-200 border-t-blue-500 rounded-full;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Utility Classes */
+.flex-center {
+  @apply flex items-center justify-center;
+}
+
+.text-gradient {
+  @apply bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent;
+}
+
+.shadow-glow {
+  @apply shadow-lg shadow-blue-500/20;
+}
+
+.blur-glass {
+  @apply backdrop-blur-md bg-white/30 border border-white/40;
+}
+
+/* Gradient Background */
+.gradient-primary {
+  @apply bg-gradient-primary;
+}
+
+.gradient-dark {
+  @apply bg-gradient-dark;
+}
+
+/* Typography */
+h1 {
+  @apply text-4xl font-bold text-gray-900 leading-tight;
+}
+
+h2 {
+  @apply text-3xl font-bold text-gray-900 leading-snug;
+}
+
+h3 {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+h4 {
+  @apply text-xl font-semibold text-gray-900;
+}
+
+h5 {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+h6 {
+  @apply text-base font-semibold text-gray-900;
+}
+
+a {
+  @apply text-blue-600 hover:text-blue-700 transition-colors duration-200;
+}
+
+/* Table Styles */
+table {
+  @apply w-full border-collapse;
+}
+
+th {
+  @apply bg-gray-50 px-4 py-3 text-left text-sm font-semibold text-gray-900 border-b border-gray-200;
+}
+
+td {
+  @apply px-4 py-3 border-b border-gray-100;
+}
+
+tr:hover {
+  @apply bg-gray-50;
+}
+
+/* Responsive Grid */
+.grid-responsive {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+/* Shadow Utilities */
+.shadow-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Focus Ring Utilities */
+.ring-focus {
+  @apply ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Responsive Text */
+.responsive-text {
+  @apply text-sm sm:text-base md:text-lg lg:text-xl;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-40 animate-fade-in;
+}
+
+/* Modal Content */
+.modal-content {
+  @apply relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-auto p-8 animate-slide-up;
+}
+
+/* Divider */
+.divider {
+  @apply border-t border-gray-200 my-6;
+}
+
+.divider-light {
+  @apply border-t border-gray-100 my-4;
+}
+/* react-select – remove blue text selection */
+.react-select__input input::selection {
+  background: rgba(56, 125, 34, 0.25);
+  color: #1f2937;
+}
+
+.react-select__input input::-moz-selection {
+  background: rgba(56, 125, 34, 0.25);
+  color: #1f2937;
+}
+
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #a5c4ad transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #94a3b8;
+  border-radius: 9999px;
+}
