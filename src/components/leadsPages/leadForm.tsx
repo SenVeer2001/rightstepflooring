@@ -3,8 +3,6 @@ import SelectReact from "react-select"
 import { Calendar, Upload, X } from "lucide-react"
 
 import {
-  LEAD_STATUSES,
-  LEAD_STATUS_LABELS,
   LEAD_SOURCES,
 } from "../LeadModal"
 import type { LeadFormData } from "../LeadModal"
@@ -35,6 +33,20 @@ const LEAD_TAG_OPTIONS = [
   { value: "VIP", label: "VIP" },
 ]
 
+const CONTACT_METHODS = [
+  "Phone",
+  "Email",
+  "Text",
+  "In Person",
+  "Video Call",
+]
+
+const FINAL_WALK_THROUGH_OPTIONS = [
+  "Required",
+  "Not Required",
+  "Scheduled",
+]
+
 export function LeadForm({
   formData,
   onChange,
@@ -45,6 +57,7 @@ export function LeadForm({
   onSubmit: () => void
 }) {
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [newReceipt, setNewReceipt] = useState("")
 
   /* ================= VALIDATION ================= */
 
@@ -97,20 +110,41 @@ export function LeadForm({
     onSubmit()
   }
 
-  /* ================= UI ================= */
+  const handleAddReceipt = () => {
+    if (newReceipt.trim()) {
+      onChange({
+        ...formData,
+        receipts: [...formData.receipts, newReceipt.trim()],
+      })
+      setNewReceipt("")
+    }
+  }
+
+  const handleRemoveReceipt = (index: number) => {
+    onChange({
+      ...formData,
+      receipts: formData.receipts.filter((_, i) => i !== index),
+    })
+  }
 
   return (
     <div className="bg-white rounded-xl border p-6 space-y-8">
 
       {/* CLIENT DETAILS */}
-      <FormSection title="Client Details">
+      <FormSection title="Client">
         <Input
-          label="Client name"
+          label="First Name"
           value={formData.clientName}
-          // @ts-ignore
-          error={errors.clientName}
           onChange={value =>
             onChange({ ...formData, clientName: value })
+          }
+        />
+
+        <Input
+          label="Last Name"
+          value={formData.companyName}
+          onChange={value =>
+            onChange({ ...formData, companyName: value })
           }
         />
 
@@ -125,8 +159,6 @@ export function LeadForm({
         <Input
           label="Phone"
           value={formData.phone}
-          // @ts-ignore
-          error={errors.phone}
           onChange={value =>
             onChange({
               ...formData,
@@ -136,28 +168,35 @@ export function LeadForm({
         />
 
         <Input
+          label="Mobile Phone"
+          value={formData.mobilePhone}
+          onChange={value =>
+            onChange({
+              ...formData,
+              mobilePhone: value.replace(/\D/g, ""),
+            })
+          }
+        />
+
+        <Input
           label="Email"
           value={formData.email}
-          // @ts-ignore
-          error={errors.email}
           onChange={value =>
             onChange({ ...formData, email: value })
+          }
+        />
+
+        <Input
+          label="Address"
+          value={formData.address}
+          onChange={value =>
+            onChange({ ...formData, address: value })
           }
         />
       </FormSection>
 
       {/* SERVICE LOCATION */}
       <FormSection title="Service Location">
-        <Input
-          label="Address"
-          value={formData.address}
-           // @ts-ignore
-          error={errors.address}
-          onChange={value =>
-            onChange({ ...formData, address: value })
-          }
-        />
-
         <Input
           label="Unit"
           value={formData.unit}
@@ -169,8 +208,6 @@ export function LeadForm({
         <Input
           label="City"
           value={formData.city}
-          // @ts-ignore
-          error={errors.city}
           onChange={value =>
             onChange({ ...formData, city: value })
           }
@@ -179,8 +216,6 @@ export function LeadForm({
         <Select
           label="State"
           value={formData.state}
-           // @ts-ignore
-          error={errors.state}
           onChange={value =>
             onChange({ ...formData, state: value })
           }
@@ -227,8 +262,6 @@ export function LeadForm({
               label="Date"
               type="date"
               value={formData.scheduleDate}
-               // @ts-ignore
-              error={errors.scheduleDate}
               onChange={value =>
                 onChange({ ...formData, scheduleDate: value })
               }
@@ -237,8 +270,6 @@ export function LeadForm({
               label="Start time"
               type="time"
               value={formData.startTime}
-               // @ts-ignore
-              error={errors.startTime}
               onChange={value =>
                 onChange({ ...formData, startTime: value })
               }
@@ -247,8 +278,6 @@ export function LeadForm({
               label="End time"
               type="time"
               value={formData.endTime}
-               // @ts-ignore
-              error={errors.endTime}
               onChange={value =>
                 onChange({ ...formData, endTime: value })
               }
@@ -258,12 +287,10 @@ export function LeadForm({
       </div>
 
       {/* JOB DETAILS */}
-      <FormSection title="Job Details">
+      <FormSection title="Job">
         <Select
           label="Job type"
           value={formData.jobType}
-           // @ts-ignore
-          error={errors.jobType}
           onChange={value =>
             onChange({ ...formData, jobType: value })
           }
@@ -278,13 +305,12 @@ export function LeadForm({
 
         <Select
           label="Job source"
-           // @ts-ignore
-          value={formData.source}
+          value={formData.jobSource}
           onChange={value =>
-             // @ts-ignore
-            onChange({ ...formData, source: value })
+            onChange({ ...formData, jobSource: value })
           }
         >
+          <option value="">Select source</option>
           {LEAD_SOURCES.map(source => (
             <option key={source} value={source}>
               {source}
@@ -293,14 +319,175 @@ export function LeadForm({
         </Select>
 
         <Textarea
-          label="Job description"
+          label="Description"
           value={formData.jobDescription}
-          error={errors.jobDescription}
-           // @ts-ignore
           onChange={value =>
             onChange({ ...formData, jobDescription: value })
           }
         />
+      </FormSection>
+
+      {/* TEAM */}
+      <FormSection title="Team">
+        <Input
+          label="Assign A Tech"
+          value={formData.assignTech}
+          onChange={value =>
+            onChange({ ...formData, assignTech: value })
+          }
+        />
+
+        <Input
+          label="Tech Assigned"
+          value={formData.techAssigned}
+          onChange={value =>
+            onChange({ ...formData, techAssigned: value })
+          }
+        />
+      </FormSection>
+
+      {/* CHECK LIST */}
+      <FormSection title="Check List">
+        <Input
+          label="Preferred Name"
+          value={formData.preferredName}
+          onChange={value =>
+            onChange({ ...formData, preferredName: value })
+          }
+        />
+
+        <div>
+          <label className="text-xs font-semibold block mb-2">Did you collect all tools</label>
+          <input
+            type="checkbox"
+            checked={formData.toolsCollected}
+            onChange={e =>
+              onChange({
+                ...formData,
+                toolsCollected: e.target.checked,
+              })
+            }
+            className="h-5 w-5 accent-primary"
+          />
+        </div>
+
+        <Input
+          label="Product"
+          value={formData.productType}
+          onChange={value =>
+            onChange({ ...formData, productType: value })
+          }
+        />
+
+        <Select
+          label="Preferred Contact Method"
+          value={formData.preferredContactMethod}
+          onChange={value =>
+            onChange({ ...formData, preferredContactMethod: value })
+          }
+        >
+          <option value="">Select method</option>
+          {CONTACT_METHODS.map(method => (
+            <option key={method} value={method}>
+              {method}
+            </option>
+          ))}
+        </Select>
+
+        <Input
+          label="Color"
+          value={formData.color}
+          onChange={value =>
+            onChange({ ...formData, color: value })
+          }
+        />
+
+        <Input
+          label="Desired Project Start Date"
+          type="date"
+          value={formData.projectStartDate}
+          onChange={value =>
+            onChange({ ...formData, projectStartDate: value })
+          }
+        />
+
+        <Select
+          label="Final Walk Through"
+          value={formData.finalWalkThrough}
+          onChange={value =>
+            onChange({ ...formData, finalWalkThrough: value })
+          }
+        >
+          <option value="">Select option</option>
+          {FINAL_WALK_THROUGH_OPTIONS.map(option => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </Select>
+
+        <Input
+          label="Number of Rooms"
+          type="number"
+          value={formData.numberOfRooms}
+          onChange={value =>
+            onChange({ ...formData, numberOfRooms: value })
+          }
+        />
+
+        <Input
+          label="Square Footage"
+          type="number"
+          value={formData.squareFootage}
+          onChange={value =>
+            onChange({ ...formData, squareFootage: value })
+          }
+        />
+
+        <div>
+          <label className="text-xs font-semibold block mb-2">Photos Properly documented in Company.Com</label>
+          <input
+            type="checkbox"
+            checked={formData.photosDocumented}
+            onChange={e =>
+              onChange({
+                ...formData,
+                photosDocumented: e.target.checked,
+              })
+            }
+            className="h-5 w-5 accent-primary"
+          />
+        </div>
+
+        <Input
+          label="Thank you gift to customer"
+          value={formData.thankYouGift}
+          onChange={value =>
+            onChange({ ...formData, thankYouGift: value })
+          }
+        />
+
+        <Input
+          label="Project Delivery time"
+          value={formData.projectDeliveryTime}
+          onChange={value =>
+            onChange({ ...formData, projectDeliveryTime: value })
+          }
+        />
+
+        <Select
+          label="Sales Qualifiers"
+          value={formData.salesQualifiers}
+          onChange={value =>
+            onChange({ ...formData, salesQualifiers: value })
+          }
+        >
+          <option value="">Select qualifier</option>
+          <option value="hot">Hot</option>
+          <option value="warm">Warm</option>
+          <option value="cold">Cold</option>
+          <option value="disqualified">Disqualified</option>
+        </Select>
       </FormSection>
 
       {/* TAGS */}
@@ -321,21 +508,80 @@ export function LeadForm({
         />
       </div>
 
+      {/* SUBCONTRACTOR NOTES */}
+      <Textarea
+        label="Subcontractor Notes"
+        value={formData.subcontractorNotes}
+        onChange={value =>
+          onChange({ ...formData, subcontractorNotes: value })
+        }
+      />
+
+      {/* UPLOAD RECEIPTS */}
+      <FormSection title="Upload Receipts Here">
+        <div className="md:col-span-2">
+          <div className="flex gap-2 mb-4">
+            <Input
+              label="Receipt URL or File"
+              value={newReceipt}
+              onChange={setNewReceipt}
+            />
+            <button
+              type="button"
+              onClick={handleAddReceipt}
+              className="mt-6 px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-opacity-90"
+            >
+              <Upload size={16} />
+            </button>
+          </div>
+
+          {formData.receipts && formData.receipts.length > 0 && (
+            <div className="space-y-2">
+              {formData.receipts.map((receipt, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
+                >
+                  <span className="text-sm text-gray-700">{receipt}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveReceipt(idx)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </FormSection>
+
+      {/* SALES CONSULTANT */}
+      <FormSection title="Sales Consultant">
+        <Input
+          label="Rep Name"
+          value={formData.salesConsultantName}
+          onChange={value =>
+            onChange({ ...formData, salesConsultantName: value })
+          }
+        />
+      </FormSection>
+
       {/* NOTES */}
       <Textarea
         label="Notes"
         value={formData.notes}
-         // @ts-ignore
         onChange={value =>
           onChange({ ...formData, notes: value })
         }
       />
 
       {/* ACTIONS */}
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-3">
         <button
           onClick={handleSave}
-          className="px-6 py-2 bg-primary text-white rounded-lg font-semibold"
+          className="px-6 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-opacity-90"
         >
           Save Changes
         </button>
@@ -363,7 +609,7 @@ function FormSection({
   )
 }
 
-function Textarea({ label, value, onChange, error }: any) {
+function Textarea({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return (
     <div className="md:col-span-2">
       <label className="text-xs font-semibold block mb-1">{label}</label>
@@ -371,13 +617,8 @@ function Textarea({ label, value, onChange, error }: any) {
         value={value}
         onChange={e => onChange(e.target.value)}
         rows={3}
-        className={`w-full border rounded-lg px-3 py-2 text-sm
-          ${error ? "border-red-500" : "border-gray-300"}
-        `}
+        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
       />
-      {error && (
-        <p className="text-xs text-red-600 mt-1">{error}</p>
-      )}
     </div>
   )
 }

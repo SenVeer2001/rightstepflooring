@@ -4,7 +4,8 @@ import { useState } from "react"
 import LeadHeader from "./LeadHeader"
 import LeadTabs from "./LeadTabs"
 import EstimatesSection from "./EstimatesSection"
-
+import { AttachmentsSection } from "./AttachmentsSection"
+import { TasksSection } from "./TasksSection"
 
 import type { LeadFormData } from "../../components/LeadModal"
 import { LeadForm } from "./leadForm"
@@ -18,10 +19,10 @@ type LeadTabKey = "details" | "estimates" | "attachments" | "tasks"
 export function LeadDetails() {
   const { leadId } = useParams<{ leadId: string }>()
 
-  const [activeTab, setActiveTab] = useState<LeadTabKey>("estimates")
+  const [activeTab, setActiveTab] = useState<LeadTabKey>("details")
 
   const [leadFormData, setLeadFormData] = useState<LeadFormData>({
-    // @ts-ignore
+    // @ts-expect-error - initial mock data
     name: "Mike Cousins",
     phone: "(555) 123-4567",
     email: "mike@email.com",
@@ -66,15 +67,11 @@ export function LeadDetails() {
       )}
 
       {activeTab === "attachments" && (
-        <div className="bg-white rounded-xl border p-6 text-gray-500">
-          No attachments yet
-        </div>
+        <AttachmentsSection />
       )}
 
       {activeTab === "tasks" && (
-        <div className="bg-white rounded-xl border p-6 text-gray-500">
-          No tasks yet
-        </div>
+        <TasksSection />
       )}
     </div>
   )

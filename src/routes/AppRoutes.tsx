@@ -17,8 +17,13 @@ import { Team } from "../app/team/Team"
 import { Map } from "../app/map/Map"
 import { Estimates } from "../app/estimates/Estimates"
 import { Products } from "../app/product/Products"
-import { StaffManagement } from "../app/staff/StaffManagement"
-import { LeadDetails } from "../components/leads/LeadDetails"
+
+
+import { InvoiceDetailsPage } from "../components/invoicePages/InvoiceDetailsPage"
+import { LeadDetails } from "../components/leadsPages/LeadDetails"
+import UserProfile from "../components/teamPages/UserProfile"
+import { CategoryManagement, CourseBuilder, CourseDashboard, CourseDetail, CoursePublish, ModuleDetail } from "../app/training"
+
 
 
 export function AppRoutes() {
@@ -49,18 +54,36 @@ export function AppRoutes() {
                   <Route path="/team" element={<Team />} />
                   <Route path="/technicians" element={<Technicians />} />
                   <Route path="/invoices" element={<Invoices />} />
+                  <Route path="/invoices/:invoiceId" element={<InvoiceDetailsPage />} />
                   {/* <Route path="/estimates" element={<Estimates />} /> */}
                   <Route
                     path="/estimates"
                     element={<Navigate to="/estimates/add" replace />}
                   />
+
                   <Route path="/estimates">
                     <Route path="view" element={<Estimates />} />
                     <Route path="add" element={<Estimates />} />
                   </Route>
                   <Route path="/reports" element={<Reports />} />
                   <Route path="/automation" element={<Automation />} />
-                  <Route path="/staff" element={<StaffManagement />} />
+                 
+                  <Route path="/team" element={<Team/>} />
+                  <Route path="/team/user/:id" element={<UserProfile/>} />
+
+
+
+                  {/* tranning route  */}
+
+                  <Route path="/training/courses" element={<CourseDashboard />} />
+                  <Route path="/training/courses/new" element={<CourseDetail />} />
+
+                  <Route path="/training/courses/edit/:id" element={<CourseBuilder />} />
+                  <Route path="/training/categories" element={<CategoryManagement />} />
+                  <Route path="/training/courses/view/:id" element={<CourseDetail />} />
+                  <Route path="/training/builder/module/:moduleId" element={<ModuleDetail />} />
+                  <Route path="/training/publish" element={<CoursePublish />} />
+
 
 
                   <Route path="/settings" element={<Settings />} />

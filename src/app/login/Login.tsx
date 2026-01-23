@@ -5,24 +5,8 @@ import { useAuth } from "../../context/AuthContext"
 
 /* ===================== SMALL HELPERS ===================== */
 
-function FilledHint({
-  visible,
-  text,
-}: {
-  visible: boolean
-  text: string
-}) {
-  if (!visible) return null
 
-  return (
-    <div className="mt-2 flex items-center gap-2 text-xs text-[#2c621b] bg-[#f7fbf4]/60 border border-[#387d22]/30 rounded-md px-3 py-1.5 backdrop-blur-sm">
-      <span className="h-1.5 w-1.5 rounded-full bg-[#387d22]" />
-      {text}
-    </div>
-  )
-}
 
-/* ===================== COMPONENT ===================== */
 
 export function Login() {
 
@@ -74,18 +58,18 @@ export function Login() {
 
       {/* Card */}
       <div className="relative w-full max-w-md z-10">
-        <div className="glass-surface rounded-2xl p-8 md:p-10 backdrop-blur-xl">
+        <div className="glass-surface rounded-2xl p-8 md:p-10  backdrop-blur-md">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-[#387d22] to-[#2c621b] rounded-xl flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-lg">
               <img
-              src="/images/logo.jpeg"
+                src="/images/logo.jpeg"
               />
             </div>
             <h1 className="text-3xl font-bold text-gray-900">
               Right Step Flooring
             </h1>
-           
+
           </div>
 
           {/* Form */}
@@ -207,7 +191,7 @@ export function Login() {
 
           {/* Footer */}
           <p className="text-center text-gray-600 text-xs mt-6">
-            Secure login powered by Webkype• v1.0.0
+            Secure login powered by Webkype
           </p>
         </div>
       </div>

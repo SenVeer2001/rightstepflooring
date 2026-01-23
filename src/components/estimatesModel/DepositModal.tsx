@@ -81,6 +81,7 @@ export function DepositModal({
               type="number"
               value={depositValue}
               min={0}
+              max={100}
               onChange={(e) => setDepositValue(Number(e.target.value))}
               className="flex-1 border rounded-lg px-3 py-2 text-sm
                          focus:ring-2 focus:ring-primary focus:outline-none"

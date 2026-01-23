@@ -11,6 +11,7 @@ import { DepositModal } from '../../components/estimatesModel/DepositModal'
 interface LineItem {
   id: string
   description: string
+  image?:string
   quantity: number
   price: number
   cost: number
@@ -57,9 +58,9 @@ interface PriceBookCategory {
 const priceBookItems: PriceBookItem[] = [
   // @ts-ignore
   { id: "1", name: "Base residential rekey", price: 150, cost: 60 },
-   // @ts-ignore
+  // @ts-ignore
   { id: "2", name: "Smart lock installation (Gold)", price: 300, cost: 120 },
-   // @ts-ignore
+  // @ts-ignore
   { id: "3", name: "Service fee", price: 100, cost: 30 },
 ]
 
@@ -275,6 +276,7 @@ export function Estimates() {
           amount: 5000,
           taxable: false,
           color: "Purple",
+          image:"https://images.pexels.com/photos/1249611/pexels-photo-1249611.jpeg"
         },
       ],
     },
@@ -468,7 +470,7 @@ export function Estimates() {
 
   const handleSaveItem = () => {
     if (!editingItemData) return
-  //@ts-ignore
+    //@ts-ignore
     const updatedItems = currentData.items.map(item =>
       item.id === editingItemData.id
         ? {
@@ -537,7 +539,7 @@ export function Estimates() {
   const currentData = activeTab === 'view' && selectedEstimate ? selectedEstimate : newEstimate
 
 
-//@ts-ignore
+  //@ts-ignore
   const itemCost = currentData.items.reduce(
     (sum, item) => sum + item.amount,
     0
@@ -614,7 +616,7 @@ export function Estimates() {
 
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto p-6">
-        <div className="max-w-6xl">
+        <div className="">
 
           <div className="bg-white rounded-xl border shadow-sm p-6 mb-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -671,10 +673,6 @@ export function Estimates() {
                 </div>
               </div>
 
-
-
-
-              {/* Status Dropdown */}
               <div className="lg:col-span-3">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Status
@@ -821,21 +819,27 @@ export function Estimates() {
                     currentData.items.map((item) => (
                       <tr key={item.id} className="hover:bg-gray-50">
                         {/* DESCRIPTION */}
-                        <td className="px-6 py-3">
-                          {editingItemId === item.id ? (
-                            <textarea
-                              value={editingItemData?.description || ""}
-                              onChange={e =>
-                                setEditingItemData({ ...editingItemData!, description: e.target.value })
-                              }
-                              className="w-full h-14 px-3 py-2 border rounded-md text-xs
+                        <td className="px-2.5 py-3 min-w-[230px]">
+                          <div className='flex items-center gap-2'>
+                            <img src={item?.image} alt="" height={20} width={70} className="max-h-15 w-15 rounded-md" />
+                            <div className=''>
+                              <span className='text-gray-800 font-semibold text-xs'>Paint Estimate</span>
+                              {editingItemId === item.id ? (
+                                <textarea
+                                  value={editingItemData?.description || ""}
+                                  onChange={e =>
+                                    setEditingItemData({ ...editingItemData!, description: e.target.value })
+                                  }
+                                  className="w-full h-14 px-3 py-2 border rounded-md text-xs
                    focus:ring-1 focus:ring-primary"
-                            />
-                          ) : (
-                            <p className="text-xs text-gray-700 whitespace-pre-wrap">
-                              {item.description}
-                            </p>
-                          )}
+                                />
+                              ) : (
+                                <p className="text-xs text-gray-700 whitespace-pre-wrap">
+                                  {item.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
                         </td>
 
                         {/* QUANTITY */}
@@ -1281,23 +1285,23 @@ export function Estimates() {
             /> */}
             <div className='flex items-center justify-between'>
               <button
-              type="button"
-              onClick={() => setIsDepositModalOpen(true)}
-              className={` text-sm text-left text-blue-500 underline cursor-pointer"
+                type="button"
+                onClick={() => setIsDepositModalOpen(true)}
+                className={` text-sm text-left text-blue-500 underline cursor-pointer"
                 `}
-            >
-              Deposit:
-            </button>
-            <input
-              type="number"
-              value={deposit}
-              // readOnly={readOnly}
-              min={0}
-              // @ts-ignore
-              onChange={setDeposit}
-              className={`max-w-[300px] border border-gray-400 rounded-md px-2 py-1 text-sm
+              >
+                Deposit:
+              </button>
+              <input
+                type="number"
+                value={deposit}
+                // readOnly={readOnly}
+                min={0}
+                // @ts-ignore
+                onChange={setDeposit}
+                className={`max-w-[300px] border border-gray-400 rounded-md px-2 py-1 text-sm
               `}
-            />
+              />
             </div>
 
             <div className="border-t pt-3 flex justify-between font-semibold text-base">
@@ -1318,7 +1322,7 @@ export function Estimates() {
       <PriceBookModal
         isOpen={isPriceBookOpen}
         onClose={() => setIsPriceBookOpen(false)}
-         // @ts-ignore
+        // @ts-ignore
         data={priceBookData}
         onAddToEstimate={handleAddFromPriceBook}
       />
@@ -1337,7 +1341,7 @@ export function Estimates() {
         isOpen={isCreateModalOpen}
         initialName={newItemName}
         onCancel={() => setIsCreateModalOpen(false)}
-         // @ts-ignore
+        // @ts-ignore
         onSave={handleSaveCreatedItem}
       />
 
@@ -1352,20 +1356,20 @@ export function Estimates() {
       )}
 
       <DepositModal
-  isOpen={isDepositModalOpen}
-  initialType="amount"
-  initialValue={deposit}
-  onClose={() => setIsDepositModalOpen(false)}
-  onSave={(data) => {
-    if (data.depositType === "amount") {
-      setDeposit(data.depositValue)
-    } else {
-      // example: percentage → convert using total
-      setDeposit((total * data.depositValue) / 100)
-    }
-    setIsDepositModalOpen(false)
-  }}
-/>
+        isOpen={isDepositModalOpen}
+        initialType="amount"
+        initialValue={deposit}
+        onClose={() => setIsDepositModalOpen(false)}
+        onSave={(data) => {
+          if (data.depositType === "amount") {
+            setDeposit(data.depositValue)
+          } else {
+            // example: percentage → convert using total
+            setDeposit((total * data.depositValue) / 100)
+          }
+          setIsDepositModalOpen(false)
+        }}
+      />
 
 
     </div>

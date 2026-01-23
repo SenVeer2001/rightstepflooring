@@ -120,6 +120,7 @@ export function Leads() {
   const [searchText, setSearchText] = useState("")
   const [selectedStatus, setSelectedStatus] = useState<"all" | LeadStatus>("all")
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set())
   const navigateTo = useNavigate()
 
 
@@ -181,6 +182,32 @@ export function Leads() {
     setLeads(previousLeads =>
       previousLeads.filter(lead => lead.id !== leadId)
     )
+  }
+
+  const handleStatusChange = (leadId: string, newStatus: LeadStatus) => {
+    setLeads(previousLeads =>
+      previousLeads.map(lead =>
+        lead.id === leadId ? { ...lead, status: newStatus } : lead
+      )
+    )
+  }
+
+  const handleSelectLead = (leadId: string) => {
+    const newSelected = new Set(selectedLeads)
+    if (newSelected.has(leadId)) {
+      newSelected.delete(leadId)
+    } else {
+      newSelected.add(leadId)
+    }
+    setSelectedLeads(newSelected)
+  }
+
+  const handleSelectAll = () => {
+    if (selectedLeads.size === filteredLeads.length) {
+      setSelectedLeads(new Set())
+    } else {
+      setSelectedLeads(new Set(filteredLeads.map(lead => lead.id)))
+    }
   }
 
 
@@ -293,6 +320,14 @@ export function Leads() {
           <table className="min-w-[1000px] w-full text-sm">
             <thead className="bg-gray-100">
               <tr>
+                <th className="px-4 py-3 text-left font-semibold whitespace-nowrap w-12">
+                  <input
+                    type="checkbox"
+                    checked={selectedLeads.size === filteredLeads.length && filteredLeads.length > 0}
+                    onChange={handleSelectAll}
+                    className="w-3 h-3 rounded border-gray-300 cursor-pointer accent-primary"
+                  />
+                </th>
                 {["ID", "Status", "Tags", "Source", "Client", "Location", "Type", "Phone", "Created", "Action"].map(
                   (heading) => (
                     <th
@@ -310,16 +345,30 @@ export function Leads() {
               {filteredLeads.map((lead) => (
                 <tr
                   key={lead.id}
-                  className="border-t hover:bg-gray-50"
+                  className={`border-t hover:bg-gray-50 ${selectedLeads.has(lead.id) ? "bg-blue-50" : ""}`}
                 >
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedLeads.has(lead.id)}
+                      onChange={() => handleSelectLead(lead.id)}
+                      className="w-3 h-3 rounded border-gray-300 cursor-pointer accent-primary"
+                    />
+                  </td>
                   <td className="px-4 py-3 font-semibold">{lead.id}</td>
 
                   <td className="px-4 py-3">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[lead.status]}`}
+                    <select
+                      value={lead.status}
+                      onChange={(e) => handleStatusChange(lead.id, e.target.value as LeadStatus)}
+                      className={`px-2 py-1 rounded-md text-xs font-semibold border cursor-pointer border-primary outline-none`}
                     >
-                      {LEAD_STATUS_LABELS[lead.status]}
-                    </span>
+                      {Object.entries(LEAD_STATUS_LABELS).map(([statusKey, statusLabel]) => (
+                        <option key={statusKey} value={statusKey}>
+                          {statusLabel}
+                        </option>
+                      ))}
+                    </select>
                   </td>
 
                   <td className="px-4 py-3">

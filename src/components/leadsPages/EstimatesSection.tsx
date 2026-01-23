@@ -11,9 +11,7 @@ function EstimatesSection() {
         </h3>
 
         <div className="flex gap-2">
-          <button className="px-4 py-2 rounded-lg border text-sm">
-            Load proposal template
-          </button>
+         
 
           <button onClick={()=>{navigate('/estimates/add')}} className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold flex items-center gap-1">
             <Plus size={16} />

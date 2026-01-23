@@ -1,4 +1,4 @@
-import { useState } from "react"
+
 import { Sidebar } from "./Sidebar"
 import { Header } from "./Header"
 
@@ -25,8 +25,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
         <Header />
 
-        <main className="mt-1 flex-1 overflow-auto p-4 md:p-6 ">
-          <div className="mx-auto max-w-7xl">
+        <main className=" flex-1 overflow-auto  ">
+          <div className="mx-auto max-w-full">
             {children}
           </div>
         </main>

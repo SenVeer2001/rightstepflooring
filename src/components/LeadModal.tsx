@@ -1,9 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import SelectReact from "react-select"
+import Select, { components } from "react-select";
+import type { MultiValue, OptionProps } from "react-select";
+
+
+
 import { X, Upload, Calendar } from "lucide-react"
 import type { StylesConfig } from "react-select"
+
 
 /* ===================== TAG STYLES ===================== */
 
@@ -52,12 +57,18 @@ export const JOB_TYPES = [
 export const LEAD_SOURCES = ["Google", "Facebook", "Instagram", "Website", "Phone Call", "WhatsApp", "Referral", "Walk-in",]
 export const LEAD_TYPES = ["Flooring", "Carpet", "Tile", "Vinyl", "Wood", "Other",]
 
-const TAG_OPTIONS = [
+type TagOption = {
+  value: string;
+  label: string;
+};
+
+const TAG_OPTIONS: TagOption[] = [
   { value: "Hot", label: "Hot" },
   { value: "Urgent", label: "Urgent" },
   { value: "High Value", label: "High Value" },
   { value: "Follow-up", label: "Follow-up" },
-]
+];
+
 
 /* ===================== TYPES ===================== */
 
@@ -67,6 +78,7 @@ export interface LeadFormData {
   companyName: string
   phone: string
   phoneExt: string
+  mobilePhone: string
   email: string
 
   /* Location */
@@ -89,6 +101,34 @@ export interface LeadFormData {
   startTime: string
   endTime: string
 
+  /* Team */
+  assignTech: string
+  techAssigned: string
+
+  /* Checklist */
+  preferredName: string
+  toolsCollected: boolean
+  productType: string
+  preferredContactMethod: string
+  color: string
+  projectStartDate: string
+  finalWalkThrough: string
+  numberOfRooms: string
+  squareFootage: string
+  photosDocumented: boolean
+  thankYouGift: string
+  projectDeliveryTime: string
+  salesQualifiers: string
+
+  /* Subcontractor Notes */
+  subcontractorNotes: string
+
+  /* Receipts */
+  receipts: string[]
+
+  /* Sales Consultant */
+  salesConsultantName: string
+
   /* Extras */
   tags: string[]
   notes: string
@@ -100,7 +140,7 @@ interface LeadModalProps {
   isOpen: boolean
   onClose: () => void
   onSubmit: (data: LeadFormData) => void
-  
+
 }
 
 /* ===================== DEFAULT DATA ===================== */
@@ -110,6 +150,7 @@ const emptyLeadData: LeadFormData = {
   companyName: "",
   phone: "",
   phoneExt: "",
+  mobilePhone: "",
   email: "",
 
   address: "",
@@ -129,6 +170,27 @@ const emptyLeadData: LeadFormData = {
   startTime: "",
   endTime: "",
 
+  assignTech: "",
+  techAssigned: "",
+
+  preferredName: "",
+  toolsCollected: false,
+  productType: "",
+  preferredContactMethod: "",
+  color: "",
+  projectStartDate: "",
+  finalWalkThrough: "",
+  numberOfRooms: "",
+  squareFootage: "",
+  photosDocumented: false,
+  thankYouGift: "",
+  projectDeliveryTime: "",
+  salesQualifiers: "",
+
+  subcontractorNotes: "",
+  receipts: [],
+  salesConsultantName: "",
+
   tags: [],
   notes: "",
 }
@@ -143,17 +205,17 @@ export function LeadModal({ isOpen, onClose, onSubmit }: LeadModalProps) {
 
   if (!isOpen) return null
 
- const handleSubmit = async (event: React.FormEvent) => {
-  event.preventDefault()
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
 
-  if (!validateLead()) return
+    if (!validateLead()) return
 
-  setIsSaving(true)
-  await new Promise(res => setTimeout(res, 400))
-  onSubmit(leadData)
-  setIsSaving(false)
-  onClose()
-}
+    setIsSaving(true)
+    await new Promise(res => setTimeout(res, 400))
+    onSubmit(leadData)
+    setIsSaving(false)
+    onClose()
+  }
 
   const handleImageUpload = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -170,65 +232,65 @@ export function LeadModal({ isOpen, onClose, onSubmit }: LeadModalProps) {
   }
 
   const validateLead = () => {
-  const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {}
 
-  /* CLIENT DETAILS */
-  if (!leadData.clientName.trim()) {
-    newErrors.clientName = "Client name is required"
+    /* CLIENT DETAILS */
+    if (!leadData.clientName.trim()) {
+      newErrors.clientName = "Client name is required"
+    }
+
+
+    if (!leadData.phone) {
+      newErrors.phone = "Phone number is required"
+    }
+    if (
+      leadData.email &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(leadData.email)
+    ) {
+      newErrors.email = "Invalid email format"
+    }
+
+
+    if (!leadData.address.trim()) {
+      newErrors.address = "Address is required"
+    }
+
+    if (!leadData.city.trim()) {
+      newErrors.city = "City is required"
+    }
+
+    if (!leadData.state) {
+      newErrors.state = "State is required"
+    }
+
+
+    if (!leadData.jobType.trim()) {
+      newErrors.jobType = "Job type is required"
+    }
+
+    // if (!leadData.jobDescription.trim()) {
+    //   newErrors.jobDescription = "Job description is required"
+    // }
+
+    /* SCHEDULE (ONLY IF ENABLED) */
+    // if (leadData.isScheduled) {
+    //   if (!leadData.scheduleDate) {
+    //     newErrors.scheduleDate = "Schedule date is required"
+    //   }
+
+    //   if (!leadData.startTime) {
+    //     newErrors.startTime = "Start time is required"
+    //   }
+
+
+    //   if (!leadData.endTime) {
+    //     newErrors.endTime = "End time is required"
+    //   }
+    // }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
-
-
-if (!leadData.phone) {
-    newErrors.phone = "Phone number is required"
-  }
-  if (
-    leadData.email &&
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(leadData.email)
-  ) {
-    newErrors.email = "Invalid email format"
-  }
-
- 
-  if (!leadData.address.trim()) {
-    newErrors.address = "Address is required"
-  }
-
-  if (!leadData.city.trim()) {
-    newErrors.city = "City is required"
-  }
-
-  if (!leadData.state) {
-    newErrors.state = "State is required"
-  }
-
- 
-  if (!leadData.jobType.trim()) {
-    newErrors.jobType = "Job type is required"
-  }
-
-  // if (!leadData.jobDescription.trim()) {
-  //   newErrors.jobDescription = "Job description is required"
-  // }
-
-  /* SCHEDULE (ONLY IF ENABLED) */
-  // if (leadData.isScheduled) {
-  //   if (!leadData.scheduleDate) {
-  //     newErrors.scheduleDate = "Schedule date is required"
-  //   }
-
-  //   if (!leadData.startTime) {
-  //     newErrors.startTime = "Start time is required"
-  //   }
-    
-
-  //   if (!leadData.endTime) {
-  //     newErrors.endTime = "End time is required"
-  //   }
-  // }
-
-  setErrors(newErrors)
-  return Object.keys(newErrors).length === 0
-}
 
 
   return (
@@ -249,11 +311,11 @@ if (!leadData.phone) {
           <div className="flex flex-col md:flex-row gap-4 justify-between">
 
             <Section title="Client Details">
-              <Input label="Client name" value={leadData.clientName} 
-              onChange={(v:any) => setLeadData({ ...leadData, clientName: v })} 
-               error={errors.clientName}
+              <Input label="Client name" value={leadData.clientName}
+                onChange={(v: any) => setLeadData({ ...leadData, clientName: v })}
+                error={errors.clientName}
               />
-              <Input label="Company name" value={leadData.companyName} onChange={(v:any) => setLeadData({ ...leadData, companyName: v })} />
+              <Input label="Company name" value={leadData.companyName} onChange={(v: any) => setLeadData({ ...leadData, companyName: v })} />
               <Input
                 label="Phone"
                 value={leadData.phone}
@@ -262,35 +324,65 @@ if (!leadData.phone) {
                   setLeadData({ ...leadData, phone: onlyNumbers })
 
                 }}
-                 error={errors.phone}
+                error={errors.phone}
               />
 
-              <Input label="Ext" value={leadData.phoneExt} onChange={(v:any) => setLeadData({ ...leadData, phoneExt: v })} />
-              <Input label="Email" value={leadData.email} onChange={(v:any) => setLeadData({ ...leadData, email: v })}
-              error = {errors.email}
+              <Input label="Ext" value={leadData.phoneExt} onChange={(v: any) => setLeadData({ ...leadData, phoneExt: v })} />
+              <Input label="Email" value={leadData.email} onChange={(v: any) => setLeadData({ ...leadData, email: v })}
+                error={errors.email}
               />
+              <div>
+                <label className="text-xs font-semibold block mb-1">Tags</label>
+                <Select<TagOption, true>
+                  isMulti
+                  className="basic-multi-select"
+                  classNamePrefix="react-select"
+                  options={TAG_OPTIONS}
+                  value={TAG_OPTIONS.filter(tagOption =>
+                    leadData.tags.includes(tagOption.value)
+                  )}
+                  onChange={(selectedTagOptions: MultiValue<TagOption>) => {
+                    const selectedTagValues = selectedTagOptions.map(
+                      tagOption => tagOption.value
+                    );
+
+                    setLeadData({
+                      ...leadData,
+                      tags: selectedTagValues,
+                    });
+                  }}
+                  components={{ Option: CheckboxOption }}
+                  closeMenuOnSelect={false}
+                  hideSelectedOptions={false}
+                />
+
+
+
+
+
+              </div>
             </Section>
 
 
             <Section title="Service Location">
-              <Input label="Address" value={leadData.address} onChange={(v:any) => setLeadData({ ...leadData, address: v })}
+              <Input label="Address" value={leadData.address} onChange={(v: any) => setLeadData({ ...leadData, address: v })}
                 error={errors.address}
               />
-              <Input label="Unit" value={leadData.unit} onChange={(v:any) => setLeadData({ ...leadData, unit: v })} />
-              <Input label="City" value={leadData.city} onChange={(v:any) => setLeadData({ ...leadData, city: v })} 
-               error={errors.city}
+              <Input label="Unit" value={leadData.unit} onChange={(v: any) => setLeadData({ ...leadData, unit: v })} />
+              <Input label="City" value={leadData.city} onChange={(v: any) => setLeadData({ ...leadData, city: v })}
+                error={errors.city}
               />
 
               <SelectField
                 label="State"
                 value={leadData.state}
                 options={STATES}
-                onChange={(v:any) => setLeadData({ ...leadData, state: v })}
-                 error={errors.state}
+                onChange={(v: any) => setLeadData({ ...leadData, state: v })}
+                error={errors.state}
               />
 
-              <Input label="Zip" value={leadData.zip} onChange={(v:any) => setLeadData({ ...leadData, zip: v })} />
-              <Input label="Metro area" value={leadData.metroArea} onChange={(v:any) => setLeadData({ ...leadData, metroArea: v })} />
+              <Input label="Zip" value={leadData.zip} onChange={(v: any) => setLeadData({ ...leadData, zip: v })} />
+              <Input label="Metro area" value={leadData.metroArea} onChange={(v: any) => setLeadData({ ...leadData, metroArea: v })} />
             </Section>
           </div>
 
@@ -304,7 +396,7 @@ if (!leadData.phone) {
                 label="Job type"
                 value={leadData.jobType}
                 options={JOB_TYPES}
-                onChange={(v:any) => setLeadData({ ...leadData, jobType: v })}
+                onChange={(v: any) => setLeadData({ ...leadData, jobType: v })}
                 error={errors.jobType}
               />
 
@@ -312,14 +404,14 @@ if (!leadData.phone) {
                 label="Job source"
                 value={leadData.jobSource}
                 options={LEAD_SOURCES}
-                onChange={(v:any) => setLeadData({ ...leadData, jobSource: v })}
-            
+                onChange={(v: any) => setLeadData({ ...leadData, jobSource: v })}
+
               />
 
               <Textarea
                 label="Job description"
                 value={leadData.jobDescription}
-                onChange={(v:any) =>
+                onChange={(v: any) =>
                   setLeadData({ ...leadData, jobDescription: v })
                 }
               />
@@ -327,8 +419,8 @@ if (!leadData.phone) {
 
 
             <Section title="Before & After Photos">
-              <ImageUpload label="Before photo" image={leadData.beforeImage} onUpload={(e:any) => handleImageUpload(e, "before")} />
-              <ImageUpload label="After photo" image={leadData.afterImage} onUpload={(e:any) => handleImageUpload(e, "after")} />
+              <ImageUpload label="Before photo" image={leadData.beforeImage} onUpload={(e: any) => handleImageUpload(e, "before")} />
+              <ImageUpload label="After photo" image={leadData.afterImage} onUpload={(e: any) => handleImageUpload(e, "after")} />
             </Section>
 
 
@@ -347,33 +439,13 @@ if (!leadData.phone) {
 
               {leadData.isScheduled && (
                 <div className="grid md:grid-cols-3 gap-4 mt-4">
-                  <Input label="Date" type="date" value={leadData.scheduleDate} onChange={(v:any) => setLeadData({ ...leadData, scheduleDate: v })} />
-                  <Input label="Start time" type="time" value={leadData.startTime} onChange={(v:any) => setLeadData({ ...leadData, startTime: v })} />
-                  <Input label="End time" type="time" value={leadData.endTime} onChange={(v:any) => setLeadData({ ...leadData, endTime: v })} />
+                  <Input label="Date" type="date" value={leadData.scheduleDate} onChange={(v: any) => setLeadData({ ...leadData, scheduleDate: v })} />
+                  <Input label="Start time" type="time" value={leadData.startTime} onChange={(v: any) => setLeadData({ ...leadData, startTime: v })} />
+                  <Input label="End time" type="time" value={leadData.endTime} onChange={(v: any) => setLeadData({ ...leadData, endTime: v })} />
                 </div>
               )}
             </div>
-
-
-
           </div>
-
-
-          <div>
-            <label className="text-xs font-semibold block mb-1">Tags</label>
-            <SelectReact
-              isMulti
-              options={TAG_OPTIONS}
-              styles={tagSelectStyles}
-              onChange={options =>
-                setLeadData({ ...leadData, tags: options.map(o => o.value) })
-              }
-            />
-          </div>
-
-
-
-
           {/* ACTIONS */}
           <div className="flex justify-end gap-3 pt-4 border-t">
             <button type="button" onClick={onClose} className="px-6 py-2 border rounded-lg">Cancel</button>
@@ -468,3 +540,22 @@ function ImageUpload({ label, image, onUpload }: any) {
     </div>
   )
 }
+
+
+const CheckboxOption = (
+  props: OptionProps<TagOption, true>
+) => {
+  return (
+    <components.Option {...props}>
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={props.isSelected}
+          readOnly
+        />
+        <span>{props.label}</span>
+      </div>
+    </components.Option>
+  );
+};
+

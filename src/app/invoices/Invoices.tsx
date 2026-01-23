@@ -1,7 +1,6 @@
 import {
   Search,
   Filter,
-  Plus,
   Eye,
   Download,
   Send,
@@ -9,7 +8,8 @@ import {
   MoreHorizontal,
 } from "lucide-react"
 import { useState } from "react"
-import InvoiceViewModal from "../../components/invoice/InvoiceViewModal"
+import { Link } from "react-router-dom"
+import InvoiceViewModal from "../../components/invoicePages/InvoiceViewModal"
 
 
 /* ================= TYPES ================= */
@@ -88,6 +88,7 @@ const tabs = [
 /* ================= COMPONENT ================= */
 
 export function Invoices() {
+  // const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("all")
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
@@ -220,7 +221,7 @@ export function Invoices() {
               <th className="p-3 text-right">Due</th>
               <th className="p-3 text-left">Status</th>
               <th className="p-3 text-left">Job</th>
-              <th className="p-3 text-center">Action</th>
+             
             </tr>
           </thead>
 
@@ -243,13 +244,23 @@ export function Invoices() {
                     />
                   </td>
 
-                  <td className="p-3 font-semibold text-primary">{invoice.invoiceId}</td>
+                  <td className="p-3 font-semibold text-primary">
+                    <Link to={`/invoices/${invoice.invoiceId}`} className="text-primary hover:text-blue-500">
+
+                      {invoice.invoiceId}
+                    </Link>
+                  </td>
                   <td className="p-3 text-gray-600">{invoice.invoiceName}</td>
 
-                  <td className="p-3">
-                    <div className="font-semibold">{invoice.clientName}</div>
-                    <div className="text-xs text-gray-500">{invoice.clientEmail}</div>
-                  </td>
+                  <button
+                    onClick={() => setSelectedInvoice(invoice)}
+                    className="flex  flex-col text-left text-primary border-none"
+                  >
+                    <td className="p-3">
+                      <div className="font-semibold">{invoice.clientName}</div>
+                      <div className="text-xs text-gray-500">{invoice.clientEmail}</div>
+                    </td>
+                  </button>
 
                   <td className="p-3">{invoice.createdAt}</td>
                   <td className="p-3 text-right">${invoice.subTotal.toLocaleString()}</td>
@@ -269,14 +280,7 @@ export function Invoices() {
 
                   <td className="p-3">{invoice.jobId}</td>
 
-                  <td className="p-3 text-center">
-                    <button
-                      onClick={() => setSelectedInvoice(invoice)}
-                      className="p-2 rounded-lg hover:bg-gray-100"
-                    >
-                      <Eye size={16} />
-                    </button>
-                  </td>
+                 
                 </tr>
               ))
             )}

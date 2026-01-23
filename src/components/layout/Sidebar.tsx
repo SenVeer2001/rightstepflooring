@@ -1,23 +1,25 @@
 import { useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import {
-  Home,
+
   Calendar,
-  MapPin,
+ 
   Phone,
   Users,
   FileText,
-  DollarSign,
+ 
   CreditCard,
   LogOut,
-  Plus,
-  Sparkles,
+
   Menu,
   LayoutDashboard,
   CalendarCheck,
   MapPinned,
   SquareGanttChart,
-  ChevronRight
+  UserPen,
+  BarChart3,
+  BookOpen,
+
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 
@@ -37,11 +39,12 @@ const navItems = [
   { name: "Product", path: "/products", icon:SquareGanttChart , section: "Delivery" },
   { name: "Payout", path: "/rsf-pay", icon: CreditCard, section: "Delivery" },
 
-  // Master
-  { name: "Staff(Internal)", path: "/staff", icon: CreditCard, section: "Master" },
+  
+  { name: "Team", path: "/team", icon:UserPen, section: "Master" },
+  { name: "Training Courses", path: "/training/courses", icon: BookOpen, section: "Master" },
 
   // Report
-  { name: "Report", path: "/reports", icon: CreditCard, section: "Report" },
+  { name: "Report", path: "/reports", icon:BarChart3, section: "Report" },
 ]
 
 
@@ -55,19 +58,27 @@ export function Sidebar() {
     navigate("/login")
   }
 
+  const toggleSidebar = () => {
+    setIsExpanded(!isExpanded)
+  }
+
   return (
     <aside
       className="h-screen bg-white flex flex-col sticky top-0 border-r border-gray-200 shadow-sm transition-all duration-300 ease-in-out"
       style={{
         width: isExpanded ? "240px" : "70px",
       }}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
     >
       {/* Header with Logo and Menu */}
       <div className="p-4 flex items-center justify-center border-b border-gray-200">
         <div className="flex items-center gap-3 w-full">
-          <Menu size={24} className="text-gray-700 flex-shrink-0" />
+          <button
+            onClick={toggleSidebar}
+            className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg p-1.5 transition-colors flex-shrink-0"
+            title="Toggle Sidebar"
+          >
+            <Menu size={24} />
+          </button>
           {/* Logo and Text - Hidden when collapsed */}
           <div
             className="flex-1 overflow-hidden transition-all duration-300"
