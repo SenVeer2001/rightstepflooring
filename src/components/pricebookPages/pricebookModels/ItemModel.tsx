@@ -148,7 +148,7 @@ export default function ItemModal({
           {/* LEFT COLUMN */}
           <div className="space-y-4">
 
-            {/* IMAGE */}3
+            {/* IMAGE */}
             <div className="flex flex-col items-center">
               <label className="block text-sm font-medium mb-2 text-gray-700">
                 Item Image
