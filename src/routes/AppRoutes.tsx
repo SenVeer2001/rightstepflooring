@@ -16,13 +16,19 @@ import { Leads } from "../app/leads/Leads"
 import { Team } from "../app/team/Team"
 import { Map } from "../app/map/Map"
 import { Estimates } from "../app/estimates/Estimates"
-import { Products } from "../app/product/Products"
+
 
 
 import { InvoiceDetailsPage } from "../components/invoicePages/InvoiceDetailsPage"
 import { LeadDetails } from "../components/leadsPages/LeadDetails"
 import UserProfile from "../components/teamPages/UserProfile"
 import { CategoryManagement, CourseBuilder, CourseDashboard, CourseDetail, CoursePublish, ModuleDetail } from "../app/training"
+import CustomerAndJobModel from "../components/customerPages/CustomerAndJobModel"
+import ClientModel from "../components/customerPages/clientPages/ClientModel"
+import PriceBook from "../app/pricebook/PriceBook"
+
+
+
 
 
 
@@ -45,12 +51,16 @@ export function AppRoutes() {
                   <Route path="/schedule" element={<Schedule />} />
                   <Route path="/map" element={<Map />} />
                   <Route path="/jobs" element={<Jobs />} />
-                  <Route path="/products" element={<Products />} />
+                  <Route path="/products" element={<PriceBook />} />
                   <Route path="/dispatch" element={<Dispatch />} />
                   <Route path="/leads" element={<Leads />} />
                   <Route path="/leads/:leadId" element={<LeadDetails />} />
 
-                  <Route path="/customers" element={<Customers />} />
+                  <Route path="/client" element={<Customers />} />
+                  <Route path="/client/jobs/:jobId" element={<CustomerAndJobModel />}/>
+                  <Route path="/client/:customerId" element={<ClientModel />}/>
+                  
+
                   <Route path="/team" element={<Team />} />
                   <Route path="/technicians" element={<Technicians />} />
                   <Route path="/invoices" element={<Invoices />} />

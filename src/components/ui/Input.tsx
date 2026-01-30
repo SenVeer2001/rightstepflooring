@@ -19,7 +19,7 @@ function Input({
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm
+        className="w-full rounded-lg border border-gray-400 bg-gray-50 px-3 py-2.5 text-sm
                    focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white"
       />
     </div>

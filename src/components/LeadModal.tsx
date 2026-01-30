@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useState } from "react"
 import Select, { components } from "react-select";

@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useState } from "react"
 import { STAFF_STATUS_LABELS } from "../types/staffTypes"

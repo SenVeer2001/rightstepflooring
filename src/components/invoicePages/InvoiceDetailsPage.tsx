@@ -284,7 +284,7 @@ export function InvoiceDetailsPage() {
                   <h2 className="text-lg font-bold flex gap-2 text-gray-900">Items<Layers className="text-primary"/></h2>
             <button
             onClick={() => console.log("Add item")}
-            className="inline-flex items-center gap-2 text-sm px-4 py-2 bg-primary text-gray-200 rounded-lg font-semibold hover:bg-opacity-90 transition"
+            className="inline-flex items-center gap-2 text-sm px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-opacity-90 transition"
           >
             <Plus size={16} />
             Add Item
@@ -326,7 +326,7 @@ export function InvoiceDetailsPage() {
                   <tr key={item.id} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-4 max-w-[250px]">
                       <div className="flex gap-3">
-                        <img src={item?.image} alt="" height={10} width={70} className="max-h-13 w-15 rounded-md" />
+                        <img src={item?.image} alt="" height={10} width={70} className="max-h-13 w-15 rounded-md object-cover" />
                        <div>
                          <p className="font-semibold text-gray-900">
                           {item.name}

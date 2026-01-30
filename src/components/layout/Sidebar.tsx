@@ -19,6 +19,8 @@ import {
   UserPen,
   BarChart3,
   BookOpen,
+  Notebook,
+  HandCoins,
 
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
@@ -29,15 +31,15 @@ const navItems = [
   { name: "Leads", path: "/leads", icon: Users, section: "CRM" },
   { name: "Estimates", path: "/estimates", icon: FileText, section: "CRM" },
   { name: "Invoices", path: "/invoices", icon: FileText, section: "CRM" },
-  { name: "Customers", path: "/customers", icon: Users, section: "CRM" },
+  { name: "Client", path: "/client", icon: Users, section: "CRM" },
   { name: "CRM Calls", path: "/phone", icon: Phone, section: "CRM" },
 
   // Delivery
   { name: "Jobs", path: "/jobs", icon: Calendar, section: "Delivery" },
   { name: "Schedule", path: "/schedule", icon: CalendarCheck, section: "Delivery" },
   { name: "Map View", path: "/map", icon: MapPinned, section: "Delivery" },
-  { name: "Product", path: "/products", icon:SquareGanttChart , section: "Delivery" },
-  { name: "Payout", path: "/rsf-pay", icon: CreditCard, section: "Delivery" },
+  { name: "Price Book", path: "/products", icon:Notebook , section: "Delivery" },
+  { name: "Payout", path: "/rsf-pay", icon: HandCoins, section: "Delivery" },
 
   
   { name: "Team", path: "/team", icon:UserPen, section: "Master" },
@@ -130,13 +132,13 @@ export function Sidebar() {
                 className={({ isActive }) =>
                   `flex items-center gap-4 px-3 py-3 my-1 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
                     isActive
-                      ? "bg-[#fcf76d52] text-primary border-r-4 border-secondary"
+                      ? "bg-[#fcf76d52] text-primary border-r-4 border-secondary font-semibold"
                       : "text-gray-700 hover:bg-gray-100 hover:text-black"
                   }`
                 }
                 title={!isExpanded ? item.name : undefined}
               >
-                <item.icon size={20} className="flex-shrink-0" />
+                <item.icon size={20} className="flex-shrink-0 " />
                 {/* Text label - Hidden when collapsed */}
                 <span
                   className="flex-1 overflow-hidden transition-all duration-300"

@@ -1,5 +1,7 @@
-import { Search, Filter, Plus, Eye, Edit, Trash2 } from "lucide-react"
+import { Search, Filter, Plus } from "lucide-react"
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { CreateClientModal } from "../../components/customerPages/CreateClientModal"
 
 /* ===================== TYPES ===================== */
 
@@ -7,9 +9,11 @@ type CustomerStatus = "active" | "inactive"
 
 interface Customer {
   id: string
+  jobId: string
   name: string
   email: string
   phone: string
+  company?: string
   address: string
   city: string
   state: string
@@ -20,14 +24,16 @@ interface Customer {
   joinDate: string
 }
 
-/* ===================== DATA ===================== */
+
 
 const customersData: Customer[] = [
   {
     id: "1",
+    jobId: "480",
     name: "John Smith",
     email: "john.smith@email.com",
     phone: "(555) 123-4567",
+    company: "Smith Heating",
     address: "123 Main St",
     city: "Springfield",
     state: "IL",
@@ -39,9 +45,11 @@ const customersData: Customer[] = [
   },
   {
     id: "2",
+    jobId: "398",
     name: "Sarah Williams",
     email: "sarah.w@email.com",
     phone: "(555) 234-5678",
+    company: "Williams Electric",
     address: "456 Oak Ave",
     city: "Chicago",
     state: "IL",
@@ -53,9 +61,11 @@ const customersData: Customer[] = [
   },
   {
     id: "3",
+    jobId: "490",
     name: "Michael Brown",
     email: "mbrown@email.com",
     phone: "(555) 345-6789",
+    company: "Brown Landscaping",
     address: "789 Pine Rd",
     city: "Aurora",
     state: "IL",
@@ -67,9 +77,11 @@ const customersData: Customer[] = [
   },
   {
     id: "4",
+    jobId: "890",
     name: "Emma Davis",
     email: "emma.d@email.com",
     phone: "(555) 456-7890",
+    company: "Davis Painting",
     address: "321 Elm St",
     city: "Naperville",
     state: "IL",
@@ -79,41 +91,39 @@ const customersData: Customer[] = [
     status: "inactive",
     joinDate: "2023-11-05",
   },
-  {
-    id: "5",
-    name: "James Wilson",
-    email: "jwilson@email.com",
-    phone: "(555) 567-8901",
-    address: "654 Maple Dr",
-    city: "Evanston",
-    state: "IL",
-    zip: "60201",
-    totalJobs: 15,
-    totalSpent: 42800,
-    status: "active",
-    joinDate: "2023-08-22",
-  },
 ]
 
 /* ===================== COMPONENT ===================== */
 
 export function Customers() {
+  const navigate = useNavigate()
+
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState<"all" | CustomerStatus>("all")
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [showFields, setShowFields] = useState(false)
+  const [openCreateClient, setOpenCreateClient] = useState(false)
 
-  /* ===================== SEARCH + FILTER ===================== */
+  const [visibleColumns, setVisibleColumns] = useState({
+    id: true,
+    name: true,
+    company: true,
+    address: true,
+    phone: true,
+    created: true,
+  })
 
-  const filteredCustomers = customersData.filter((customer) => {
-    const normalizedSearch = searchTerm.trim().toLowerCase()
+  /* ===================== FILTER LOGIC ===================== */
 
-    const normalizedPhone = customer.phone.replace(/\D/g, "")
+  const filteredCustomers = customersData.filter(customer => {
+    const search = searchTerm.toLowerCase().trim()
+    const phone = customer.phone.replace(/\D/g, "")
 
     const matchesSearch =
-      normalizedSearch === "" ||
-      customer.name.toLowerCase().includes(normalizedSearch) ||
-      customer.email.toLowerCase().includes(normalizedSearch) ||
-      customer.city.toLowerCase().includes(normalizedSearch) ||
-      normalizedPhone.includes(normalizedSearch.replace(/\D/g, ""))
+      search === "" ||
+      customer.name.toLowerCase().includes(search) ||
+      customer.email.toLowerCase().includes(search) ||
+      phone.includes(search.replace(/\D/g, ""))
 
     const matchesStatus =
       filterStatus === "all" || customer.status === filterStatus
@@ -121,121 +131,230 @@ export function Customers() {
     return matchesSearch && matchesStatus
   })
 
+  /* ===================== SELECTION ===================== */
+
+  const isAllSelected =
+    filteredCustomers.length > 0 &&
+    filteredCustomers.every(c => selectedIds.includes(c.id))
+
+  const toggleSelectAll = () => {
+    setSelectedIds(isAllSelected ? [] : filteredCustomers.map(c => c.id))
+  }
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    )
+  }
+
+  /* ===================== UI ===================== */
+
   return (
-    <div className="space-y-6 p-4 min-h-screen">
-      {/* Header */}
+    <div className="p-6 space-y-6">
+
+      {/* HEADER */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Customers</h1>
-          <p className="text-gray-600 text-sm mt-1">
-            Manage your customer database and information
+          <h1 className="text-3xl font-bold text-gray-900">Clients</h1>
+          <p className="text-sm text-gray-600">
+            Manage your client database
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-primary hover:bg-[#2c621b] text-white font-semibold py-2.5 px-4 rounded-lg transition-colors">
-          <Plus size={20} />
-          Add Customer
+
+        <button 
+        onClick={() => setOpenCreateClient(true)}
+        className="flex text-sm items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-semibold">
+          <Plus size={18} />
+          Add client
         </button>
       </div>
 
-      {/* Search & Filter */}
-      <div className=" rounded-lg  shadow-sm">
-        <div className="flex gap-4 ">
-          <div className="flex-1 min-w-[300px] ">
-            {/* SEARCH ICON FIXED (aligned & consistent) */}
-            {/* <Search
-              size={20}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-            /> */}
-            <input
-              type="text"
-              placeholder="Search by name, email, or phone..."
-              className="w-full pl-10 text-sm pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
-          </div>
+      {/* STATS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Clients" value={customersData.length} />
+        <StatCard
+          label="Total Due"
+          value={`$${customersData.reduce((s, c) => s + c.totalSpent, 0).toLocaleString()}`}
+        />
+        <StatCard
+          label="Past Due"
+          value={`$${(customersData.reduce((s, c) => s + c.totalSpent, 0) * 0.1).toFixed(2)}`}
+          danger
+        />
+        <StatCard label="Estimates Pending" value="466" />
+      </div>
 
-          <select
-            className="px-4 py-2 text-sm border max-w-[200px] border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none bg-white cursor-pointer"
-            value={filterStatus}
-            onChange={(event) =>
-              setFilterStatus(event.target.value as "all" | CustomerStatus)
-            }
+      {/* SEARCH & FILTER */}
+      <div className="flex  gap-4 items-center">
+        <input
+          type="text"
+          placeholder="Search by name, email, or phone"
+          className="w-full md:w-96 px-4 py-2.5 border rounded-lg text-sm"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
+
+        <select
+          className="px-4 py-2.5 max-w-[200px] border   focus:border-primary rounded-lg text-sm outline-none"
+          value={filterStatus}
+          onChange={e => setFilterStatus(e.target.value as any)}
+        >
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+
+        {/* FIELDS */}
+        <div className="relative">
+          <button
+            onClick={() => setShowFields(!showFields)}
+            className="px-4 py-2.5 border border-primary rounded-lg text-sm flex items-center gap-2"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-
-          <button className="flex items-center text-sm gap-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <Filter size={20} className="text-primary" />
-            More Filters
+            <Filter size={16} />
+            Fields
           </button>
+
+          {showFields && (
+            <div className="absolute right-0 mt-2 bg-white border rounded-lg shadow-lg p-3 z-20 w-48">
+              {Object.keys(visibleColumns).map(key => (
+                <label
+                  key={key}
+                  className="flex items-center gap-2 text-sm mb-2"
+                >
+                  <input
+                    type="checkbox"
+                    checked={visibleColumns[key as keyof typeof visibleColumns]}
+                    onChange={() =>
+                      setVisibleColumns(prev => ({
+                        ...prev,
+                        [key]: !prev[key as keyof typeof prev],
+                      }))
+                    }
+                    className={`${selectedIds ? " accent-primary" : ""}`}
+                  />
+                  {key.toUpperCase()}
+                </label>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Table (UNCHANGED UI) */}
-      <div className="bg-white text-sm rounded-lg border border-gray-300 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-100 border-b border-gray-300">
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Email</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Phone</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">City</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Total Jobs</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Total Spent</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Actions</th>
+      {/* TABLE */}
+      <div className="bg-white border rounded-lg shadow-sm overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-100 border-b">
+            <tr>
+              <th className="px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={toggleSelectAll}
+                  className={`${selectedIds ? " accent-primary" : ""}`}
+                />
+              </th>
+
+              {visibleColumns.id && <th className="px-4 py-3 text-left">Job ID</th>}
+              {visibleColumns.name && <th className="px-4 py-3 text-left">Name</th>}
+              {visibleColumns.company && <th className="px-4 py-3 text-left">Company</th>}
+              {visibleColumns.address && <th className="px-4 py-3 text-left">Address</th>}
+              {visibleColumns.phone && <th className="px-4 py-3 text-left">Phone</th>}
+              {visibleColumns.created && <th className="px-4 py-3 text-left">Created</th>}
+            </tr>
+          </thead>
+
+          <tbody>
+            {filteredCustomers.map(customer => (
+              <tr key={customer.id} className="border-b hover:bg-gray-50">
+                <td className="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(customer.id)}
+                    onChange={() => toggleSelect(customer.id)}
+                    className={`${selectedIds ? " accent-primary" : ""}`}
+                  />
+                </td>
+
+                {visibleColumns.id && 
+                (
+                  <td className="px-4 py-3">
+                    <button
+                        onClick={() => navigate(`/client/jobs/1`)}
+                        className="flex flex-col text-left text-primary border-none hover:text-blue-600 "
+                      >
+                        <div className="font-semibold text-nowrap">{customer.jobId}</div>
+                       
+                      </button>
+                  </td>
+                )
+                
+                }
+                {visibleColumns.name && (
+                <td className="px-4 py-3">
+                    <button
+                        onClick={() => navigate(`/client/${customer.id}`)}
+                        className="flex flex-col text-left text-primary border-none hover:text-blue-600 "
+                      >
+                        <div className="font-semibold text-nowrap">{customer.name}</div>
+                        <div className="text-xs text-gray-500 text-nowrap">{customer.email}</div>
+                      </button>
+                </td>
+                )}
+                {visibleColumns.company && <td className="px-4 py-3">{customer.company || "-"}</td>}
+                {visibleColumns.address && (
+                  <td className="px-4 py-3">
+                    {customer.address}, {customer.city}
+                  </td>
+                )}
+                {visibleColumns.phone && (
+                  <td className="px-4 py-3 text-primary">{customer.phone}</td>
+                )}
+                {visibleColumns.created && (
+                  <td className="px-4 py-3">
+                    {new Date(customer.joinDate).toLocaleDateString()}
+                  </td>
+                )}
               </tr>
-            </thead>
-            <tbody>
-              {filteredCustomers.map((customer) => (
-                <tr
-                  key={customer.id}
-                  className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-6 py-4 font-semibold">{customer.name}</td>
-                  <td className="px-6 py-4 text-blue-600">{customer.email}</td>
-                  <td className="px-6 py-4">{customer.phone}</td>
-                  <td className="px-6 py-4">
-                    {customer.city}, {customer.state}
-                  </td>
-                  <td className="px-6 py-4">{customer.totalJobs}</td>
-                  <td className="px-6 py-4 font-semibold">
-                    ${customer.totalSpent.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                        customer.status === "active"
-                          ? "bg-green-200 text-green-800"
-                          : "bg-gray-200 text-gray-800"
-                      }`}
-                    >
-                      {customer.status.toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2 justify-center">
-                      <Eye size={18} className="text-gray-600" />
-                      <Edit size={18} className="text-blue-600" />
-                      <Trash2 size={18} className="text-red-600" />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
 
         {filteredCustomers.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-10 text-gray-500">
             No customers found
           </div>
         )}
       </div>
+
+      <CreateClientModal
+  isOpen={openCreateClient}
+  onClose={() => setOpenCreateClient(false)}
+  onSave={(data) => {
+    console.log("CLIENT DATA", data)
+    setOpenCreateClient(false)
+  }}
+/>
+    </div>
+  )
+}
+
+/* ===================== STAT CARD ===================== */
+
+function StatCard({
+  label,
+  value,
+  danger = false,
+}: {
+  label: string
+  value: string | number
+  danger?: boolean
+}) {
+  return (
+    <div className="bg-white border rounded-xl p-5 shadow-sm">
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className={`text-2xl font-bold mt-1 ${danger ? "text-red-600" : "text-gray-900"}`}>
+        {value}
+      </p>
     </div>
   )
 }
