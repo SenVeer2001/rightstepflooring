@@ -148,7 +148,7 @@ export default function ItemModal({
           {/* LEFT COLUMN */}
           <div className="space-y-4">
 
-            {/* IMAGE */}
+            {/* IMAGE */}3
             <div className="flex flex-col items-center">
               <label className="block text-sm font-medium mb-2 text-gray-700">
                 Item Image
@@ -185,7 +185,7 @@ export default function ItemModal({
               </div>
             </div>
 
-            {/* DESCRIPTION */}
+            
             <TextareaField
               label="Description"
               value={formData.description}
@@ -195,7 +195,7 @@ export default function ItemModal({
               }
             />
 
-            {/* ITEM TYPE */}
+           
             <SelectField
               label="Item Type"
               value={formData.itemType}
@@ -206,7 +206,7 @@ export default function ItemModal({
               options={["Service", "Product"]}
             />
 
-            {/* CUSTOM FIELDS */}
+            
             <div>
               <label className="text-sm font-semibold block mb-2">
                 Custom Fields
