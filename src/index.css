@@ -489,3 +489,19 @@ aside nav {
   @apply thin-scrollbar;
   scrollbar-gutter: stable;
 }
+
+/* Normal draggable cursor */
+.cursor-grab {
+  cursor: grab !important;
+}
+
+/* While dragging → RED cursor */
+.cursor-grabbing {
+  cursor: grabbing !important;
+}
+
+/* Force red accent around cursor illusion */
+.dragging-red {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.6),
+              0 0 20px rgba(239, 68, 68, 0.35);
+}

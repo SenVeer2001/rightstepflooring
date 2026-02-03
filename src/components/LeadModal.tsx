@@ -140,6 +140,7 @@ interface LeadModalProps {
   isOpen: boolean
   onClose: () => void
   onSubmit: (data: LeadFormData) => void
+  title?:string
 
 }
 
@@ -197,7 +198,7 @@ const emptyLeadData: LeadFormData = {
 
 /* ===================== COMPONENT ===================== */
 
-export function LeadModal({ isOpen, onClose, onSubmit }: LeadModalProps) {
+export function LeadModal({ isOpen, onClose, onSubmit,title = 'Add New Lead' }: LeadModalProps) {
   const [leadData, setLeadData] = useState<LeadFormData>(emptyLeadData)
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})

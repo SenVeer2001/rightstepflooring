@@ -26,6 +26,7 @@ import { CategoryManagement, CourseBuilder, CourseDashboard, CourseDetail, Cours
 import CustomerAndJobModel from "../components/customerPages/CustomerAndJobModel"
 import ClientModel from "../components/customerPages/clientPages/ClientModel"
 import PriceBook from "../app/pricebook/PriceBook"
+import { AdvancedReport } from "../app/reports/AdvancedReport"
 
 
 
@@ -76,6 +77,7 @@ export function AppRoutes() {
                     <Route path="add" element={<Estimates />} />
                   </Route>
                   <Route path="/reports" element={<Reports />} />
+                   <Route path="/advanced-report" element={<AdvancedReport />} />
                   <Route path="/automation" element={<Automation />} />
                  
                   <Route path="/team" element={<Team/>} />

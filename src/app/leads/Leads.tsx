@@ -1,9 +1,11 @@
 import { useState } from "react"
-import { Search, Plus, Download } from "lucide-react"
+import { Search, Plus, Download, LayoutGrid, List } from "lucide-react"
 import { LeadModal, LEAD_STATUS_LABELS } from "../../components/LeadModal"
 import type { LeadStatus } from "../../components/LeadModal"
+import { KanbanView } from './KanbanView'
 import { Eye, Trash2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { mockLeadsData } from '../../services/mockLeadData'
 
 
 /* ===================== TYPES ===================== */
@@ -13,92 +15,32 @@ interface Lead {
   name: string
   email: string
   phone: string
-
   address: string
   city: string
   state: string
-
+  service?: string
+  budget?: number
+  createdAt?: string
   status: LeadStatus
   source: string
   type: string
-  tags: string[]
-
+  tags?: string[]
+  requirement?: string
   createdDate: string
 }
 
-/* ===================== MOCK DATA ===================== */
-const initialLeads: Lead[] = [
-  {
-    id: "1",
-    name: "Robert Johnson",
-    email: "robert.j@email.com",
-    phone: "(555) 111-2222",
-    address: "123 Oak Street",
-    city: "Springfield",
-    state: "IL",
-    status: "qualifying",
-    source: "Google",
-    type: "Flooring",
-    tags: ["Hot"],
-    createdDate: "2026-01-08",
-  },
-  {
-    id: "2",
-    name: "Sarah Williams",
-    email: "sarah.w@email.com",
-    phone: "(555) 222-3333",
-    address: "456 Elm Avenue",
-    city: "Chicago",
-    state: "IL",
-    status: "attempting_to_contact",
-    source: "Facebook",
-    type: "Carpet",
-    tags: ["Follow-up"],
-    createdDate: "2026-01-09",
-  },
-  {
-    id: "3",
-    name: "Michael Brown",
-    email: "mbrown@email.com",
-    phone: "(555) 333-4444",
-    address: "789 Pine Road",
-    city: "Aurora",
-    state: "IL",
-    status: "initial_contact_made",
-    source: "Website",
-    type: "Tile",
-    tags: ["Warm"],
-    createdDate: "2026-01-10",
-  },
-  {
-    id: "4",
-    name: "Emma Davis",
-    email: "emma.d@email.com",
-    phone: "(555) 444-5555",
-    address: "321 Maple Drive",
-    city: "Naperville",
-    state: "IL",
-    status: "scheduling_visit",
-    source: "Referral",
-    type: "Vinyl",
-    tags: ["High Value"],
-    createdDate: "2026-01-06",
-  },
-  {
-    id: "5",
-    name: "James Wilson",
-    email: "jwilson@email.com",
-    phone: "(555) 555-6666",
-    address: "654 Cedar Lane",
-    city: "Evanston",
-    state: "IL",
-    status: "scheduled",
-    source: "Phone Call",
-    type: "Wood",
-    tags: ["Confirmed"],
-    createdDate: "2026-01-05",
-  },
-]
+// @ts-ignore
+const leadsData: Lead[] = Array.isArray(mockLeadsData)
+  ? mockLeadsData.map(lead => ({
+    ...lead,
+    address: lead.address || '',
+    city: lead.city || '',
+    state: lead.state || '',
+    createdDate: lead.createdAt,
+  }))
+  : []
+
+
 
 
 /* ===================== STATUS STYLES ===================== */
@@ -116,11 +58,16 @@ const statusStyles: Record<LeadStatus, string> = {
 /* ===================== COMPONENT ===================== */
 
 export function Leads() {
-  const [leads, setLeads] = useState<Lead[]>(initialLeads)
+  const [leads, setLeads] = useState<Lead[]>(leadsData ?? [])
+
   const [searchText, setSearchText] = useState("")
   const [selectedStatus, setSelectedStatus] = useState<"all" | LeadStatus>("all")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set())
+  const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table')
+  const [currentPage, setCurrentPage] = useState(1)
+const rowsPerPage = 10 // change if needed
+
   const navigateTo = useNavigate()
 
 
@@ -142,33 +89,42 @@ export function Leads() {
     return matchesSearch && matchesStatus
   })
 
+  const totalRows = filteredLeads.length
+const totalPages = Math.ceil(totalRows / rowsPerPage)
+
+const startIndex = (currentPage - 1) * rowsPerPage
+const endIndex = startIndex + rowsPerPage
+
+const paginatedLeads = filteredLeads.slice(startIndex, endIndex)
+
+
   /* ===================== CREATE ===================== */
 
   const handleCreateLead = (formData: any) => {
-  const newLead: Lead = {
-    id: String(leads.length + 1),
+    const newLead: Lead = {
+      id: String(leads.length + 1),
 
-    // 🔹 map correctly
-    name: formData.clientName,
-    email: formData.email,
-    phone: formData.phone,
+      // 🔹 map correctly
+      name: formData.clientName,
+      email: formData.email,
+      phone: formData.phone,
 
-    address: formData.address,
-    city: formData.city,
-    state: formData.state,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
 
-    status: formData.status,
-    source: formData.jobSource || "Manual",
-    type: formData.jobType || "Other",
+      status: formData.status,
+      source: formData.jobSource || "Manual",
+      type: formData.jobType || "Other",
 
-    tags: formData.tags || [],
+      tags: formData.tags || [],
 
-    createdDate: new Date().toISOString().split("T")[0],
+      createdDate: new Date().toISOString().split("T")[0],
+    }
+
+    setLeads(previousLeads => [newLead, ...previousLeads])
+    setIsModalOpen(false)
   }
-
-  setLeads(previousLeads => [newLead, ...previousLeads])
-  setIsModalOpen(false)
-}
 
 
   const handleViewLead = (leadId: string) => {
@@ -236,69 +192,101 @@ export function Leads() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-black">Leads</h1>
+          <h1 className="text-3xl font-bold text-black">{viewMode == "table" ? "Leads" : "Lead Pipeline"}</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Manage sales leads and prospects
+            {viewMode == "table" ? "Manage sales leads and prospects" : "Drag and drop leads between columns to update their status"}
           </p>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg font-semibold"
-        >
-          <Plus size={18} />
-          Add Lead
-        </button>
+        <div className="flex gap-8">
+
+          <div className="flex items-center gap-3">
+            {/* View Toggle */}
+            <div className="flex gap-1 bg-white rounded-lg border border-gray-300 p-1">
+              <button
+                onClick={() => setViewMode('table')}
+                title="Table View"
+                className={`p-2 rounded transition-colors ${viewMode === 'table'
+                  ? 'bg-primary text-white'
+                  : 'text-primary hover:bg-gray-100'
+                  }`}
+              >
+                <List size={20} />
+              </button>
+              <button
+                onClick={() => setViewMode('kanban')}
+                title="Kanban View"
+                className={`p-2 rounded transition-colors ${viewMode === 'kanban'
+                  ? 'bg-primary text-white'
+                  : 'text-primary hover:bg-gray-100'
+                  }`}
+              >
+                <LayoutGrid size={20} />
+              </button>
+            </div>
+
+
+          </div>
+
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg font-semibold"
+          >
+            <Plus size={18} />
+            Add Lead
+          </button>
+        </div>
       </div>
 
+      {viewMode === 'table' && (
+        <>
+          <div className="flex gap-3 overflow-x-auto pb-2 thin-scrollbar">
+            {leadStatusTabs.map((tab) => {
+              const isActive = selectedStatus === tab.id
 
-      <div className="flex gap-3 overflow-x-auto pb-2 thin-scrollbar">
-        {leadStatusTabs.map((tab) => {
-          const isActive = selectedStatus === tab.id
-
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setSelectedStatus(tab.id as any)}
-              className={`
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedStatus(tab.id as any)}
+                  className={`
           flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold
           whitespace-nowrap transition
           ${isActive
-                  ? "bg-primary text-white"
-                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
-                }
+                      ? "bg-primary text-white"
+                      : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+                    }
         `}
-            >
-              {tab.label}
-              <span
-                className={`
+                >
+                  {tab.label}
+                  <span
+                    className={`
             text-xs px-2 py-0.5 rounded-full
             ${isActive
-                    ? "bg-white/20 text-white"
-                    : "bg-gray-200 text-gray-700"
-                  }
+                        ? "bg-white/20 text-white"
+                        : "bg-gray-200 text-gray-700"
+                      }
           `}
-              >
-                {leadStatusCounts[tab.id] || 0}
-              </span>
-            </button>
-          )
-        })}
-      </div>
+                  >
+                    {leadStatusCounts[tab.id] || 0}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
 
 
-      {/* Search & Filter */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1 min-w-[900px]">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            value={searchText}
-            onChange={(event) => setSearchText(event.target.value)}
-            placeholder="Search name, email, phone, city or service..."
-            className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none" />
-        </div>
+          {/* Search & Filter */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1 min-w-[900px]">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                value={searchText}
+                onChange={(event) => setSearchText(event.target.value)}
+                placeholder="Search name, email, phone, city or service..."
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none" />
+            </div>
 
-        {/* <select
+            {/* <select
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value as any)}
           className="px-4 py-2 border text-sm border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-primary focus:outline-none"
@@ -308,135 +296,208 @@ export function Leads() {
             <option key={key} value={key}>{label}</option>
           ))}
         </select> */}
-         <button className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg
+            <button className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg
       text-primary bg-gray-200 font-semibold hover:bg-primary hover:text-white transition">
-        <Download size={16} /> export
-    </button>
-      </div>
+              <Download size={16} /> export
+            </button>
+          </div>
+        </>
+
+      )}
+
+
+      {viewMode === 'kanban' && (
+        <KanbanView
+           // @ts-ignore
+          leads={Array.isArray(leads) ? leads : []}
+          // @ts-ignore
+          onLeadsUpdate={(updatedLeads: Lead[]) =>
+            setLeads(Array.isArray(updatedLeads) ? updatedLeads : [])
+          }
+        />
+
+      )}
 
       {/* Table */}
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-[1000px] w-full text-sm">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-4 py-3 text-left font-semibold whitespace-nowrap w-12">
-                  <input
-                    type="checkbox"
-                    checked={selectedLeads.size === filteredLeads.length && filteredLeads.length > 0}
-                    onChange={handleSelectAll}
-                    className="w-3 h-3 rounded border-gray-300 cursor-pointer accent-primary"
-                  />
-                </th>
-                {["ID", "Status", "Tags", "Source", "Client", "Location", "Type", "Phone", "Created", "Action"].map(
-                  (heading) => (
-                    <th
-                      key={heading}
-                      className="px-4 py-3 text-left font-semibold whitespace-nowrap"
-                    >
-                      {heading}
-                    </th>
-                  )
-                )}
-              </tr>
-            </thead>
 
-            <tbody>
-              {filteredLeads.map((lead) => (
-                <tr
-                  key={lead.id}
-                  className={`border-t hover:bg-gray-50 ${selectedLeads.has(lead.id) ? "bg-blue-50" : ""}`}
-                >
-                  <td className="px-4 py-3">
+      {viewMode === 'table' && (
+
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-[1000px] w-full text-sm">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap w-12">
                     <input
                       type="checkbox"
-                      checked={selectedLeads.has(lead.id)}
-                      onChange={() => handleSelectLead(lead.id)}
+                      checked={selectedLeads.size === filteredLeads.length && filteredLeads.length > 0}
+                      onChange={handleSelectAll}
                       className="w-3 h-3 rounded border-gray-300 cursor-pointer accent-primary"
                     />
-                  </td>
-                  <td className="px-4 py-3 font-semibold">{lead.id}</td>
-
-                  <td className="px-4 py-3">
-                    <select
-                      value={lead.status}
-                      onChange={(e) => handleStatusChange(lead.id, e.target.value as LeadStatus)}
-                      className={`px-2 py-1 rounded-md text-xs font-semibold border cursor-pointer border-primary outline-none`}
-                    >
-                      {Object.entries(LEAD_STATUS_LABELS).map(([statusKey, statusLabel]) => (
-                        <option key={statusKey} value={statusKey}>
-                          {statusLabel}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-
-                  <td className="px-4 py-3">
-                    {lead.tags.map(tag => (
-                      <span
-                        key={tag}
-                        className="mr-1 px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-700"
+                  </th>
+                  {["ID", "Status", "Tags", "Source", "Client", "Location", "Type", "Phone", "Created", "Action"].map(
+                    (heading) => (
+                      <th
+                        key={heading}
+                        className="px-4 py-3 text-left font-semibold whitespace-nowrap"
                       >
-                        {tag}
-                      </span>
-                    ))}
-                  </td>
-
-                  <td className="px-4 py-3">{lead.source}</td>
-                  <td className="px-4 py-3 font-semibold">{lead.name}</td>
-
-                  <td className="px-4 py-3 table-cell">
-                    {lead.city}, {lead.state}
-                  </td>
-
-                  <td className="px-4 py-3 table-cell">
-                    {lead.type}
-                  </td>
-
-                  <td className="px-4 py-3">{lead.phone}</td>
-                  <td className="px-4 py-3">{lead.createdDate}</td>
-
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      {/* View */}
-                      <button
-                        onClick={() => handleViewLead(lead.id)}
-                        className="p-1.5 rounded hover:bg-primary/10 text-primary"
-                        title="View Lead"
-                      >
-                        <Eye size={16} />
-                      </button>
-
-                      {/* Delete */}
-                      <button
-                        onClick={() => handleDeleteLead(lead.id)}
-                        className="p-1.5 rounded hover:bg-red-100 text-red-600"
-                        title="Delete Lead"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-
+                        {heading}
+                      </th>
+                    )
+                  )}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {paginatedLeads.map((lead) => (
+                  <tr
+                    key={lead.id}
+                    className={`border-t hover:bg-gray-50 ${selectedLeads.has(lead.id) ? "bg-blue-50" : ""}`}
+                  >
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedLeads.has(lead.id)}
+                        onChange={() => handleSelectLead(lead.id)}
+                        className="w-3 h-3 rounded border-gray-300 cursor-pointer accent-primary"
+                      />
+                    </td>
+                    <td className="px-4 py-3 font-semibold">{lead.id}</td>
+
+                    <td className="px-4 py-3">
+                      <select
+                        value={lead.status}
+                        onChange={(e) => handleStatusChange(lead.id, e.target.value as LeadStatus)}
+                        className={`px-2 py-1 rounded-md text-xs font-semibold border cursor-pointer border-primary outline-none`}
+                      >
+                        {Object.entries(LEAD_STATUS_LABELS).map(([statusKey, statusLabel]) => (
+                          <option key={statusKey} value={statusKey}>
+                            {statusLabel}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-4 py-3">
+                      {(lead.tags ?? []).map(tag => (
+                        <span
+                          key={tag}
+                          className="mr-1 px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-700"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </td>
+
+
+                    <td className="px-4 py-3">{lead.source}</td>
+                    <td className="px-4 py-3 font-semibold">{lead.name}</td>
+
+                    <td className="px-4 py-3 table-cell">
+                      {lead.city}, {lead.state}
+                    </td>
+
+                    <td className="px-4 py-3 table-cell">
+                      {lead.type}
+                    </td>
+
+                    <td className="px-4 py-3">{lead.phone}</td>
+                    <td className="px-4 py-3">{lead.createdDate}</td>
+
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        {/* View */}
+                        <button
+                          onClick={() => handleViewLead(lead.id)}
+                          className="p-1.5 rounded hover:bg-primary/10 text-primary"
+                          title="View Lead"
+                        >
+                          <Eye size={16} />
+                        </button>
+
+                        {/* Delete */}
+                        <button
+                          onClick={() => handleDeleteLead(lead.id)}
+                          className="p-1.5 rounded hover:bg-red-100 text-red-600"
+                          title="Delete Lead"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {filteredLeads.length > 0 && (
+  <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
+    
+    {/* Left: info */}
+    <p className="text-sm text-gray-600">
+      Showing{" "}
+      <span className="font-semibold">{startIndex + 1}</span>
+      {" - "}
+      <span className="font-semibold">
+        {Math.min(endIndex, totalRows)}
+      </span>
+      {" of "}
+      <span className="font-semibold">{totalRows}</span>
+    </p>
+
+    {/* Right: controls */}
+    <div className="flex items-center gap-1">
+      <button
+        onClick={() => setCurrentPage(1)}
+        disabled={currentPage === 1}
+        className="px-3 py-1.5 text-sm rounded border disabled:opacity-50"
+      >
+        First
+      </button>
+
+      <button
+        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+        disabled={currentPage === 1}
+        className="px-3 py-1.5 text-sm rounded border disabled:opacity-50"
+      >
+        Prev
+      </button>
+
+      <span className="px-3 py-1.5 text-sm font-semibold">
+        Page {currentPage} of {totalPages}
+      </span>
+
+      <button
+        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+        disabled={currentPage === totalPages}
+        className="px-3 py-1.5 text-sm rounded border disabled:opacity-50"
+      >
+        Next
+      </button>
+
+      <button
+        onClick={() => setCurrentPage(totalPages)}
+        disabled={currentPage === totalPages}
+        className="px-3 py-1.5 text-sm rounded border disabled:opacity-50"
+      >
+        Last
+      </button>
+    </div>
+  </div>
+)}
+
         </div>
 
-        {filteredLeads.length === 0 && (
-          <div className="text-center py-10 text-gray-500">
-            No leads found
-          </div>
-        )}
-      </div>
+      )}
+
 
       {/* Modal */}
       <LeadModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleCreateLead}
-        // title="Add New Lead"
+      // title="Add New Lead"
       />
     </div>
   )

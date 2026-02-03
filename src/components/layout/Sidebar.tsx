@@ -47,6 +47,8 @@ const navItems = [
 
   // Report
   { name: "Report", path: "/reports", icon:BarChart3, section: "Report" },
+  { name: " Advanced Report", path: "/advanced-report", icon:BarChart3, section: "Report" },
+
 ]
 
 

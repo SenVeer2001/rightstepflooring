@@ -5,14 +5,16 @@ import { Plus } from "lucide-react"
 
 import ItemsProductsTable from "../../components/pricebookPages/ItemsProductsTable"
 import ItemGroupsTable from "../../components/pricebookPages/ItemGroupsTable"
-import ItemCategories from "../../components/pricebookPages/ItemCategories"
+
 import ItemBrandsTable from "../../components/pricebookPages/ItemBrands"
 
 
 import ItemModal from "../../components/pricebookPages/pricebookModels/ItemModel"
 import ItemGroupModal from "../../components/pricebookPages/pricebookModels/ItemGroupModal"
-import CategoryModal from "../../components/pricebookPages/pricebookModels/CategoryModal"
+
 import BrandModal from "../../components/pricebookPages/pricebookModels/BrandModel"
+import PriceBookPage from "../../components/pricebookPages/priceBookCategory/PriceBookPage"
+import CategoryModal from "../../components/pricebookPages/priceBookCategory/CategoryModel"
 
 type TabKey =
   | "Items & products"
@@ -87,8 +89,6 @@ export default function PriceBook() {
     setOpenModal(true)
   }
 
-
-
   const handleEditItem = (item: any) => {
     setSelectedItem(item)
     setItemModalMode("edit")
@@ -101,7 +101,7 @@ export default function PriceBook() {
     setOpenModal(true)
   }
 
-  /* ================= UI ================= */
+
 
   return (
     <div className="p-6 space-y-6">
@@ -145,7 +145,7 @@ export default function PriceBook() {
       )}
 
       {activeTab === "Item categories" && (
-        <ItemCategories onRowClick={handleEditCategory} />
+        <PriceBookPage onEditCategory={handleEditCategory} />
       )}
 
 
