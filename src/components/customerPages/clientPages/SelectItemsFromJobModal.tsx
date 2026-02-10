@@ -18,7 +18,7 @@ export function SelectItemsFromJobModal({
   if (!isOpen) return null
 
   return (
-    <div className="absolute top-0 right-0 h-full w-[380px] bg-white border-l shadow-xl p-4 z-50">
+    <div className="absolute top-[62px] right-20 h-[82%] w-[380px]  bg-white border-l shadow-xl p-4 z-50">
       <div className="flex justify-between items-center mb-3">
         <h3 className="font-bold">Select items from this job</h3>
         <button onClick={onClose}>✕</button>

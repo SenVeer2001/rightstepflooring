@@ -232,10 +232,10 @@ export function Sidebar() {
                 alt="Logo"
               />
               <div>
-                <h1 className="font-bold text-sm text-gray-900 leading-tight whitespace-nowrap">
+                <h1 className="font-bold text-sm text-primary leading-tight whitespace-nowrap">
                   Right Step
                 </h1>
-                <p className="text-xs text-gray-600 leading-tight whitespace-nowrap">
+                <p className="text-xs text-gray-700 leading-tight font-medium whitespace-nowrap">
                   Flooring
                 </p>
               </div>

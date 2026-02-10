@@ -2,6 +2,10 @@ import { Plus, Edit, Trash2, Layers, Clock, TrendingUp } from "lucide-react"
 import { useState } from "react"
 import { PurchaseOrderFormModal } from "./clientPages/PurchaseOrderFormModal"
 import { PurchaseOrderChoiceModal } from "./clientPages/PurchaseOrderChoiceModal"
+import type { PurchaseOrder } from "../../types/vendor"
+
+
+
 
 interface Item {
   id: number
@@ -23,7 +27,7 @@ interface ItemsTabProps {
   onDeleteItem?: (id: number) => void
 }
 
-export function ItemsTab({ items = [], onAddItem, onEditItem, onDeleteItem }: ItemsTabProps) {
+export function ItemsTab({ items = [], onDeleteItem }: ItemsTabProps) {
   const [discount, setDiscount] = useState(0)
   const [taxRate, setTaxRate] = useState(0)
   const [laborCost, setLaborCost] = useState(0)
@@ -33,9 +37,16 @@ export function ItemsTab({ items = [], onAddItem, onEditItem, onDeleteItem }: It
   // const [timeTracking, setTimeTracking] = useState(0)
   const [commissionRate, setCommissionRate] = useState(0)
   const [customTechRateEnabled, setCustomTechRateEnabled] = useState(false)
-  const [isPOChoiceOpen, setIsPOChoiceOpen] = useState(false)
-const [isPOFormOpen, setIsPOFormOpen] = useState(false)
+
+
+
+
+// Purchase Order flow
+const [choiceOpen, setChoiceOpen] = useState(false)
+const [poFormOpen, setPoFormOpen] = useState(false)
 const [poMode, setPoMode] = useState<"create" | "edit">("create")
+const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
+
 
 
   const defaultItems: Item[] = [
@@ -66,6 +77,21 @@ const [poMode, setPoMode] = useState<"create" | "edit">("create")
 
   const displayItems = items.length > 0 ? items : defaultItems
 
+  const purchaseOrders: PurchaseOrder[] = [
+  {
+    id: "101",
+    vendorId: "v1",
+    orderDate: "2024-02-10",
+    items: displayItems.map(i => ({
+      id: i.id,
+      name: i.name,
+      quantity: i.quantity,
+      cost: i.cost,
+    })),
+  },
+]
+
+
   // Calculations
   const itemCost = displayItems.reduce((sum, item) => sum + item.amount, 0)
   const subtotal = itemCost - discount
@@ -82,13 +108,14 @@ const [poMode, setPoMode] = useState<"create" | "edit">("create")
           Job Items
           <Layers className="text-primary" />
         </h2>
-       <button
-  onClick={() => setIsPOChoiceOpen(true)}
-  className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 font-semibold text-sm"
+      <button
+  onClick={() => setChoiceOpen(true)}
+  className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm"
 >
   <Plus size={18} />
   Purchase Order
 </button>
+
 
       </div>
 
@@ -466,22 +493,38 @@ const [poMode, setPoMode] = useState<"create" | "edit">("create")
       </div>
 
 
-
-
       <PurchaseOrderChoiceModal
-  isOpen={isPOChoiceOpen}
-  onClose={() => setIsPOChoiceOpen(false)}
-  onContinue={(mode) => {
+  isOpen={choiceOpen}
+  existingPOs={purchaseOrders.map(po => ({
+    id: po.id,
+    name: `PO #${po.id}`,
+  }))}
+  onClose={() => setChoiceOpen(false)}
+  onContinue={({ mode, poId }) => {
     setPoMode(mode)
-    setIsPOChoiceOpen(false)
-    setIsPOFormOpen(true)
+    setEditingPO(
+      mode === "edit"
+        ? purchaseOrders.find(po => po.id === poId)
+        : undefined
+    )
+    setChoiceOpen(false)
+    setPoFormOpen(true)
   }}
 />
 
+
+
 <PurchaseOrderFormModal
-  isOpen={isPOFormOpen}
-  onClose={() => setIsPOFormOpen(false)}
-  jobItems={displayItems}
+  isOpen={poFormOpen}
+  mode={poMode}
+  initialPO={editingPO}
+  jobItems={displayItems.map(i => ({
+    id: i.id,
+    name: i.name,
+    quantity: i.quantity,
+    cost: i.cost,
+  }))}
+  onClose={() => setPoFormOpen(false)}
 />
 
 

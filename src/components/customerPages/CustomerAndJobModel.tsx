@@ -406,7 +406,7 @@ function CustomerAndJobModel() {
                 ))}
                 <button
                   onClick={handleOpenTagsModal}
-                  className="inline-flex items-center justify-center w-6 h-6 text-green-600 hover:bg-green-50 rounded-full transition-colors"
+                  className="inline-flex items-center justify-center w-6 h-6 text-green-600 bg-green-50 rounded-full transition-colors"
                   title="Edit tags"
                 >
                   <Plus size={16} />
