@@ -151,7 +151,7 @@ export function Sidebar() {
 
             {/* Submenu Items */}
             {isSubmenuExpanded && isExpanded && (
-              <div className="ml-4 pl-4 border-l-2 border-gray-100 animate-slideDown">
+              <div className="ml-5 pl-4 border-l-2 border-primary/50 animate-slideDown">
                 {item.submenu?.map((subItem: SubMenuItem) => ( 
                   <NavLink
                     key={subItem.path}
