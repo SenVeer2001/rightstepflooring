@@ -27,10 +27,10 @@ export function Header() {
 
   return (
     <header className="h-16 bg-black bg-opacity-10 border-b border-gray-200 flex items-center px-6 sticky top-0 z-40 shadow-sm">
-      {/* Left */}
+      {/* Left
       <button className="lg:hidden text-gray-600 hover:bg-gray-100 p-2 rounded-lg">
         <Menu size={22} />
-      </button>
+      </button> */}
 
       <div className="flex-1" />
 
