@@ -81,42 +81,33 @@ export function PurchaseOrderFormModal({
         </div>
 
         {/* VENDOR + DATE */}
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          <div className="space-y-1">
-            <select
-              className="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
-              value={selectedVendorId}
-              onChange={e => setSelectedVendorId(e.target.value)}
-            >
-              <option value="">Select vendor</option>
-
-              {vendors.map(v => (
-                <option key={v.id} value={v.id}>
-                  {v.name}
-                </option>
-              ))}
-            </select>
-
-
-
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setVendorOpenForm(true)}
-            className="text-primary text-sm font-semibold hover:underline inline-flex items-center gap-1"
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <select
+            className="border rounded-md cursor-pointer px-3 py-2 text-sm"
+            value={selectedVendorId}
+            onChange={e => {
+              if (e.target.value === "create") {
+                setVendorOpenForm(true)
+                return
+              }
+              setSelectedVendorId(e.target.value)
+            }}
           >
-            + Create vendor
-          </button>
+            <option value="">Select vendor</option>
+            {vendors.map(v => (
+              <option key={v.id} value={v.id}>
+                {v.name}
+              </option>
+            ))}
+            <option value="create" className="text-primary font-medium text-md cursor-pointer bg-primary/10"> + Create vendor</option>
+          </select>
 
-           <button
-            onClick={() => setIsItemSelectorOpen(true)}
-            className="px-4 py-2 border rounded-md text-sm font-semibold"
-          >
-            Select from job
-          </button>
-
-         
+          <input
+            type="date"
+            value={orderDate}
+            onChange={e => setOrderDate(e.target.value)}
+            className="border rounded-md px-3 py-2 text-sm"
+          />
         </div>
 
         {/* ADD ITEMS */}
@@ -137,13 +128,13 @@ export function PurchaseOrderFormModal({
               </option>
             ))}
           </select>
-           <input
-            type="date"
-            value={orderDate}
-            onChange={e => setOrderDate(e.target.value)}
-            className="border rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-primary"
-          />
-         
+
+          <button
+            onClick={() => setIsItemSelectorOpen(true)}
+            className="px-4 py-2 border rounded-md text-sm font-semibold"
+          >
+            Select from job
+          </button>
         </div>
 
         {/* ITEMS TABLE */}

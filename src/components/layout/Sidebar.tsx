@@ -256,9 +256,9 @@ export function Sidebar() {
           className="w-full flex items-center gap-4 px-3 py-3 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all whitespace-nowrap"
           title="Logout"
         >
-          <LogOut size={20} className="flex-shrink-0" />
+          <LogOut size={20} className="flex-shrink-0 text-red-600" />
           <span
-            className="flex-1 overflow-hidden transition-all duration-300"
+            className="flex-1 overflow-hidden text-red-700 transition-all duration-300"
             style={{
               opacity: isExpanded ? 1 : 0,
               width: isExpanded ? "auto" : "0",
