@@ -65,6 +65,7 @@ export function AdvancedReport() {
                 type="radio"
                 checked={viewFilter === "retention"}
                 onChange={() => setViewFilter("retention")}
+                className="accent-primary h-4 w-5"
               />
               Retention
             </label>
@@ -74,6 +75,7 @@ export function AdvancedReport() {
                 type="radio"
                 checked={viewFilter === "attrition"}
                 onChange={() => setViewFilter("attrition")}
+                className="accent-primary h-4 w-5"
               />
               Attrition
             </label>
@@ -100,7 +102,7 @@ export function AdvancedReport() {
 
            <div >
               <SectionTitle title="Recent Attrition" />
-              <div className="p-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-2 grid grid-cols-1 md:grid-cols-1 gap-4">
                 {recentAttritionRecords.map((employee) => (
                   <div key={employee.empId} className={glassSoft}>
                     <EmployeeAttritionCard employee={employee} />

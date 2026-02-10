@@ -6,6 +6,47 @@ import { useNavigate } from "react-router-dom"
 
 /* ================= TYPES ================= */
 
+
+const selectStyles = {
+  control: (base: any, state: any) => ({
+    ...base,
+    minHeight: "38px",
+    borderRadius: "0.5rem",
+    borderColor: state.isFocused ? "#2563eb" : "#d1d5db", // blue when focus
+    boxShadow: state.isFocused ? "0 0 0 1px #2563eb" : "none",
+    "&:hover": {
+      borderColor: "#2563eb",
+    },
+  }),
+  input: (base: any) => ({
+    ...base,
+    outline: "none",      
+    boxShadow: "none",
+  }),
+  placeholder: (base: any) => ({
+    ...base,
+    color: "#9ca3af",
+    fontSize: "14px",
+  }),
+  multiValue: (base: any) => ({
+    ...base,
+    backgroundColor: "#dbeafe",
+  }),
+  multiValueLabel: (base: any) => ({
+    ...base,
+    color: "#1e40af",
+  }),
+  multiValueRemove: (base: any) => ({
+    ...base,
+    color: "#1e40af",
+    ":hover": {
+      backgroundColor: "#bfdbfe",
+      color: "#1e3a8a",
+    },
+  }),
+};
+
+
 interface TeamMember {
   id: string
   name: string
@@ -115,8 +156,11 @@ export function Team() {
             value={statusFilter}
             onChange={(val) => setStatusFilter(val as any)}
             placeholder="Status"
-            classNamePrefix="react-select outline-none "
+            styles={selectStyles}
+            className="text-sm"
+            classNamePrefix="react-select"
           />
+
         </div>
 
         {/* SEARCH */}
@@ -155,7 +199,7 @@ export function Team() {
               <tr
                 key={member.id}
                 className="border-b hover:bg-primary/10 transition cursor-pointer"
-                onClick={()=>{navigate(`/team/user/${member.id}`)}}
+                onClick={() => { navigate(`/team/user/${member.id}`) }}
               >
                 {/* NAME */}
                 <td className="p-3">

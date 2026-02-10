@@ -1,5 +1,14 @@
-import { ChevronLeft, ChevronRight, Plus, Clock, MapPin, User } from 'lucide-react'
-import { useState } from 'react'
+"use client"
+
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Clock,
+  MapPin,
+  User,
+} from "lucide-react"
+import { useState } from "react"
 
 interface ScheduleEvent {
   id: string
@@ -8,123 +17,129 @@ interface ScheduleEvent {
   time: string
   technician: string
   location: string
-  status: 'scheduled' | 'in-progress' | 'completed'
-  color: string
+  status: "scheduled" | "in-progress" | "completed"
 }
 
 const scheduleData: ScheduleEvent[] = [
   {
-    id: '1',
-    title: 'Flooring Installation',
-    date: '2026-01-10',
-    time: '09:00 AM',
-    technician: 'Mike Johnson',
-    location: '123 Main St, Springfield',
-    status: 'scheduled',
-    color: 'bg-blue-500',
+    id: "1",
+    title: "Flooring Installation",
+    date: "2026-01-10",
+    time: "09:00 AM",
+    technician: "Mike Johnson",
+    location: "123 Main St, Springfield",
+    status: "scheduled",
   },
   {
-    id: '2',
-    title: 'Carpet Cleaning',
-    date: '2026-01-10',
-    time: '02:00 PM',
-    technician: 'Lisa Brown',
-    location: '456 Oak Ave, Chicago',
-    status: 'in-progress',
-    color: 'bg-green-500',
+    id: "2",
+    title: "Carpet Cleaning",
+    date: "2026-01-10",
+    time: "02:00 PM",
+    technician: "Lisa Brown",
+    location: "456 Oak Ave, Chicago",
+    status: "in-progress",
   },
   {
-    id: '3',
-    title: 'Flooring Repair',
-    date: '2026-01-11',
-    time: '10:00 AM',
-    technician: 'Tom Davis',
-    location: '789 Pine Rd, Aurora',
-    status: 'scheduled',
-    color: 'bg-orange-500',
-  },
-  {
-    id: '4',
-    title: 'Tile Restoration',
-    date: '2026-01-12',
-    time: '11:00 AM',
-    technician: 'Mike Johnson',
-    location: '654 Maple Dr, Evanston',
-    status: 'scheduled',
-    color: 'bg-purple-500',
+    id: "3",
+    title: "Flooring Repair",
+    date: "2026-01-11",
+    time: "10:00 AM",
+    technician: "Tom Davis",
+    location: "789 Pine Rd, Aurora",
+    status: "scheduled",
   },
 ]
 
-const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 const monthsOfYear = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ]
+
+const statusStyles: Record<
+  "scheduled" | "in-progress" | "completed",
+  string
+> = {
+  scheduled: "bg-blue-100 text-blue-700",
+  "in-progress": "bg-yellow-100 text-yellow-800",
+  completed: "bg-green-100 text-green-700",
+}
 
 export function Schedule() {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 10))
-  const [viewType, setViewType] = useState<'month' | 'week' | 'day'>('month')
+  const [viewType, setViewType] = useState<"month" | "week" | "day">("month")
 
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
-  }
+  const getDaysInMonth = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
 
-  const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay()
-  }
+  const getFirstDayOfMonth = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), 1).getDay()
 
-  const handlePrevMonth = () => {
+  const handlePrevMonth = () =>
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))
-  }
 
-  const handleNextMonth = () => {
+  const handleNextMonth = () =>
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))
-  }
 
   const renderCalendarDays = () => {
     const daysInMonth = getDaysInMonth(currentDate)
     const firstDay = getFirstDayOfMonth(currentDate)
-    const days = []
+    const cells = []
 
-    // Empty days
     for (let i = 0; i < firstDay; i++) {
-      days.push(
-        <div key={`empty-${i}`} className="bg-gray-50 h-24 rounded-lg border border-gray-200" />
+      cells.push(
+        <div
+          key={`empty-${i}`}
+          className="h-28 rounded-lg border border-gray-100 bg-gray-50"
+        />
       )
     }
 
-    // Days with events
     for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-      const dayEvents = scheduleData.filter((e) => e.date === dateStr)
-      const isToday =
-        new Date().toDateString() === new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toDateString()
+      const dateStr = `${currentDate.getFullYear()}-${String(
+        currentDate.getMonth() + 1
+      ).padStart(2, "0")}-${String(day).padStart(2, "0")}`
 
-      days.push(
+      const dayEvents = scheduleData.filter(e => e.date === dateStr)
+      const isToday =
+        new Date().toDateString() ===
+        new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          day
+        ).toDateString()
+
+      cells.push(
         <div
-          key={`day-${day}`}
-          className={`rounded-lg border h-24 p-2 overflow-y-auto cursor-pointer transition-colors ${
-            isToday ? 'bg-blue-50 border-blue-300' : 'bg-white border-gray-200 hover:bg-gray-50'
-          }`}
+          key={day}
+          className={`h-28 rounded-lg border p-2 text-sm transition
+            ${isToday
+              ? "border-primary bg-primary/5"
+              : "border-gray-200 hover:bg-gray-50"
+            }`}
         >
-          <div className={`text-sm font-semibold mb-1 ${isToday ? 'text-blue-600' : 'text-gray-700'}`}>
+          <div
+            className={`mb-1 text-xs font-semibold ${isToday ? "text-primary" : "text-gray-700"
+              }`}
+          >
             {day}
           </div>
+
           <div className="space-y-1">
-            {dayEvents.map((event) => (
+            {dayEvents.slice(0, 3).map(event => (
               <div
                 key={event.id}
-                className={`text-xs px-2 py-1 rounded text-white font-semibold truncate ${event.color}`}
+                className="rounded bg-primary text-white px-2 py-0.5 text-[11px] truncate"
                 title={event.title}
               >
                 {event.time}
@@ -135,136 +150,124 @@ export function Schedule() {
       )
     }
 
-    return days
+    return cells
   }
 
-  const upcomingEvents = scheduleData
-    .filter((e) => new Date(e.date) >= currentDate)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .slice(0, 5)
+  const upcomingEvents = scheduleData.slice(0, 4)
 
   return (
-    <div className="space-y-6 p-6 min-h-screen">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+    <div className="p-6 space-y-8">
+
+      {/* HEADER */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Schedule</h1>
-          <p className="text-gray-600 text-sm mt-1">View and manage job schedules</p>
+          <h1 className="text-2xl font-semibold text-gray-900">Schedule</h1>
+          <p className="text-sm text-gray-500">
+            Manage and track scheduled jobs
+          </p>
         </div>
-        <button className="flex items-center gap-2 bg-primary hover:bg-[##2c621b] text-white font-semibold py-2.5 px-4 rounded-lg transition-colors">
-          <Plus size={20} />
+
+        <button className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold">
+          <Plus size={16} />
           Add Event
         </button>
       </div>
 
-      {/* View Type Selector */}
-      <div className=" rounded-lg p-4 shadow-sm">
-        <div className="flex gap-2">
-          {['month', 'week', 'day'].map((type) => (
-            <button
-              key={type}
-              onClick={() => setViewType(type as any)}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                viewType === type
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+      {/* VIEW SWITCH */}
+      <div className="inline-flex rounded-lg border bg-white p-1">
+        {["month", "week", "day"].map(type => (
+          <button
+            key={type}
+            onClick={() => setViewType(type as any)}
+            className={`px-4 py-2 text-[12px] font-semibold rounded-md transition
+              ${viewType === type
+                ? "bg-primary text-white"
+                : "text-gray-600 hover:bg-gray-100"
               }`}
-            >
-              {type.charAt(0).toUpperCase() + type.slice(1)} View
-            </button>
-          ))}
-        </div>
+          >
+            {type.toUpperCase()}
+          </button>
+        ))}
       </div>
 
-      {/* Calendar Header */}
-      <div className="bg-white rounded-lg border border-gray-300 shadow-sm p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {monthsOfYear[currentDate.getMonth()]} {currentDate.getFullYear()}
-          </h2>
-          <div className="flex gap-2">
-            <button
-              onClick={handlePrevMonth}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ChevronLeft size={24} className="text-gray-600" />
-            </button>
-            <button
-              onClick={() => setCurrentDate(new Date())}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-            >
-              Today
-            </button>
-            <button
-              onClick={handleNextMonth}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ChevronRight size={24} className="text-gray-600" />
-            </button>
-          </div>
-        </div>
 
-        {/* Calendar Grid */}
-        <div>
-          {/* Days of week header */}
-          <div className="grid grid-cols-7 gap-3 mb-3">
-            {daysOfWeek.map((day) => (
-              <div key={day} className="text-center font-semibold text-gray-600 text-sm py-2">
-                {day}
-              </div>
-            ))}
-          </div>
+      {/* UPCOMING EVENTS */}
+      <div className="bg-white border rounded-xl p-6">
+        <h3 className="text-sm font-semibold mb-4 text-gray-900">
+          Upcoming Events
+        </h3>
 
-          {/* Calendar days */}
-          <div className="grid grid-cols-7 gap-3">{renderCalendarDays()}</div>
-        </div>
-      </div>
-
-      {/* Upcoming Events */}
-      <div className="bg-white rounded-lg border border-gray-300 shadow-sm p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-4">Upcoming Events</h3>
         <div className="space-y-3">
-          {upcomingEvents.length > 0 ? (
-            upcomingEvents.map((event) => (
-              <div key={event.id} className="border border-gray-300 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 text-lg">{event.title}</h4>
-                    <div className="flex gap-4 mt-2 text-sm text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <Clock size={16} className="text-blue-600" />
-                        {event.time}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MapPin size={16} className="text-green-600" />
-                        {event.location}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <User size={16} className="text-purple-600" />
-                        {event.technician}
-                      </div>
-                    </div>
-                  </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${
-                      event.status === 'scheduled'
-                        ? 'bg-blue-500'
-                        : event.status === 'in-progress'
-                          ? 'bg-green-500'
-                          : 'bg-gray-500'
-                    }`}
-                  >
-                    {event.status.replace('-', ' ').charAt(0).toUpperCase() +
-                      event.status.replace('-', ' ').slice(1)}
+          {upcomingEvents.map(event => (
+            <div
+              key={event.id}
+              className="flex items-start justify-between border rounded-lg p-4 hover:bg-gray-50"
+            >
+              <div>
+                <p className="font-semibold text-gray-900">{event.title}</p>
+                <div className="mt-1 flex flex-wrap gap-4 text-xs text-gray-600">
+                  <span className="flex items-center gap-1">
+                    <Clock size={12} /> {event.time}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <MapPin size={12} /> {event.location}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <User size={12} /> {event.technician}
                   </span>
                 </div>
               </div>
-            ))
-          ) : (
-            <p className="text-gray-500 text-center py-8">No upcoming events</p>
-          )}
+
+              <span
+                className={`text-xs px-3 py-1 rounded-full font-semibold capitalize
+    ${statusStyles[event.status]}
+  `}
+              >
+                {event.status.replace("-", " ")}
+              </span>
+
+            </div>
+          ))}
         </div>
       </div>
+      {/* CALENDAR */}
+      <div className="bg-white border rounded-xl p-6 space-y-4">
+
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">
+            {monthsOfYear[currentDate.getMonth()]} {currentDate.getFullYear()}
+          </h2>
+
+          <div className="flex gap-2">
+            <button onClick={handlePrevMonth} className="p-2 hover:bg-gray-100 rounded-lg">
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              onClick={() => setCurrentDate(new Date())}
+              className="px-3 py-2 text-sm border rounded-lg"
+            >
+              Today
+            </button>
+            <button onClick={handleNextMonth} className="p-2 hover:bg-gray-100 rounded-lg">
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-7 gap-3 text-xs font-semibold text-gray-500">
+          {daysOfWeek.map(day => (
+            <div key={day} className="text-center">
+              {day}
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7 gap-3">
+          {renderCalendarDays()}
+        </div>
+      </div>
+
+
     </div>
   )
 }

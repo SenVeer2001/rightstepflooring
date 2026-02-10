@@ -1,26 +1,12 @@
 import { Phone, Mail, MapPin } from 'lucide-react'
+import type { Lead } from '../../../types/lead'
 
-export interface Lead {
-  id: string
-  name: string
-  email: string
-  phone: string
-  address?: string
-  city?: string
-  state?: string
-  source?: string
-  requirement?: string
-  budget: number
-  status: string
-  tags?: string[]
-  type?:string
-  createdAt: string
-  service?: string
-}
+export type { Lead }
+
 
 interface LeadCardProps {
   lead: Lead
-  index: number
+  
 }
 
 export function LeadCard({ lead }: LeadCardProps) {
@@ -45,7 +31,7 @@ export function LeadCard({ lead }: LeadCardProps) {
         </div>
       </div>
 
-     
+      {/* Source/Service */}
       {(lead.source || lead.service) && (
         <div className="mb-2 pb-2 border-b border-gray-100">
           {lead.source && (
@@ -72,7 +58,7 @@ export function LeadCard({ lead }: LeadCardProps) {
       )}
 
       {/* Budget */}
-      {lead.budget > 0 && (
+      {lead.budget && lead.budget > 0 && (
         <div className="mt-3 p-2 bg-green-50 rounded border border-green-200">
           <p className="text-xs font-semibold text-green-800">
             Budget: ${lead.budget.toLocaleString()}

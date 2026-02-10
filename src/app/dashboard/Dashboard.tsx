@@ -105,78 +105,8 @@ export function Dashboard() {
         <div className="grid grid-cols-2 gap-3 ">
 
           <div className="">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3 ">
-              <OverviewCard
-                title="REVENUE RATE"
-                value="16.1%"
-                subtitle="Total Revenue"
-                amount={14539}
-                trend="up"
-              />
-              <OverviewCard
-                title="TOTAL JOBS"
-                value="237"
-                subtitle="Current Jobs"
-                amount={395}
-                trend="up"
-              />
-              <OverviewCard
-                title="CURRENT EMPLOYEES"
-                value="1,233"
-                subtitle="Active"
-                trend="down"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-             
-
-
-               <div className={`${glassCard} p-6`}>
-                <SectionHeader title="DEPARTMENT" />
-                <div className="space-y-6 mt-6">
-                  {departmentData.map((dept, idx) => (
-                    <DepartmentCircle
-                      key={dept.name}
-                      name={dept.name}
-                      value={dept.value}
-                      total={dept.total}
-                      color={idx === 0 ? "#fdf76d" : idx === 1 ? "#fbbf24" : "#fb923c"}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className={`${glassCard} p-6`}>
-                <SectionHeader title="JOB ROLE" subtitle="Top 5" />
-                <div className="space-y-3 mt-4">
-                  {topJobTypesData.map((job, idx) => (
-                    <JobRoleRow
-                      key={job.name}
-                      rank={idx + 1}
-                      name={job.name}
-                      count={job.count}
-                      isHighlight={idx < 2}
-                    />
-                  ))}
-                </div>
-              </div>
-
-             
-
-
-
-
-
-
-            </div>
-
-
-
-
-          </div>
-          <div className="">
-            <div className="grid grid-cols-2 gap-2">
+           
+                <div className="grid grid-cols-2 gap-2 mb-3">
               <div className={`${glassCard} p-6`}>
                 <SectionHeader title="TODAY OVERVIEW" />
                 <div className="space-y-4 mt-5">
@@ -220,51 +150,124 @@ export function Dashboard() {
                 </div>
               </div>
 
-              
-            </div>
 
-             <div className={`${glassCard} p-6 mt-3`}>
-                <div className="flex justify-between items-center mb-4">
-                  <SectionHeader title="REVENUE TREND" />
-                  <div className="flex gap-2">
-                    <PeriodButton active>1M</PeriodButton>
-                    <PeriodButton>3M</PeriodButton>
-                    <PeriodButton>6M</PeriodButton>
-                    <PeriodButton>1Y</PeriodButton>
-                  </div>
-                </div>
-                <div className="h-[280px] mt-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={monthlySalesData}>
-                      <CartesianGrid
-                        stroke="rgba(0,0,0,0.05)"
-                        strokeDasharray="3 3"
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="month"
-                        tick={{ fill: "#6B7280", fontSize: 12 }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        tick={{ fill: "#6B7280", fontSize: 12 }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <Tooltip
-                        cursor={{ fill: "rgba(253, 247, 109, 0.1)" }}
-                        contentStyle={{
-                          background: "rgba(255,255,255,0.95)",
-                          border: "1px solid rgba(0,0,0,0.1)",
-                          borderRadius: "8px",
-                        }}
-                      />
-                      <Bar dataKey="revenue" fill="#387d22" radius={[8, 8, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+
+
+
+              <div className={`${glassCard} p-6`}>
+                <SectionHeader title="DEPARTMENT" />
+                <div className="space-y-6 mt-6">
+                  {departmentData.map((dept, idx) => (
+                    <DepartmentCircle
+                      key={dept.name}
+                      name={dept.name}
+                      value={dept.value}
+                      total={dept.total}
+                      color={idx === 0 ? "#fdf76d" : idx === 1 ? "#fbbf24" : "#fb923c"}
+                    />
+                  ))}
                 </div>
               </div>
+            
+
+              <div className={`${glassCard} p-6`}>
+                <SectionHeader title="JOB ROLE" subtitle="Top 5" />
+                <div className="space-y-3 mt-4">
+                  {topJobTypesData.map((job, idx) => (
+                    <JobRoleRow
+                      key={job.name}
+                      rank={idx + 1}
+                      name={job.name}
+                      count={job.count}
+                      isHighlight={idx < 2}
+                    />
+                  ))}
+                </div>
+              </div>
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+          </div>
+          <div className="">
+         
+
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3 ">
+              <OverviewCard
+                title="REVENUE RATE"
+                value="16.1%"
+                subtitle="Total Revenue"
+                amount={14539}
+                trend="up"
+              />
+              <OverviewCard
+                title="TOTAL JOBS"
+                value="237"
+                subtitle="Current Jobs"
+                amount={395}
+                trend="up"
+              />
+              <OverviewCard
+                title="CURRENT EMPLOYEES"
+                value="1,233"
+                subtitle="Active"
+                trend="down"
+              />
+            </div>
+
+            <div className={`${glassCard} p-6 mt-3`}>
+              <div className="flex justify-between items-center mb-4">
+                <SectionHeader title="REVENUE TREND" />
+                <div className="flex gap-2">
+                  <PeriodButton active>1M</PeriodButton>
+                  <PeriodButton>3M</PeriodButton>
+                  <PeriodButton>6M</PeriodButton>
+                  <PeriodButton>1Y</PeriodButton>
+                </div>
+              </div>
+              <div className="h-[380px] mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlySalesData}>
+                    <CartesianGrid
+                      stroke="rgba(0,0,0,0.05)"
+                      strokeDasharray="3 3"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fill: "#6B7280", fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fill: "#6B7280", fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      cursor={{ fill: "rgba(253, 247, 109, 0.1)" }}
+                      contentStyle={{
+                        background: "rgba(255,255,255,0.95)",
+                        border: "1px solid rgba(0,0,0,0.1)",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Bar dataKey="revenue" fill="#387d22" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
 
           </div>
 

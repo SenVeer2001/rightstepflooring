@@ -1,4 +1,5 @@
-import type { Lead } from '../components/LeadCard'
+import type { Lead } from "../components/kanban/leadKanban/LeadCard";
+
 
 export const mockLeadsData: Lead[] = [
   // New Leads

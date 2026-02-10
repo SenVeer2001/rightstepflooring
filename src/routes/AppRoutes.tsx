@@ -10,12 +10,12 @@ import { Technicians } from "../app/technicians/Technicians"
 import { Invoices } from "../app/invoices/Invoices"
 import { Reports } from "../app/reports/Reports"
 import { Automation } from "../app/automation/Automation"
-import { Settings } from "../app/settings/Settings"
+
 import { Schedule } from "../app/schedule/Schedule"
 import { Leads } from "../app/leads/Leads"
 import { Team } from "../app/team/Team"
 import { Map } from "../app/map/Map"
-import { Estimates } from "../app/estimates/Estimates"
+
 
 
 
@@ -27,6 +27,11 @@ import CustomerAndJobModel from "../components/customerPages/CustomerAndJobModel
 import ClientModel from "../components/customerPages/clientPages/ClientModel"
 import PriceBook from "../app/pricebook/PriceBook"
 import { AdvancedReport } from "../app/reports/AdvancedReport"
+import { EstimatesView } from "../components/estimatesModel/estimates/estimatesView"
+import Estimates from "../app/estimates/Estimates"
+import Settings from "../app/settings/Settings"
+
+
 
 
 
@@ -54,13 +59,13 @@ export function AppRoutes() {
                   <Route path="/jobs" element={<Jobs />} />
                   <Route path="/products" element={<PriceBook />} />
                   <Route path="/dispatch" element={<Dispatch />} />
-                  <Route path="/leads" element={<Leads />} />
+                  <Route path="/leads/all" element={<Leads />} />
                   <Route path="/leads/:leadId" element={<LeadDetails />} />
 
                   <Route path="/client" element={<Customers />} />
-                  <Route path="/client/jobs/:jobId" element={<CustomerAndJobModel />}/>
-                  <Route path="/client/:customerId" element={<ClientModel />}/>
-                  
+                  <Route path="/client/jobs/:jobId" element={<CustomerAndJobModel />} />
+                  <Route path="/client/:customerId" element={<ClientModel />} />
+
 
                   <Route path="/team" element={<Team />} />
                   <Route path="/technicians" element={<Technicians />} />
@@ -73,15 +78,17 @@ export function AppRoutes() {
                   />
 
                   <Route path="/estimates">
-                    <Route path="view" element={<Estimates />} />
-                    <Route path="add" element={<Estimates />} />
+                    <Route index element={<Estimates />} />
+                    <Route path="add" element={<EstimatesView />} />
+                    <Route path=":leadId" element={<EstimatesView />} />
                   </Route>
+
                   <Route path="/reports" element={<Reports />} />
-                   <Route path="/advanced-report" element={<AdvancedReport />} />
+                  <Route path="/advanced-report" element={<AdvancedReport />} />
                   <Route path="/automation" element={<Automation />} />
-                 
-                  <Route path="/team" element={<Team/>} />
-                  <Route path="/team/user/:id" element={<UserProfile/>} />
+
+                  <Route path="/team" element={<Team />} />
+                  <Route path="/team/user/:id" element={<UserProfile />} />
 
 
 

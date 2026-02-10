@@ -2,32 +2,18 @@ import { useState } from "react"
 import { Search, Plus, Download, LayoutGrid, List } from "lucide-react"
 import { LeadModal, LEAD_STATUS_LABELS } from "../../components/LeadModal"
 import type { LeadStatus } from "../../components/LeadModal"
-import { KanbanView } from './KanbanView'
+
 import { Eye, Trash2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { mockLeadsData } from '../../services/mockLeadData'
+import { LeadKanbanBoard } from "../../components/kanban/leadKanban/LeadKanbanView"
+import type { Lead } from "../../types/lead"
+
+
 
 
 /* ===================== TYPES ===================== */
 
-interface Lead {
-  id: string
-  name: string
-  email: string
-  phone: string
-  address: string
-  city: string
-  state: string
-  service?: string
-  budget?: number
-  createdAt?: string
-  status: LeadStatus
-  source: string
-  type: string
-  tags?: string[]
-  requirement?: string
-  createdDate: string
-}
 
 // @ts-ignore
 const leadsData: Lead[] = Array.isArray(mockLeadsData)
@@ -43,6 +29,7 @@ const leadsData: Lead[] = Array.isArray(mockLeadsData)
 
 
 
+
 /* ===================== STATUS STYLES ===================== */
 
 const statusStyles: Record<LeadStatus, string> = {
@@ -53,6 +40,12 @@ const statusStyles: Record<LeadStatus, string> = {
   scheduling_visit: "bg-purple-100 text-purple-800",
   scheduled: "bg-emerald-100 text-emerald-800",
   delayed: "bg-red-100 text-red-800",
+  contacted: "bg-green-100 text-green-800",
+  qualified: "bg-purple-100 text-purple-800",
+  "proposal-sent": "bg-indigo-100 text-indigo-800",
+  "follow-up": "bg-amber-100 text-amber-800",
+  "closed-won": "bg-emerald-100 text-emerald-800",
+  "closed-lost": "bg-gray-100 text-gray-800",
 }
 
 /* ===================== COMPONENT ===================== */
@@ -66,9 +59,10 @@ export function Leads() {
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set())
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table')
   const [currentPage, setCurrentPage] = useState(1)
-const rowsPerPage = 10 // change if needed
+  const rowsPerPage = 10 // change if needed
 
   const navigateTo = useNavigate()
+
 
 
   /* ===================== FILTER ===================== */
@@ -81,7 +75,7 @@ const rowsPerPage = 10 // change if needed
       lead.email.toLowerCase().includes(search) ||
       lead.phone.replace(/\s/g, "").includes(search.replace(/\s/g, "")) ||
       lead.city.toLowerCase().includes(search) ||
-      lead.type.toLowerCase().includes(search)
+      lead.type?.toLowerCase().includes(search) || ""
 
     const matchesStatus =
       selectedStatus === "all" || lead.status === selectedStatus
@@ -90,12 +84,12 @@ const rowsPerPage = 10 // change if needed
   })
 
   const totalRows = filteredLeads.length
-const totalPages = Math.ceil(totalRows / rowsPerPage)
+  const totalPages = Math.ceil(totalRows / rowsPerPage)
 
-const startIndex = (currentPage - 1) * rowsPerPage
-const endIndex = startIndex + rowsPerPage
+  const startIndex = (currentPage - 1) * rowsPerPage
+  const endIndex = startIndex + rowsPerPage
 
-const paginatedLeads = filteredLeads.slice(startIndex, endIndex)
+  const paginatedLeads = filteredLeads.slice(startIndex, endIndex)
 
 
   /* ===================== CREATE ===================== */
@@ -306,17 +300,13 @@ const paginatedLeads = filteredLeads.slice(startIndex, endIndex)
       )}
 
 
-      {viewMode === 'kanban' && (
-        <KanbanView
-           // @ts-ignore
-          leads={Array.isArray(leads) ? leads : []}
-          // @ts-ignore
-          onLeadsUpdate={(updatedLeads: Lead[]) =>
-            setLeads(Array.isArray(updatedLeads) ? updatedLeads : [])
-          }
-        />
+  {viewMode === "kanban" && (
+  <LeadKanbanBoard
+    leads={leads}
+    onLeadsUpdate={setLeads}
+  />
+)}
 
-      )}
 
       {/* Table */}
 
@@ -432,60 +422,60 @@ const paginatedLeads = filteredLeads.slice(startIndex, endIndex)
           </div>
 
           {filteredLeads.length > 0 && (
-  <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
-    
-    {/* Left: info */}
-    <p className="text-sm text-gray-600">
-      Showing{" "}
-      <span className="font-semibold">{startIndex + 1}</span>
-      {" - "}
-      <span className="font-semibold">
-        {Math.min(endIndex, totalRows)}
-      </span>
-      {" of "}
-      <span className="font-semibold">{totalRows}</span>
-    </p>
+            <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
 
-    {/* Right: controls */}
-    <div className="flex items-center gap-1">
-      <button
-        onClick={() => setCurrentPage(1)}
-        disabled={currentPage === 1}
-        className="px-3 py-1.5 text-sm rounded border disabled:opacity-50"
-      >
-        First
-      </button>
+              {/* Left: info */}
+              <p className="text-sm text-gray-600">
+                Showing{" "}
+                <span className="font-semibold">{startIndex + 1}</span>
+                {" - "}
+                <span className="font-semibold">
+                  {Math.min(endIndex, totalRows)}
+                </span>
+                {" of "}
+                <span className="font-semibold">{totalRows}</span>
+              </p>
 
-      <button
-        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-        disabled={currentPage === 1}
-        className="px-3 py-1.5 text-sm rounded border disabled:opacity-50"
-      >
-        Prev
-      </button>
+              {/* Right: controls */}
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 text-sm rounded border disabled:opacity-50"
+                >
+                  First
+                </button>
 
-      <span className="px-3 py-1.5 text-sm font-semibold">
-        Page {currentPage} of {totalPages}
-      </span>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 text-sm rounded border disabled:opacity-50"
+                >
+                  Prev
+                </button>
 
-      <button
-        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-        disabled={currentPage === totalPages}
-        className="px-3 py-1.5 text-sm rounded border disabled:opacity-50"
-      >
-        Next
-      </button>
+                <span className="px-3 py-1.5 text-sm font-semibold">
+                  Page {currentPage} of {totalPages}
+                </span>
 
-      <button
-        onClick={() => setCurrentPage(totalPages)}
-        disabled={currentPage === totalPages}
-        className="px-3 py-1.5 text-sm rounded border disabled:opacity-50"
-      >
-        Last
-      </button>
-    </div>
-  </div>
-)}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 text-sm rounded border disabled:opacity-50"
+                >
+                  Next
+                </button>
+
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 text-sm rounded border disabled:opacity-50"
+                >
+                  Last
+                </button>
+              </div>
+            </div>
+          )}
 
         </div>
 

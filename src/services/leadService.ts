@@ -1,4 +1,6 @@
-import type { Lead } from '../components/LeadCard'
+import type { Lead } from "../types/lead"
+
+
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) || 'http://localhost:5000/api'
 

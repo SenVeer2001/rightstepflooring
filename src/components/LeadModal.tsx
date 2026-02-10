@@ -27,10 +27,10 @@ const tagSelectStyles: StylesConfig<
 
 /* ===================== CONSTANTS ===================== */
 
-export const LEAD_STATUSES = ["new", "attempting_to_contact", "initial_contact_made", "qualifying", "scheduling_visit", "scheduled", "delayed",] as const
+export const LEAD_STATUSES = ["new", "attempting_to_contact", "initial_contact_made", "qualifying", "scheduling_visit", "scheduled", "delayed", "contacted", "qualified", "proposal-sent", "follow-up", "closed-won", "closed-lost"] as const
 export type LeadStatus = typeof LEAD_STATUSES[number]
 export const LEAD_STATUS_LABELS: Record<LeadStatus, string> =
-  { new: "New", attempting_to_contact: "Attempting to Contact", initial_contact_made: "Initial Contact Made", qualifying: "Qualifying", scheduling_visit: "Scheduling Visit", scheduled: "Scheduled", delayed: "Delayed", }
+  { new: "New", attempting_to_contact: "Attempting to Contact", initial_contact_made: "Initial Contact Made", qualifying: "Qualifying", scheduling_visit: "Scheduling Visit", scheduled: "Scheduled", delayed: "Delayed", contacted: "Contacted", qualified: "Qualified", "proposal-sent": "Proposal Sent", "follow-up": "Follow Up", "closed-won": "Closed Won", "closed-lost": "Closed Lost", }
 
 const STATES = ["IL", "IN", "MI", "OH", "WI", "MN", "MO", "IA"]
 

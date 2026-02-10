@@ -1,5 +1,7 @@
 import { Plus, Edit, Trash2, Layers, Clock, TrendingUp } from "lucide-react"
 import { useState } from "react"
+import { PurchaseOrderFormModal } from "./clientPages/PurchaseOrderFormModal"
+import { PurchaseOrderChoiceModal } from "./clientPages/PurchaseOrderChoiceModal"
 
 interface Item {
   id: number
@@ -31,6 +33,10 @@ export function ItemsTab({ items = [], onAddItem, onEditItem, onDeleteItem }: It
   // const [timeTracking, setTimeTracking] = useState(0)
   const [commissionRate, setCommissionRate] = useState(0)
   const [customTechRateEnabled, setCustomTechRateEnabled] = useState(false)
+  const [isPOChoiceOpen, setIsPOChoiceOpen] = useState(false)
+const [isPOFormOpen, setIsPOFormOpen] = useState(false)
+const [poMode, setPoMode] = useState<"create" | "edit">("create")
+
 
   const defaultItems: Item[] = [
     {
@@ -76,13 +82,14 @@ export function ItemsTab({ items = [], onAddItem, onEditItem, onDeleteItem }: It
           Job Items
           <Layers className="text-primary" />
         </h2>
-        <button
-          onClick={onAddItem}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 font-semibold text-sm"
-        >
-          <Plus size={18} />
-          Add Item
-        </button>
+       <button
+  onClick={() => setIsPOChoiceOpen(true)}
+  className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 font-semibold text-sm"
+>
+  <Plus size={18} />
+  Purchase Order
+</button>
+
       </div>
 
      
@@ -457,6 +464,26 @@ export function ItemsTab({ items = [], onAddItem, onEditItem, onDeleteItem }: It
           )}
         </div>
       </div>
+
+
+
+
+      <PurchaseOrderChoiceModal
+  isOpen={isPOChoiceOpen}
+  onClose={() => setIsPOChoiceOpen(false)}
+  onContinue={(mode) => {
+    setPoMode(mode)
+    setIsPOChoiceOpen(false)
+    setIsPOFormOpen(true)
+  }}
+/>
+
+<PurchaseOrderFormModal
+  isOpen={isPOFormOpen}
+  onClose={() => setIsPOFormOpen(false)}
+  jobItems={displayItems}
+/>
+
 
     </div>
   )

@@ -11,6 +11,8 @@ import {
   Calendar,
   Briefcase,
   ClipboardList,
+  Settings,
+ 
 } from "lucide-react"
 import DropdownItem from "../ui/DropdownItem"
 
@@ -91,31 +93,40 @@ export function Header() {
           <Search size={20} />
         </IconButton>
 
+        <IconButton onClick={() => navigate("/settings")}>
+          <Settings size={20} className="hover:rotate-90 transition duration-200" />
+        </IconButton>
+
+
         {/* Help */}
         <IconButton>
           <HelpCircle size={20} />
         </IconButton>
 
         {/* Profile */}
-        <button className="w-9 h-9 bg-green-500 text-white rounded-lg flex items-center justify-center font-semibold">
+        {/* <button className="w-9 h-9 bg-green-500 text-white rounded-lg flex items-center justify-center font-semibold">
           D
-        </button>
+        </button> */}
       </div>
     </header>
   )
 }
 
 
-
 function IconButton({
   children,
   badge,
+  onClick,
 }: {
   children: React.ReactNode
   badge?: string
+  onClick?: () => void
 }) {
   return (
-    <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+    <button
+      onClick={onClick}
+      className="relative p-2 text-gray-600 hover:bg-gray-100 hover:text-primary rounded-lg"
+    >
       {badge && (
         <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
           {badge}

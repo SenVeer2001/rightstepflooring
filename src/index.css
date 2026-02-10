@@ -124,7 +124,7 @@ input[type="date"],
 input[type="time"],
 select,
 textarea {
-  @apply w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-white text-gray-900 placeholder-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  @apply w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-white text-gray-900 placeholder-gray-400 transition-all duration-200 focus:outline-none focus:border-transparent;
   font-family: inherit;
 }
 
@@ -142,7 +142,7 @@ button {
 }
 
 .btn-primary {
-  @apply bg-gradient-primary text-white hover:shadow-lg hover:shadow-blue-500/30 focus:ring-blue-500 active:scale-95;
+  @apply bg-gradient-primary text-white hover:shadow-lg hover:shadow-blue-500/30  active:scale-95;
 }
 
 .btn-primary:hover {
@@ -372,6 +372,7 @@ tr:hover {
 }
 
 /* Focus Ring Utilities */
+
 .ring-focus {
   @apply ring-2 ring-blue-500 ring-offset-2;
 }
@@ -504,4 +505,10 @@ aside nav {
 .dragging-red {
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.6),
               0 0 20px rgba(239, 68, 68, 0.35);
+}
+
+
+.react-select__input input {
+  box-shadow: none !important;
+  outline: none !important;
 }

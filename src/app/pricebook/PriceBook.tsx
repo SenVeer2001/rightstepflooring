@@ -135,7 +135,7 @@ export default function PriceBook() {
         ))}
       </div>
 
-      {/* CONTENT */}
+     
       {activeTab === "Items & products" && (
         <ItemsProductsTable onRowClick={handleEditItem} />
       )}
@@ -153,7 +153,7 @@ export default function PriceBook() {
         <ItemBrandsTable onRowClick={handleEditBrand} />
       )}
 
-      {/* MODALS */}
+    
 
       <ItemModal
         open={openModal && activeTab === "Items & products"}

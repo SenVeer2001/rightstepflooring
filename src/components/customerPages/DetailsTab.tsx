@@ -1,8 +1,8 @@
 import { useRef, useState } from "react"
-import { Send, Upload, X } from "lucide-react"
+import { ArrowUp, ArrowUp01, MessageSquareText, NotepadText, Phone, PointerOffIcon, Send, Trash2, Upload, X } from "lucide-react"
 import Input from "../ui/Input"
 import Select from "../ui/Select"
-
+import { Tooltip } from 'react-tooltip'
 
 interface DetailFormData {
   // Client
@@ -56,6 +56,37 @@ interface DetailFormData {
   // Schedule
   isScheduled: boolean
 }
+
+
+const teamActions = [
+  {
+    id: "notes",
+    icon: NotepadText,
+    tooltip: "View notes",
+  },
+  {
+    id: "promote",
+    icon: ArrowUp,
+    tooltip: "Change role",
+  },
+  {
+    id: "call",
+    icon: Phone,
+    tooltip: "Call technician",
+  },
+  {
+    id: "message",
+    icon: MessageSquareText,
+    tooltip: "Send message",
+  },
+  {
+    id: "remove",
+    icon: Trash2,
+    tooltip: "Remove from job",
+    danger: true,
+  },
+]
+
 const teamMembers: TeamMember[] = [
   {
     id: "1",
@@ -212,7 +243,7 @@ export function DetailsTab({ customerData }: DetailsTabProps) {
 
 
   return (
-    <div className=" grid grid-cols-1 lg:grid-cols-3 gap-3">
+    <div className=" grid grid-cols-1 lg:grid-cols-3 gap-2">
 
       <div className="lg:col-span-2  bg-white p-4 rounded-lg border border-gray-200">
 
@@ -600,16 +631,58 @@ export function DetailsTab({ customerData }: DetailsTabProps) {
 
               <div className="space-y-2">
                 {teamMembers.map(member => (
-                  <div key={member.id} className="flex items-center gap-3">
-                    <img
-                      src={member.avatar}
-                      alt={member.name}
-                      className="h-8 w-8 rounded-full object-cover"
-                    />
-                    <span className="text-sm text-gray-800">{member.name}</span>
+                  <div
+                    key={member.id}
+                    className="group flex items-center justify-between gap-3 p-2 rounded-lg
+                 hover:bg-gray-50 transition"
+                  >
+                    {/* LEFT */}
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={member.avatar}
+                        alt={member.name}
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                      <span className="text-sm font-medium text-gray-800">
+                        {member.name}
+                      </span>
+                    </div>
+
+                    {/* RIGHT ICONS (SHOW ON HOVER) */}
+                    <div className="flex items-center gap-3 opacity-0
+                      group-hover:opacity-100 transition">
+                      {teamActions.map(action => {
+                        const Icon = action.icon
+                        const tooltipId = `${action.id}-${member.id}`
+
+                        return (
+                          <button
+                            key={tooltipId}
+                            data-tooltip-id={tooltipId}
+                            data-tooltip-content={action.tooltip}
+                            className={`p-1.5 rounded-full transition
+                ${action.danger
+                                ? "text-gray-500 hover:text-red-600 hover:bg-red-50"
+                                : "text-gray-500 hover:text-primary hover:bg-primary/10"
+                              }`}
+                          >
+                            <Icon size={18} />
+
+                            {/* TOOLTIP */}
+                            <Tooltip
+                              id={tooltipId}
+                              place="top"
+                              className="!bg-gray-900 !text-white !text-xs
+                           !px-3 !py-1.5 !rounded-md"
+                            />
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
                 ))}
               </div>
+
 
               {/* ASSIGN TECH */}
               <select
