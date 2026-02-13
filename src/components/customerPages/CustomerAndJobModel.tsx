@@ -12,10 +12,15 @@ import { AttachmentsTab } from './AttachmentsTab'
 import { TasksTab } from './TasksTab'
 import { EquipmentTab } from './EquipmentTab'
 import EstimatesSection from '../leadsPages/EstimatesSection'
+import { ClientPurchaseOrderTab } from './clientPages/tabs/ClientPurchaseOrderTab'
+import { staticPurchaseOrders } from '../../types/vendor'
+import WorkOrder from '../../app/work-order/WorkOrder'
+import ClientWorkOrder from '../../app/work-order/ClientWorkOrder'
+
 
 /* ===================== TYPES ===================== */
 
-type CustomerJobTabKey = "details" | "items" | "payments" | "estimates" | "attachments" | "tasks" | "equipment"
+type CustomerJobTabKey = "details" | "items" | "payments" | "estimates" | "attachments" | "tasks" | "equipment" | "purchase" | "workOrder"
 
 interface JobData {
   id: string
@@ -55,6 +60,10 @@ interface TagOption {
   value: string
   label: string
 }
+
+
+
+
 
 // Mock jobs data - same as in Jobs.tsx
 const MOCK_JOBS: JobData[] = [
@@ -178,7 +187,7 @@ function CustomerAndJobModel() {
   const statusDropdownRef = useRef<HTMLDivElement>(null)
 
   const statusOptions = ["submitted", "in-progress", "pending", "unscheduled", "completed", "on-hold"]
-  
+
   const tagOptions: TagOption[] = [
     { value: "urgent", label: "Urgent" },
     { value: "follow-up", label: "Follow-up" },
@@ -342,7 +351,7 @@ function CustomerAndJobModel() {
       />
 
       <div className="flex items-center gap-4 flex-wrap">
-     
+
         <div className="flex items-center gap-2" ref={statusDropdownRef}>
           <span className="text-sm font-semibold text-gray-700">Status:</span>
           <div className="relative">
@@ -365,11 +374,10 @@ function CustomerAndJobModel() {
                       setCurrentStatus(status)
                       setStatusDropdownOpen(false)
                     }}
-                    className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${
-                      currentStatus === status
+                    className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${currentStatus === status
                         ? "bg-blue-50 text-primary"
                         : "text-gray-700 hover:bg-gray-50"
-                    }`}
+                      }`}
                   >
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-primary rounded-full"></span>
@@ -463,7 +471,7 @@ function CustomerAndJobModel() {
                 isMulti
                 options={tagOptions}
                 value={tempSelectedTags}
-                 // @ts-ignore
+                // @ts-ignore
                 onChange={(options) => setTempSelectedTags(options || [])}
                 placeholder="Search and select tags..."
                 styles={customSelectStyles}
@@ -517,6 +525,17 @@ function CustomerAndJobModel() {
 
         {activeTab === "tasks" && (
           <TasksTab />
+        )}
+        {activeTab === "purchase" && (
+          <ClientPurchaseOrderTab
+            purchaseOrders={staticPurchaseOrders}
+            onDelete={(id) => {
+              console.log("Delete PO:", id)
+            }}
+          />
+        )}
+        {activeTab === "workOrder" && (
+          < ClientWorkOrder />
         )}
 
         {activeTab === "equipment" && (

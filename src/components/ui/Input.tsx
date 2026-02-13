@@ -4,10 +4,12 @@ function Input({
   value,
   onChange,
   type = "text",
+  placeholder
 }: {
   label: string
   value: string
   type?: string
+  placeholder?:string
   onChange: (value: string) => void
 }) {
   return (
@@ -18,6 +20,7 @@ function Input({
       <input
         type={type}
         value={value}
+        placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         className="w-full rounded-lg border border-gray-400 bg-gray-50 px-3 py-2.5 text-sm
                    focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white"

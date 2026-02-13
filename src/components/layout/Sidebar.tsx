@@ -25,6 +25,7 @@ import {
   UserCheck,
   UserX,
   ListChecks,
+  ClockArrowUp,
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 
@@ -64,6 +65,7 @@ const navItems: NavItem[] = [
 
   // Delivery
   { name: "Jobs", path: "/jobs", icon: Calendar, section: "Delivery" },
+  { name: "Work Order", path: "/work-order", icon:ClockArrowUp, section: "Delivery" },
   { name: "Schedule", path: "/schedule", icon: CalendarCheck, section: "Delivery" },
   { name: "Map View", path: "/map", icon: MapPinned, section: "Delivery" },
   { name: "Price Book", path: "/products", icon: Notebook, section: "Delivery" },

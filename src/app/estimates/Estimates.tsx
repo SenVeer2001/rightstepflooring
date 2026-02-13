@@ -14,6 +14,7 @@ import CreateEstimateModal from "../../components/estimatesModel/CreateEstimateM
 /* ================= TYPES ================= */
 
 type EstimateStatus =
+  |"all"
   | "unsent"
   | "pending"
   | "approved"
@@ -163,6 +164,7 @@ const ESTIMATES: Estimate[] = [
 /* ================= COMPONENT ================= */
 
 const STATUS_OPTIONS: EstimateStatus[] = [
+  "all",
   "unsent",
   "pending",
   "approved",
@@ -172,6 +174,7 @@ const STATUS_OPTIONS: EstimateStatus[] = [
 ]
 
 const STATUS_STYLES: Record<EstimateStatus, string> = {
+  all:"text-gray-900",
   unsent: " text-gray-700",
   pending: " text-yellow-800",
   approved: " text-green-700",
@@ -194,6 +197,7 @@ export default function EstimatesPage() {
 
   const statusCounts = useMemo(() => {
     const base = {
+      all:ESTIMATES.length,
       unsent: 0,
       pending: 0,
       approved: 0,
@@ -253,14 +257,6 @@ export default function EstimatesPage() {
     )
   }
 
-  const STATUS_COLORS: Record<EstimateStatus, string> = {
-    unsent: "bg-gray-400",
-    pending: "bg-yellow-400",
-    approved: "bg-green-500",
-    declined: "bg-red-500",
-    won: "bg-primary",
-    archived: "bg-gray-500",
-  }
 
 
   /* ================= UI ================= */
@@ -270,19 +266,26 @@ export default function EstimatesPage() {
 
       {/* HEADER */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Estimates</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-black">Estimates</h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Create and manage estimate Here  
+          </p>
+        </div>
 
         <button
           onClick={() => setOpenEstimateModal(true)}
-          className="flex items-center gap-2 px-5 py-2 bg-primary text-white rounded-full text-sm font-semibold">
+          className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-lg font-semibold">
           <Plus size={16} />
           Add New
         </button>
       </div>
 
+
       {/* STATUS TABS */}
       <div className="flex flex-wrap gap-3 ">
         {[
+          ["All","all"],
           ["Unsent", "unsent"],
           ["Pending", "pending"],
           ["Approved", "approved"],
@@ -296,11 +299,12 @@ export default function EstimatesPage() {
             <button
               key={key}
               onClick={() => setStatusFilter(key as EstimateStatus)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition
-                ${active
-                  ? "bg-primary text-white"
-                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"}
-              `}
+              className={` flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold
+          whitespace-nowrap transition
+          ${active
+                      ? "bg-primary text-white"
+                      : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+                    }`}
             >
               {label}
               <span

@@ -3,6 +3,8 @@ import { useState } from "react"
 import { PurchaseOrderFormModal } from "./clientPages/PurchaseOrderFormModal"
 import { PurchaseOrderChoiceModal } from "./clientPages/PurchaseOrderChoiceModal"
 import type { PurchaseOrder } from "../../types/vendor"
+import WorkOrderChoiceModel from "./clientPages/WorkOrderChoiceModel"
+import { WorkOrderFormModal } from "./clientPages/WorkOrderFormModel"
 
 
 
@@ -18,6 +20,7 @@ interface Item {
   amount: number
   taxable: boolean
   color?: string
+  type: "product" | "service"
 }
 
 interface ItemsTabProps {
@@ -41,11 +44,19 @@ export function ItemsTab({ items = [], onDeleteItem }: ItemsTabProps) {
 
 
 
-// Purchase Order flow
-const [choiceOpen, setChoiceOpen] = useState(false)
-const [poFormOpen, setPoFormOpen] = useState(false)
-const [poMode, setPoMode] = useState<"create" | "edit">("create")
-const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
+  // Purchase Order flow
+  const [choiceOpen, setChoiceOpen] = useState(false)
+  const [poFormOpen, setPoFormOpen] = useState(false)
+  const [poMode, setPoMode] = useState<"create" | "edit">("create")
+  const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
+
+
+  // Work Order flow
+  const [woChoiceOpen, setWoChoiceOpen] = useState(false)
+  const [woFormOpen, setWoFormOpen] = useState(false)
+  const [woMode, setWoMode] = useState<"create" | "edit">("create")
+  const [editingWO, setEditingWO] = useState<PurchaseOrder | undefined>()
+
 
 
 
@@ -61,6 +72,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
       amount: 1040,
       taxable: true,
       color: "#DADADA",
+      type: "service",
     },
     {
       id: 2,
@@ -72,25 +84,74 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
       cost: 60,
       amount: 800,
       taxable: false,
+      color:"#30364F",
+      type: "service",
+    },
+    {
+      id: 3,
+      name: "Premium Ceramic Tiles",
+      description: "High quality ceramic tiles for flooring",
+      image: "https://images.pexels.com/photos/276528/pexels-photo-276528.jpeg",
+      quantity: 150,
+      price: 4.5,
+      cost: 2.5,
+      amount: 675,
+      taxable: true,
+      color: "#F2F2F2",
+      type: "product",
+    },
+    {
+      id: 4,
+      name: "Grout & Adhesive",
+      description: "Tile adhesive and grout material",
+      image: "https://images.pexels.com/photos/5691620/pexels-photo-5691620.jpeg",
+      quantity: 20,
+      price: 25,
+      cost: 15,
+      amount: 500,
+      taxable: true,
+      color:"#BF4646",
+      type: "product",
     },
   ]
+
 
   const displayItems = items.length > 0 ? items : defaultItems
 
   const purchaseOrders: PurchaseOrder[] = [
-  {
-    id: "101",
-    vendorId: "v1",
-    orderDate: "2024-02-10",
-    items: displayItems.map(i => ({
-      id: i.id,
-      name: i.name,
-      quantity: i.quantity,
-      cost: i.cost,
-    })),
-  },
-]
+    {
+      id: "101",
+      vendorId: "v1",
+      orderDate: "2024-02-10",
+      items: displayItems.map(i => ({
+        id: i.id,
+        name: i.name,
+        quantity: i.quantity,
+        image: i.image,
+        color: i.color,
+        type:i.type,
+        cost: i.cost,
+      })),
+    },
+  ]
 
+
+  const workOrders: PurchaseOrder[] = [
+    {
+      id: "WO-201",
+      vendorId: "v1",
+      orderDate: "2024-02-12",
+      items: displayItems.map(i => ({
+        id: i.id,
+        name: i.name,
+        quantity: i.quantity,
+        image: i.image,
+        color: i.color,
+        type:i.type,
+        cost: i.cost,
+      })),
+    },
+  ]
 
   // Calculations
   const itemCost = displayItems.reduce((sum, item) => sum + item.amount, 0)
@@ -108,18 +169,35 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
           Job Items
           <Layers className="text-primary" />
         </h2>
-      <button
-  onClick={() => setChoiceOpen(true)}
-  className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm"
->
-  <Plus size={18} />
-  Purchase Order
-</button>
+
+
+        <div className="flex items-center gap-4">
+
+          {/* WORK ORDER */}
+          <button
+            onClick={() => setWoChoiceOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm"
+          >
+            <Plus size={18} />
+            Work Order
+          </button>
+
+          {/* PURCHASE ORDER */}
+          <button
+            onClick={() => setChoiceOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-semibold text-sm"
+          >
+            <Plus size={18} />
+            Purchase Order
+          </button>
+
+        </div>
+
+
 
 
       </div>
 
-     
       <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -149,9 +227,17 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
                           className="max-h-14 w-16 rounded-md object-cover"
                         />
                       )}
-                      <div>
+                      <div className="flex flex-col gap-1">
                         <p className="font-semibold text-gray-900">{item.name}</p>
                         <p className="text-xs text-gray-500 text-wrap">{item.description}</p>
+                        <span
+                          className={`py-1 rounded-full text-xs font-semibold ${item.type === "product"
+                              ? " text-blue-700"
+                              : " text-green-700"
+                            }`}
+                        >
+                          {item.type === "product" ? "Product" : "Service"}
+                        </span>
                       </div>
                     </div>
                   </td>
@@ -192,7 +278,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
         </div>
       </div>
 
-    
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* LEFT SIDE - Summary */}
         <div className="lg:col-span-2 bg-white border border-gray-300 rounded-lg p-6">
@@ -203,7 +289,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
               <input
                 type="number"
                 value={itemCost.toFixed(2)}
-                 min={0}
+                min={0}
                 readOnly
                 className="max-w-[150px] border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 text-right font-semibold"
               />
@@ -216,7 +302,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
                 <input
                   type="number"
                   value={subtotal.toFixed(2)}
-                   min={0}
+                  min={0}
                   readOnly
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 text-right"
                 />
@@ -227,7 +313,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
                   type="number"
                   value={discount.toFixed(2)}
                   onChange={(e) => setDiscount(Number(e.target.value))}
-                   min={0}
+                  min={0}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-right"
                 />
               </div>
@@ -236,7 +322,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
                 <input
                   type="number"
                   value={subtotal.toFixed(2)}
-                   min={0}
+                  min={0}
                   readOnly
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 text-right"
                 />
@@ -268,7 +354,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
                 <input
                   type="number"
                   value={tax.toFixed(2)}
-                   min={0}
+                  min={0}
                   readOnly
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 text-right"
                 />
@@ -282,7 +368,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
                 <input
                   type="number"
                   value={techHours}
-                   min={0}
+                  min={0}
                   onChange={(e) => setTechHours(Number(e.target.value))}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                 />
@@ -292,7 +378,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
                 <input
                   type="number"
                   value={techRate}
-                   min={0}
+                  min={0}
                   onChange={(e) => setTechRate(Number(e.target.value))}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                 />
@@ -302,7 +388,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
                 <input
                   type="number"
                   value={techCost.toFixed(2)}
-                   min={0}
+                  min={0}
                   readOnly
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 text-right"
                 />
@@ -317,7 +403,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
                   type="number"
                   value={laborCost}
                   onChange={(e) => setLaborCost(Number(e.target.value))}
-                   min={0}
+                  min={0}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                 />
               </div>
@@ -327,7 +413,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
                   type="number"
                   value={tip}
                   onChange={(e) => setTip(Number(e.target.value))}
-                   min={0}
+                  min={0}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                 />
               </div>
@@ -393,7 +479,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
         </div>
       </div>
 
-    
+
       <div className="bg-white border border-gray-300 rounded-lg p-6 space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-bold text-gray-900 flex gap-2 items-center">
@@ -415,7 +501,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
         </div>
       </div>
 
-     
+
       <div className="bg-white border border-gray-300 rounded-lg p-6 space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-bold text-gray-900 flex gap-2 items-center">
@@ -434,7 +520,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
         </div>
       </div>
 
-     
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Commission Rate */}
         <div className="bg-white border border-gray-300 rounded-lg p-6 space-y-4">
@@ -465,11 +551,10 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
             <h3 className="text-lg font-bold text-gray-900">Custom Tech Rate:</h3>
             <button
               onClick={() => setCustomTechRateEnabled(!customTechRateEnabled)}
-              className={`px-3 py-1 rounded-full font-semibold text-xs transition ${
-                customTechRateEnabled
-                  ? "bg-green-400 text-white hover:bg-green-500"
-                  : "bg-gray-400 text-white hover:bg-gray-500"
-              }`}
+              className={`px-3 py-1 rounded-full font-semibold text-xs transition ${customTechRateEnabled
+                ? "bg-green-400 text-white hover:bg-green-500"
+                : "bg-gray-400 text-white hover:bg-gray-500"
+                }`}
             >
               {customTechRateEnabled ? "ON" : "OFF"}
             </button>
@@ -482,7 +567,7 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
                   type="number"
                   value={techRate}
                   onChange={(e) => setTechRate(Number(e.target.value))}
-                   min={0}
+                  min={0}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                   placeholder="Enter tech rate"
                 />
@@ -494,38 +579,78 @@ const [editingPO, setEditingPO] = useState<PurchaseOrder | undefined>()
 
 
       <PurchaseOrderChoiceModal
-  isOpen={choiceOpen}
-  existingPOs={purchaseOrders.map(po => ({
-    id: po.id,
-    name: `PO #${po.id}`,
-  }))}
-  onClose={() => setChoiceOpen(false)}
-  onContinue={({ mode, poId }) => {
-    setPoMode(mode)
-    setEditingPO(
-      mode === "edit"
-        ? purchaseOrders.find(po => po.id === poId)
-        : undefined
-    )
-    setChoiceOpen(false)
-    setPoFormOpen(true)
-  }}
-/>
+        isOpen={choiceOpen}
+        existingPOs={purchaseOrders.map(po => ({
+          id: po.id,
+          name: `PO #${po.id}`,
+        }))}
+        onClose={() => setChoiceOpen(false)}
+        onContinue={({ mode, poId }) => {
+          setPoMode(mode)
+          setEditingPO(
+            mode === "edit"
+              ? purchaseOrders.find(po => po.id === poId)
+              : undefined
+          )
+          setChoiceOpen(false)
+          setPoFormOpen(true)
+        }}
+      />
+
+      <WorkOrderChoiceModel
+        isOpen={woChoiceOpen}
+        existingPOs={workOrders.map(wo => ({
+          id: wo.id,
+          name: `WO #${wo.id}`,
+        }))}
+        onClose={() => setWoChoiceOpen(false)}
+        onContinue={({ mode, poId }) => {
+          setWoMode(mode)
+          setEditingWO(
+            mode === "edit"
+              ? workOrders.find(wo => wo.id === poId)
+              : undefined
+          )
+          setWoChoiceOpen(false)
+          setWoFormOpen(true)
+        }}
+      />
 
 
 
-<PurchaseOrderFormModal
-  isOpen={poFormOpen}
-  mode={poMode}
-  initialPO={editingPO}
-  jobItems={displayItems.map(i => ({
-    id: i.id,
-    name: i.name,
-    quantity: i.quantity,
-    cost: i.cost,
-  }))}
-  onClose={() => setPoFormOpen(false)}
-/>
+
+      <PurchaseOrderFormModal
+        isOpen={poFormOpen}
+        mode={poMode}
+        initialPO={editingPO}
+        jobItems={displayItems.map(i => ({
+          id: i.id,
+          name: i.name,
+          quantity: i.quantity,
+          image:i.image,
+          type:i.type,
+          color:i.color,
+          cost: i.cost,
+        }))}
+        onClose={() => setPoFormOpen(false)}
+      />
+
+      <WorkOrderFormModal
+        isOpen={woFormOpen}
+        mode={woMode}
+        // @ts-ignore
+        initialPO={editingWO}
+        jobItems={displayItems.map(i => ({
+          id: i.id,
+          name: i.name,
+          quantity: i.quantity,
+           image:i.image,
+          type:i.type,
+          color:i.color,
+          cost: i.cost,
+        }))}
+        onClose={() => setWoFormOpen(false)}
+      />
 
 
     </div>

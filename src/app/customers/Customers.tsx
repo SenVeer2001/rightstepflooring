@@ -254,7 +254,7 @@ export function Customers() {
                 />
               </th>
 
-              {visibleColumns.id && <th className="px-4 py-3 text-left">Job ID</th>}
+              {visibleColumns.id && <th className="px-4 py-3 text-left">Client ID</th>}
               {visibleColumns.name && <th className="px-4 py-3 text-left">Name</th>}
               {visibleColumns.company && <th className="px-4 py-3 text-left">Company</th>}
               {visibleColumns.address && <th className="px-4 py-3 text-left">Address</th>}
@@ -279,10 +279,10 @@ export function Customers() {
                 (
                   <td className="px-4 py-3">
                     <button
-                        onClick={() => navigate(`/client/jobs/1`)}
+                        onClick={() => navigate(`/client/${customer.id}`)}
                         className="flex flex-col text-left text-primary border-none hover:text-blue-600 "
                       >
-                        <div className="font-semibold text-nowrap">{customer.jobId}</div>
+                        <div className="font-semibold text-nowrap">{customer.id}</div>
                        
                       </button>
                   </td>

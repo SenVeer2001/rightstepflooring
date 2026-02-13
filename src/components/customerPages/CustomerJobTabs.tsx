@@ -1,4 +1,4 @@
-type CustomerJobTabKey = "details" | "items" | "payments" | "estimates" | "attachments" | "tasks" | "equipment"
+type CustomerJobTabKey = "details" | "items" | "payments" | "estimates" | "attachments" | "tasks" | "equipment" | "workOrder" |"purchase"
 
 interface CustomerJobTab {
   key: CustomerJobTabKey
@@ -21,6 +21,9 @@ function CustomerJobTabs({
     { key: "attachments", label: "Attachments", count: 0 },
     { key: "tasks", label: "Tasks", count: 0 },
     { key: "equipment", label: "Equipment", count: 0 },
+    { key: "purchase", label: "Purchase Order", count: 2 },
+    { key: "workOrder", label: "Work Order", count: 2 },
+
   ]
 
   return (

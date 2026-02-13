@@ -19,7 +19,7 @@ import { Map } from "../app/map/Map"
 
 
 
-import { InvoiceDetailsPage } from "../components/invoicePages/InvoiceDetailsPage"
+
 import { LeadDetails } from "../components/leadsPages/LeadDetails"
 import UserProfile from "../components/teamPages/UserProfile"
 import { CategoryManagement, CourseBuilder, CourseDashboard, CourseDetail, CoursePublish, ModuleDetail } from "../app/training"
@@ -30,6 +30,9 @@ import { AdvancedReport } from "../app/reports/AdvancedReport"
 import { EstimatesView } from "../components/estimatesModel/estimates/estimatesView"
 import Estimates from "../app/estimates/Estimates"
 import Settings from "../app/settings/Settings"
+import WorkOrder from "../app/work-order/WorkOrder"
+import WorkOrderDetailsPage from "../components/work-order-details/WorkOrderDetailsPage"
+import { InvoiceDetailsPage } from "../components/invoicePages/InvoiceDetailsPage"
 
 
 
@@ -65,6 +68,9 @@ export function AppRoutes() {
                   <Route path="/client" element={<Customers />} />
                   <Route path="/client/jobs/:jobId" element={<CustomerAndJobModel />} />
                   <Route path="/client/:customerId" element={<ClientModel />} />
+
+                  <Route path="/work-order" element={<WorkOrder/>} />
+                  <Route path="/work-order/:id" element={<WorkOrderDetailsPage/>} />
 
 
                   <Route path="/team" element={<Team />} />
