@@ -55,7 +55,6 @@ const tagColorMap: Record<string, string> = {
   "Qualified": "bg-green-100 text-green-700 border border-green-200",
 }
 
-// Function to get tag color - returns default if not found
 const getTagColor = (tagLabel: string): string => {
   return tagColorMap[tagLabel] || "bg-blue-100 text-blue-700 border border-blue-200"
 }
@@ -209,7 +208,6 @@ export function Leads() {
 
   /* ===================== BULK ACTIONS ===================== */
 
-  // Bulk status change
   const handleBulkStatusChange = (newStatus: LeadStatus) => {
     setLeads(previousLeads =>
       previousLeads.map(lead =>
@@ -219,7 +217,6 @@ export function Leads() {
     setActiveDropdown(null)
   }
 
-  // Bulk add tag
   const handleBulkAddTag = (tagLabel: string) => {
     setLeads(previousLeads =>
       previousLeads.map(lead => {
@@ -235,7 +232,6 @@ export function Leads() {
     setActiveDropdown(null)
   }
 
-  // Bulk remove tag
   const handleBulkRemoveTag = (tagLabel: string) => {
     setLeads(previousLeads =>
       previousLeads.map(lead => {
@@ -248,7 +244,6 @@ export function Leads() {
     )
   }
 
-  // Clear selection
   const handleClearSelection = () => {
     setSelectedLeads(new Set())
   }
@@ -269,7 +264,6 @@ export function Leads() {
     }, {}),
   }
 
-  // Get selected leads' common tags
   const getSelectedLeadsTags = () => {
     const selectedLeadsList = leads.filter(lead => selectedLeads.has(lead.id))
     const allTags = selectedLeadsList.flatMap(lead => lead.tags || [])
@@ -400,11 +394,13 @@ export function Leads() {
               )}
 
               <div className="flex items-center gap-1 bg-white border border-gray-300 rounded-lg px-2 py-1">
-                {/* Change Status Button */}
+                {/* Change Status Button - FIXED: Added tooltip when hasSelection */}
                 <div className="relative" ref={statusDropdownRef}>
                   {hasSelection ? (
                     <button
                       onClick={() => setActiveDropdown(activeDropdown === "status" ? null : "status")}
+                      data-tooltip-id="quick-actions-tooltip"
+                      data-tooltip-content="Change Status"
                       className={`p-2 rounded transition-colors ${
                         activeDropdown === "status" 
                           ? "bg-primary text-white" 
@@ -445,11 +441,13 @@ export function Leads() {
                   )}
                 </div>
 
-                {/* Modify Tags Button */}
+                {/* Modify Tags Button - FIXED: Added tooltip when hasSelection */}
                 <div className="relative" ref={tagsDropdownRef}>
                   {hasSelection ? (
                     <button
                       onClick={() => setActiveDropdown(activeDropdown === "tags" ? null : "tags")}
+                      data-tooltip-id="quick-actions-tooltip"
+                      data-tooltip-content="Modify Tags"
                       className={`p-2 rounded transition-colors ${
                         activeDropdown === "tags" 
                           ? "bg-primary text-white" 
@@ -531,7 +529,7 @@ export function Leads() {
                 {hasSelection ? (
                   <button
                     data-tooltip-id="quick-actions-tooltip"
-                    data-tooltip-content="Reassign Job"
+                    data-tooltip-content="Reassign Leads"
                     className="p-2 rounded hover:bg-primary hover:text-white text-gray-700"
                   >
                     <UserCog size={20} />
@@ -551,7 +549,7 @@ export function Leads() {
                 {hasSelection ? (
                   <button
                     data-tooltip-id="quick-actions-tooltip"
-                    data-tooltip-content="Reschedule Job"
+                    data-tooltip-content="Reschedule Leads"
                     className="p-2 rounded hover:bg-primary hover:text-white text-gray-700"
                   >
                     <CalendarClock size={20} />

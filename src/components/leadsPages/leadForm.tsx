@@ -30,13 +30,13 @@ const JOB_TYPES = [
 ]
 
 const LEAD_TAG_OPTIONS = [
-  { value: "Hot", label: "🔥 Hot", color: "#EF4444" },
-  { value: "Urgent", label: "⚡ Urgent", color: "#F59E0B" },
-  { value: "Follow-up", label: "📞 Follow-up", color: "#3B82F6" },
-  { value: "High Value", label: "💎 High Value", color: "#8B5CF6" },
-  { value: "Low Budget", label: "💰 Low Budget", color: "#6B7280" },
-  { value: "Repeat Client", label: "🔄 Repeat Client", color: "#10B981" },
-  { value: "VIP", label: "⭐ VIP", color: "#EC4899" },
+  { value: "Hot", label: "Hot", color: "#EF4444" },
+  { value: "Urgent", label: "Urgent", color: "#F59E0B" },
+  { value: "Follow-up", label: "Follow-up", color: "#3B82F6" },
+  { value: "High Value", label: "High Value", color: "#8B5CF6" },
+  { value: "Low Budget", label: "Low Budget", color: "#6B7280" },
+  { value: "Repeat Client", label: " Repeat Client", color: "#10B981" },
+  { value: "VIP", label: "VIP", color: "#EC4899" },
 ]
 
 const TEAM_MEMBERS = [
@@ -55,6 +55,7 @@ interface PhoneNumber {
   number: string
   type: string
   isPrimary: boolean
+  ext: string  //
 }
 
 interface ExtendedLeadFormData extends LeadFormData {
@@ -75,13 +76,16 @@ export function LeadForm({
   onChange: (data: LeadFormData) => void
   onSubmit: () => void
 }) {
+
+  console.log("dfghj",initialFormData);
+  
   // Extended form data with additional fields
   const [formData, setFormData] = useState<ExtendedLeadFormData>({
     ...initialFormData,
     firstName: initialFormData.clientName?.split(' ')[0] || '',
     lastName: initialFormData.clientName?.split(' ').slice(1).join(' ') || '',
     phoneNumbers: [
-      { id: '1', number: initialFormData.phone || '', type: 'Mobile', isPrimary: true }
+      { id: '1', number: initialFormData.phone || '', type: 'Mobile', isPrimary: true,ext : "" }
     ],
     scheduleEndDate: '',
     isAllDayEvent: false,
@@ -107,6 +111,7 @@ export function LeadForm({
     
     // Sync with parent
     onChange({
+      
       ...newData,
       clientName: `${newData.firstName} ${newData.lastName}`.trim(),
       phone: newData.phoneNumbers.find(p => p.isPrimary)?.number || newData.phoneNumbers[0]?.number || ''
@@ -116,6 +121,7 @@ export function LeadForm({
   /* ================= PHONE NUMBER HANDLERS ================= */
 
   const addPhoneNumber = () => {
+    // @ts-ignore
     const newPhone: PhoneNumber = {
       id: Date.now().toString(),
       number: '',
@@ -241,31 +247,7 @@ export function LeadForm({
   return (
     <div className="min-h-screen p-4 md:p-2">
       <div className="max-w-8xl mx-auto">
-        
-        {/* HEADER */}
-        <div className="bg-white rounded-xl border p-4 md:p-6 mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-                {formData.firstName || formData.lastName 
-                  ? `${formData.firstName} ${formData.lastName}`.trim()
-                  : 'New Lead'
-                }
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                Fill in the details below to create or update the lead
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleSave}
-                className="px-6 py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/90 transition-colors"
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
+         
 
         {/* TWO COLUMN LAYOUT */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -1003,6 +985,16 @@ export function LeadForm({
                   Convert to Job
                 </button>
               </div>
+            </div>
+
+
+            <div className="flex items-center justify-end gap-3 mb-5">
+              <button
+                onClick={handleSave}
+                className="px-6 py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/90 transition-colors"
+              >
+                Save Changes
+              </button>
             </div>
 
           </div>
