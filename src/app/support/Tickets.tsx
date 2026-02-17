@@ -57,8 +57,7 @@ export default function Tickets() {
 
     setTickets(prev => [newTicket, ...prev]);
 
-    // Show success toast if you have a toast library
-    // console.log("Ticket created successfully!", newTicket);
+   
   };
 
   return (

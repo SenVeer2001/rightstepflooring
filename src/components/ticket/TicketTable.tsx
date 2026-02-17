@@ -185,7 +185,7 @@ const ImageCarousel = ({ files }: ImageCarouselProps) => {
           >
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="font-semibold text-gray-800">
-                File {currentIndex + 1} of {files.length}
+                TID-1001 | WO ID-001 | 	Johnson Residence
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
