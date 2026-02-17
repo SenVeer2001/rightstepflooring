@@ -184,9 +184,9 @@ const ImageCarousel = ({ files }: ImageCarouselProps) => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="font-semibold text-gray-800">
+              <h5 className="font-semibold text-gray-800">
                 TID-1001 | WO ID-001 | 	Johnson Residence
-              </h3>
+              </h5>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition"
