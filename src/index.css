@@ -512,3 +512,137 @@ aside nav {
   box-shadow: none !important;
   outline: none !important;
 }
+
+
+
+/* Custom styles for react-big-calendar */
+.rbc-calendar {
+  font-family: inherit;
+}
+
+.rbc-time-view {
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.rbc-time-header {
+  display: none;
+}
+
+.rbc-time-content {
+  border-top: none;
+}
+
+.rbc-timeslot-group {
+  min-height: 60px;
+}
+
+.rbc-time-slot {
+  border-top: 1px solid #f3f4f6;
+}
+
+.rbc-current-time-indicator {
+  background-color: #EF4444;
+  height: 2px;
+}
+
+.rbc-current-time-indicator::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #EF4444;
+}
+
+.rbc-day-slot .rbc-event {
+  border: none !important;
+}
+
+.rbc-event-label {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.rbc-slot-selection {
+  background-color: rgba(124, 58, 237, 0.3);
+  border: 2px dashed #7C3AED;
+  border-radius: 8px;
+}
+
+.rbc-time-gutter .rbc-timeslot-group {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.rbc-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+
+/* Add to your global CSS or create a new file */
+/* styles/quill-custom.css */
+
+.ql-container {
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.ql-editor {
+  min-height: 150px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.ql-editor.ql-blank::before {
+  color: #9ca3af;
+  font-style: normal;
+}
+
+.ql-toolbar.ql-snow {
+  border: none;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.ql-container.ql-snow {
+  border: none;
+}
+
+.ql-snow .ql-picker-label:hover,
+.ql-snow .ql-picker-label.ql-active,
+.ql-snow .ql-picker-item:hover,
+.ql-snow .ql-picker-item.ql-selected {
+  color: var(--primary);
+}
+
+.ql-snow.ql-toolbar button:hover,
+.ql-snow .ql-toolbar button:hover,
+.ql-snow.ql-toolbar button:focus,
+.ql-snow .ql-toolbar button:focus,
+.ql-snow.ql-toolbar button.ql-active,
+.ql-snow .ql-toolbar button.ql-active {
+  color: var(--primary);
+}
+
+.ql-snow.ql-toolbar button:hover .ql-stroke,
+.ql-snow .ql-toolbar button:hover .ql-stroke,
+.ql-snow.ql-toolbar button:focus .ql-stroke,
+.ql-snow .ql-toolbar button:focus .ql-stroke,
+.ql-snow.ql-toolbar button.ql-active .ql-stroke,
+.ql-snow .ql-toolbar button.ql-active .ql-stroke {
+  stroke: var(--primary);
+}
+
+.ql-snow.ql-toolbar button:hover .ql-fill,
+.ql-snow .ql-toolbar button:hover .ql-fill,
+.ql-snow.ql-toolbar button:focus .ql-fill,
+.ql-snow .ql-toolbar button:focus .ql-fill,
+.ql-snow.ql-toolbar button.ql-active .ql-fill,
+.ql-snow .ql-toolbar button.ql-active .ql-fill {
+  fill: var(--primary);
+}

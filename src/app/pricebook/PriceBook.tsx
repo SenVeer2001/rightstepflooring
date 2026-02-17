@@ -121,7 +121,7 @@ export default function PriceBook() {
 
       {/* TABS */}
       <div className="flex gap-6 border-b">
-        {(["Items & products", "Item groups", "Item categories", "Item brands"] as TabKey[]).map(tab => (
+        {(["Item categories","Items & products", "Item groups",  "Item brands"] as TabKey[]).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -136,6 +136,11 @@ export default function PriceBook() {
       </div>
 
      
+
+       {activeTab === "Item categories" && (
+        <PriceBookPage onEditCategory={handleEditCategory} />
+      )}
+
       {activeTab === "Items & products" && (
         <ItemsProductsTable onRowClick={handleEditItem} />
       )}
@@ -144,9 +149,7 @@ export default function PriceBook() {
         <ItemGroupsTable onRowClick={handleEditGroup} />
       )}
 
-      {activeTab === "Item categories" && (
-        <PriceBookPage onEditCategory={handleEditCategory} />
-      )}
+    
 
 
       {activeTab === "Item brands" && (

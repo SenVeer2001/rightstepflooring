@@ -2,11 +2,11 @@
 "use client"
 
 import { useState } from "react"
-import { 
-  Package, 
-  Plus, 
-  Trash2, 
-  Edit2, 
+import {
+  Package,
+  Plus,
+  Trash2,
+  Edit2,
   Search,
   X,
   Check,
@@ -155,17 +155,17 @@ export default function WorkItemsTab() {
     if (!formData.name.trim()) return
 
     if (editingItem) {
-      setItems(prev => prev.map(item => 
-        item.id === editingItem.id 
-          ? { 
-              ...item, 
-              name: formData.name,
-              image: formData.image,
-              type: formData.type,
-              quantity: formData.quantity,
-              cost: formData.cost,
-              color: formData.color
-            }
+      setItems(prev => prev.map(item =>
+        item.id === editingItem.id
+          ? {
+            ...item,
+            name: formData.name,
+            image: formData.image,
+            type: formData.type,
+            quantity: formData.quantity,
+            cost: formData.cost,
+            color: formData.color
+          }
           : item
       ))
     } else {
@@ -216,8 +216,8 @@ export default function WorkItemsTab() {
               </p>
             </div>
           </div>
-          
-         
+
+
         </div>
 
         {/* Search & Type Filter */}
@@ -247,8 +247,8 @@ export default function WorkItemsTab() {
                   key={type.id}
                   onClick={() => setSelectedType(type.id)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all
-                    ${selectedType === type.id 
-                      ? 'bg-primary text-white' 
+                    ${selectedType === type.id
+                      ? 'bg-primary text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                 >
@@ -262,22 +262,22 @@ export default function WorkItemsTab() {
         </div>
       </div>
 
-   
+
 
       {/* ITEMS LIST */}
       <div className="space-y-3">
         {filteredItems.length > 0 ? (
           filteredItems.map(item => {
             const itemTotal = item.quantity * item.cost
-            
+
             return (
-              <div 
-                key={item.id} 
+              <div
+                key={item.id}
                 className="bg-white rounded-xl shadow-sm border p-4 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start gap-4">
                   {/* Item Image */}
-                  <div 
+                  <div
                     className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden"
                     style={{ backgroundColor: item.color || '#f3f4f6' }}
                   >
@@ -301,8 +301,8 @@ export default function WorkItemsTab() {
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="text-sm font-semibold text-gray-900 truncate">{item.name}</h3>
                           <span className={`px-2 py-0.5 text-xs font-medium rounded-full
-                            ${item.type === "product" 
-                              ? 'bg-blue-100 text-blue-700' 
+                            ${item.type === "product"
+                              ? 'bg-blue-100 text-blue-700'
                               : 'bg-purple-100 text-purple-700'
                             }`}
                           >
@@ -338,19 +338,19 @@ export default function WorkItemsTab() {
 
                         {showMobileActions === item.id && (
                           <>
-                            <div 
-                              className="fixed inset-0 z-10" 
-                              onClick={() => setShowMobileActions(null)} 
+                            <div
+                              className="fixed inset-0 z-10"
+                              onClick={() => setShowMobileActions(null)}
                             />
                             <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border py-2 z-20 min-w-[140px]">
-                              <button 
+                              <button
                                 onClick={() => { openEditModal(item); setShowMobileActions(null) }}
                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
                               >
                                 <Edit2 size={16} />
                                 Edit
                               </button>
-                              <button 
+                              <button
                                 onClick={() => { setShowDeleteModal(item.id); setShowMobileActions(null) }}
                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"
                               >
@@ -363,7 +363,7 @@ export default function WorkItemsTab() {
                       </div>
                     </div>
 
-                   
+
 
                     {/* Item Meta */}
                     <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -372,13 +372,19 @@ export default function WorkItemsTab() {
                         Qty: {item.quantity}
                       </span>
                       <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 text-xs font-medium rounded-lg">
-                       
+
                         {formatCurrency(item.cost)} each
                       </span>
-                       <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text- text-[11px]  font-medium rounded-lg border border-green-200">
-  <Check size={12} />
-  Item reached at warehouse
-</span>
+                      {
+                        item.type === "product"
+                          ?
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text- text-[11px]  font-medium rounded-lg border border-green-200">
+                            <Check size={12} />
+                            Item reached at warehouse
+                          </span>
+                          :
+                          ""
+                      }
                     </div>
                   </div>
 
@@ -406,7 +412,7 @@ export default function WorkItemsTab() {
             <h3 className="text-base font-medium text-gray-900 mb-1">No items found</h3>
             <p className="text-sm text-gray-500 mb-4">
               {searchQuery || selectedType !== "all"
-                ? "Try adjusting your search or filters" 
+                ? "Try adjusting your search or filters"
                 : "Add products or services to this work order"
               }
             </p>
@@ -434,11 +440,11 @@ export default function WorkItemsTab() {
 
       {/* ADD/EDIT MODAL */}
       {showAddModal && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4"
           onClick={() => { setShowAddModal(false); resetForm() }}
         >
-          <div 
+          <div
             className="bg-white w-full sm:rounded-xl sm:max-w-lg rounded-t-xl shadow-2xl max-h-[90vh] flex flex-col"
             onClick={e => e.stopPropagation()}
           >
@@ -467,8 +473,8 @@ export default function WorkItemsTab() {
                     type="button"
                     onClick={() => handleTypeChange("product")}
                     className={`flex items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all
-                      ${formData.type === "product" 
-                        ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                      ${formData.type === "product"
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
                         : 'border-gray-200 hover:border-gray-300 text-gray-600'
                       }`}
                   >
@@ -482,8 +488,8 @@ export default function WorkItemsTab() {
                     type="button"
                     onClick={() => handleTypeChange("service")}
                     className={`flex items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all
-                      ${formData.type === "service" 
-                        ? 'border-purple-500 bg-purple-50 text-purple-700' 
+                      ${formData.type === "service"
+                        ? 'border-purple-500 bg-purple-50 text-purple-700'
                         : 'border-gray-200 hover:border-gray-300 text-gray-600'
                       }`}
                   >
@@ -524,9 +530,9 @@ export default function WorkItemsTab() {
                 />
                 {formData.image && (
                   <div className="mt-2">
-                    <img 
-                      src={formData.image} 
-                      alt="Preview" 
+                    <img
+                      src={formData.image}
+                      alt="Preview"
                       className="w-20 h-20 object-cover rounded-lg border"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none'
@@ -626,8 +632,8 @@ export default function WorkItemsTab() {
                 onClick={handleSubmit}
                 disabled={!formData.name.trim()}
                 className={`px-4 py-2 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed
-                  ${formData.type === "product" 
-                    ? 'bg-blue-600 hover:bg-blue-700' 
+                  ${formData.type === "product"
+                    ? 'bg-blue-600 hover:bg-blue-700'
                     : 'bg-purple-600 hover:bg-purple-700'
                   }`}
               >
@@ -640,11 +646,11 @@ export default function WorkItemsTab() {
 
       {/* DELETE CONFIRMATION MODAL */}
       {showDeleteModal !== null && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
           onClick={() => setShowDeleteModal(null)}
         >
-          <div 
+          <div
             className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6"
             onClick={e => e.stopPropagation()}
           >

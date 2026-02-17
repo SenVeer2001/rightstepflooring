@@ -33,6 +33,9 @@ import Settings from "../app/settings/Settings"
 import WorkOrder from "../app/work-order/WorkOrder"
 import WorkOrderDetailsPage from "../components/work-order-details/WorkOrderDetailsPage"
 import { InvoiceDetailsPage } from "../components/invoicePages/InvoiceDetailsPage"
+import WorkOrderGallery from "../app/work-order/WorkOrderGallery"
+import Tickets from "../app/support/Tickets"
+import TicketView from "../components/ticket/TicketView"
 
 
 
@@ -71,6 +74,11 @@ export function AppRoutes() {
 
                   <Route path="/work-order" element={<WorkOrder/>} />
                   <Route path="/work-order/:id" element={<WorkOrderDetailsPage/>} />
+
+                  <Route path="/projects" element={<WorkOrderGallery/>} />
+                  <Route path="/support/manage-ticket" element={<Tickets/>} />
+                  <Route path="/support/manage-ticket/:id" element={<TicketView />} />
+
 
 
                   <Route path="/team" element={<Team />} />

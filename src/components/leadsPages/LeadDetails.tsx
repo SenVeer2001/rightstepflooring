@@ -41,6 +41,12 @@ export function LeadDetails() {
     // 🔗 API call later
   }
 
+   const [isScheduleOpen, setIsScheduleOpen] = useState(false)
+
+  const handleSaveSchedule = (data:any) => {
+    console.log("Schedule data:", data)
+  }
+
   
   return (
     <div className="p-4 space-y-6 min-h-screen">

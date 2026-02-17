@@ -1,9 +1,9 @@
 // LeadForm.tsx
 import { useState } from "react"
 import SelectReact from "react-select"
-import { 
-  Calendar, Upload, X, Plus, Phone, Mail, MapPin, 
-  Briefcase, User, Clock, Users, CalendarCheck, 
+import {
+  Calendar, Upload, X, Plus, Phone, Mail, MapPin,
+  Briefcase, User, Clock, Users, CalendarCheck,
   Eye, Trash2, Building, FileText, Tags, ChevronDown, ChevronUp
 } from "lucide-react"
 
@@ -15,6 +15,7 @@ import type { LeadFormData } from "../LeadModal"
 import Select from "../ui/Select"
 import Input from "../ui/Input"
 import Textarea from "../ui/Textarea"
+import { ScheduleModal } from "./ScheduleModal"
 
 const STATES = ["IL", "IN", "MI", "OH", "WI", "MN", "MO", "IA", "NY", "CA", "TX", "FL"]
 
@@ -77,20 +78,22 @@ export function LeadForm({
   onSubmit: () => void
 }) {
 
-  console.log("dfghj",initialFormData);
-  
+  console.log("dfghj", initialFormData);
+
   // Extended form data with additional fields
   const [formData, setFormData] = useState<ExtendedLeadFormData>({
     ...initialFormData,
     firstName: initialFormData.clientName?.split(' ')[0] || '',
     lastName: initialFormData.clientName?.split(' ').slice(1).join(' ') || '',
     phoneNumbers: [
-      { id: '1', number: initialFormData.phone || '', type: 'Mobile', isPrimary: true,ext : "" }
+      { id: '1', number: initialFormData.phone || '', type: 'Mobile', isPrimary: true, ext: "" }
     ],
     scheduleEndDate: '',
     isAllDayEvent: false,
     assignedTeamMembers: []
   })
+
+    const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [newReceipt, setNewReceipt] = useState("")
@@ -104,14 +107,15 @@ export function LeadForm({
     notes: false
   })
 
+
   // Update parent form data
   const updateFormData = (updates: Partial<ExtendedLeadFormData>) => {
     const newData = { ...formData, ...updates }
     setFormData(newData)
-    
+
     // Sync with parent
     onChange({
-      
+
       ...newData,
       clientName: `${newData.firstName} ${newData.lastName}`.trim(),
       phone: newData.phoneNumbers.find(p => p.isPrimary)?.number || newData.phoneNumbers[0]?.number || ''
@@ -223,10 +227,10 @@ export function LeadForm({
   // Format schedule preview
   const getSchedulePreview = () => {
     if (!formData.isScheduled || !formData.scheduleDate) return null
-    
+
     const startDate = new Date(formData.scheduleDate)
     const endDate = formData.scheduleEndDate ? new Date(formData.scheduleEndDate) : startDate
-    
+
     const formatDate = (date: Date) => date.toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
@@ -247,14 +251,14 @@ export function LeadForm({
   return (
     <div className="min-h-screen p-4 md:p-2">
       <div className="max-w-8xl mx-auto">
-         
+
 
         {/* TWO COLUMN LAYOUT */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          
+
           {/* ==================== LEFT SECTION ==================== */}
           <div className="lg:col-span-2 space-y-4">
-            
+
             {/* CLIENT DETAILS */}
             <CollapsibleSection
               title="Client Details"
@@ -267,7 +271,7 @@ export function LeadForm({
                   label="First Name *"
                   value={formData.firstName}
                   onChange={value => updateFormData({ firstName: value })}
-                   // @ts-ignore
+                  // @ts-ignore
                   error={errors.firstName}
                   placeholder="Enter first name"
                 />
@@ -284,7 +288,7 @@ export function LeadForm({
                   value={formData.companyName}
                   onChange={value => updateFormData({ companyName: value })}
                   placeholder="Enter company name"
-                   // @ts-ignore
+                  // @ts-ignore
                   icon={<Building size={16} className="text-gray-400" />}
                 />
 
@@ -293,7 +297,7 @@ export function LeadForm({
                   type="email"
                   value={formData.email}
                   onChange={value => updateFormData({ email: value })}
-                   // @ts-ignore
+                  // @ts-ignore
                   error={errors.email}
                   placeholder="email@example.com"
                   icon={<Mail size={16} className="text-gray-400" />}
@@ -323,11 +327,10 @@ export function LeadForm({
 
                 <div className="space-y-3">
                   {formData.phoneNumbers.map((phone, index) => (
-                    <div 
-                      key={phone.id} 
-                      className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                        phone.isPrimary ? 'bg-primary/5 border-primary/30' : 'bg-gray-50 border-gray-200'
-                      }`}
+                    <div
+                      key={phone.id}
+                      className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${phone.isPrimary ? 'bg-primary/5 border-primary/30' : 'bg-gray-50 border-gray-200'
+                        }`}
                     >
                       {/* Phone Type */}
                       <select
@@ -344,8 +347,8 @@ export function LeadForm({
                       <input
                         type="tel"
                         value={phone.number}
-                        onChange={e => updatePhoneNumber(phone.id, { 
-                          number: e.target.value.replace(/\D/g, '') 
+                        onChange={e => updatePhoneNumber(phone.id, {
+                          number: e.target.value.replace(/\D/g, '')
                         })}
                         placeholder="(555) 123-4567"
                         className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
@@ -395,7 +398,7 @@ export function LeadForm({
                     label="Address *"
                     value={formData.address}
                     onChange={value => updateFormData({ address: value })}
-                     // @ts-ignore
+                    // @ts-ignore
                     error={errors.address}
                     placeholder="Street address"
                     icon={<MapPin size={16} className="text-gray-400" />}
@@ -413,7 +416,7 @@ export function LeadForm({
                   label="City *"
                   value={formData.city}
                   onChange={value => updateFormData({ city: value })}
-                   // @ts-ignore
+                  // @ts-ignore
                   error={errors.city}
                   placeholder="City"
                 />
@@ -422,7 +425,7 @@ export function LeadForm({
                   label="State *"
                   value={formData.state}
                   onChange={value => updateFormData({ state: value })}
-                   // @ts-ignore
+                  // @ts-ignore
                   error={errors.state}
                 >
                   <option value="">Select state</option>
@@ -452,7 +455,7 @@ export function LeadForm({
                   label="Job Type *"
                   value={formData.jobType}
                   onChange={value => updateFormData({ jobType: value })}
-                   // @ts-ignore
+                  // @ts-ignore
                   error={errors.jobType}
                 >
                   <option value="">Select job type</option>
@@ -477,7 +480,7 @@ export function LeadForm({
                     label="Job Description"
                     value={formData.jobDescription}
                     onChange={value => updateFormData({ jobDescription: value })}
-                     // @ts-ignore
+                    // @ts-ignore
                     placeholder="Describe the job requirements..."
                     rows={4}
                   />
@@ -678,7 +681,7 @@ export function LeadForm({
                   label="Subcontractor Notes"
                   value={formData.subcontractorNotes}
                   onChange={value => updateFormData({ subcontractorNotes: value })}
-                   // @ts-ignore
+                  // @ts-ignore
                   placeholder="Notes for subcontractors..."
                   rows={3}
                 />
@@ -689,7 +692,7 @@ export function LeadForm({
 
           {/* ==================== RIGHT SECTION ==================== */}
           <div className="space-y-4">
-            
+
             {/* SCHEDULE */}
             <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
               <div className="p-4 border-b bg-gray-50">
@@ -813,7 +816,7 @@ export function LeadForm({
 
                   {/* View Schedule Button */}
                   <button
-                    onClick={() => setShowSchedulePreview(true)}
+                    onClick={() => setIsScheduleModalOpen(true)}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-primary text-primary rounded-lg font-medium text-sm hover:bg-primary/5 transition-colors"
                   >
                     <CalendarCheck size={18} />
@@ -909,7 +912,7 @@ export function LeadForm({
                       const member = TEAM_MEMBERS.find(m => m.value === memberId)
                       if (!member) return null
                       return (
-                        <div 
+                        <div
                           key={memberId}
                           className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                         >
@@ -1003,17 +1006,17 @@ export function LeadForm({
 
       {/* SCHEDULE PREVIEW MODAL */}
       {showSchedulePreview && formData.isScheduled && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
           onClick={() => setShowSchedulePreview(false)}
         >
-          <div 
+          <div
             className="bg-white rounded-xl w-full max-w-md shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
             <div className="p-4 border-b flex items-center justify-between">
               <h3 className="font-semibold text-gray-900">Schedule Preview</h3>
-              <button 
+              <button
                 onClick={() => setShowSchedulePreview(false)}
                 className="p-1.5 hover:bg-gray-100 rounded-lg"
               >
@@ -1076,7 +1079,7 @@ export function LeadForm({
               </div>
             </div>
             <div className="p-4 border-t bg-gray-50 flex gap-2">
-              <button 
+              <button
                 onClick={() => setShowSchedulePreview(false)}
                 className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-100"
               >
@@ -1089,6 +1092,24 @@ export function LeadForm({
           </div>
         </div>
       )}
+
+
+    <ScheduleModal
+  isOpen={isScheduleModalOpen}
+  onClose={() => setIsScheduleModalOpen(false)}
+  scheduleDate={formData.scheduleDate}
+  startTime={formData.startTime}
+  endTime={formData.endTime}
+  jobTitle={`${formData.firstName} ${formData.lastName} - ${formData.jobType}`}
+  selectedTeamMembers={formData.assignedTeamMembers}
+  onSave={(teamMemberIds) => {
+    console.log("Team members assigned:", teamMemberIds)
+    updateFormData({
+      assignedTeamMembers: teamMemberIds,
+    })
+    setIsScheduleModalOpen(false)
+  }}
+/>
     </div>
   )
 }
@@ -1104,13 +1125,13 @@ interface CollapsibleSectionProps {
   badge?: string
 }
 
-function CollapsibleSection({ 
-  title, 
-  icon, 
-  children, 
-  isExpanded, 
+function CollapsibleSection({
+  title,
+  icon,
+  children,
+  isExpanded,
   onToggle,
-  badge 
+  badge
 }: CollapsibleSectionProps) {
   return (
     <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
@@ -1133,7 +1154,7 @@ function CollapsibleSection({
           <ChevronDown size={20} className="text-gray-400" />
         )}
       </button>
-      
+
       {isExpanded && (
         <div className="p-4 pt-0 border-t">
           <div className="pt-4">
@@ -1141,6 +1162,9 @@ function CollapsibleSection({
           </div>
         </div>
       )}
+
+
+
     </div>
   )
 }

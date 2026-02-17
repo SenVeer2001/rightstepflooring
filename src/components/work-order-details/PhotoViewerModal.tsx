@@ -219,28 +219,6 @@ export default function PhotoViewerModal({ photos, startIndex, onClose }: Props)
         </button>
       </div>
 
-      {/* PHOTO DETAILS CARD */}
-      {/* <div className="mx-4 mb-2 sm:mx-auto sm:max-w-xl">
-        <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 sm:p-4 text-white">
-          <h4 className="font-semibold text-sm sm:text-base mb-2">{currentPhoto.name}</h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs sm:text-sm">
-            <div>
-              <span className="text-white/60 block">Date</span>
-              <span className="font-medium">{formatDate(currentPhoto.date)}</span>
-            </div>
-            <div>
-              <span className="text-white/60 block">Time</span>
-              <span className="font-medium">{currentPhoto.time}</span>
-            </div>
-            {currentPhoto.uploadedBy && (
-              <div>
-                <span className="text-white/60 block">Uploaded By</span>
-                <span className="font-medium">{currentPhoto.uploadedBy}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div> */}
 
       {/* THUMBNAIL STRIP */}
       <div className="p-3 sm:p-4 border-t border-white/10">

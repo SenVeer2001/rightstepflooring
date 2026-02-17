@@ -26,6 +26,12 @@ import {
   UserX,
   ListChecks,
   ClockArrowUp,
+  GalleryThumbnails,
+  Images,
+  Ticket,
+  TicketPlus,
+  TicketX,
+  TicketMinus,
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 
@@ -66,10 +72,27 @@ const navItems: NavItem[] = [
   // Delivery
   { name: "Jobs", path: "/jobs", icon: Calendar, section: "Delivery" },
   { name: "Work Order", path: "/work-order", icon:ClockArrowUp, section: "Delivery" },
+  { name: "Projects", path: "/projects", icon:Images, section: "Delivery" },
   { name: "Schedule", path: "/schedule", icon: CalendarCheck, section: "Delivery" },
   { name: "Map View", path: "/map", icon: MapPinned, section: "Delivery" },
   { name: "Price Book", path: "/products", icon: Notebook, section: "Delivery" },
   { name: "Payout", path: "/rsf-pay", icon: HandCoins, section: "Delivery" },
+  // { name: "Support Ticket", path: "/support-ticket", icon: Ticket, section: "Delivery" },
+
+   { 
+    name: "Support Ticket", 
+    path: "/support", 
+    icon: Ticket, 
+    section: "Delivery",
+    submenu: [
+      { name: "Add Ticket", path: "/support/manage-ticket", icon: TicketPlus },
+      // { name: "Open Ticket", path: "/support/manage-ticket/open", icon: Ticket },
+      // { name: "In Progress  Ticket", path: "/support/manage-ticket/progress", icon: TicketMinus },
+      // { name: "Close  Ticket", path: "/support/manage-ticket/close", icon: TicketX},
+    ]
+  },
+
+
 
   // Master
   { name: "Team", path: "/team", icon: UserPen, section: "Master" },
