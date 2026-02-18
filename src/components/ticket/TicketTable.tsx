@@ -248,7 +248,7 @@ const ImageCarousel = ({ files }: ImageCarouselProps) => {
   );
 };
 
-// ==================== MAIN TABLE COMPONENT ====================
+
 export default function TicketTable({
   tickets,
   onStatusChange,
@@ -288,7 +288,7 @@ export default function TicketTable({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Filter tickets
+  
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch =
       ticket.customer.toLowerCase().includes(search.toLowerCase()) ||
@@ -353,7 +353,7 @@ export default function TicketTable({
     navigate(`/work-order/${workOrderId}`)
   }
 
-  // Status filter tabs
+  
   const statusTabs: { id: "all" | TicketStatus; label: string; color: string }[] = [
     { id: "all", label: "All", color: "#6B7280" },
     { id: "Open", label: "Open", color: STATUS_COLORS["Open"] },
@@ -399,7 +399,7 @@ export default function TicketTable({
         })}
       </div>
 
-      {/* Search & Actions */}
+      
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="flex flex-1 gap-3 w-full md:w-auto items-center">
           {/* Search */}
@@ -443,10 +443,10 @@ export default function TicketTable({
             </div>
           )}
 
-          {/* Action Icons Container */}
+          
           <div className="flex items-center gap-1 bg-white border border-gray-300 rounded-lg px-2 py-1">
 
-            {/* Change Status Button */}
+            
             <div className="relative" ref={statusDropdownRef}>
               {hasSelection ? (
                 <button
@@ -506,7 +506,7 @@ export default function TicketTable({
               )}
             </div>
 
-            {/* Change Priority Button */}
+            
             <div className="relative" ref={priorityDropdownRef}>
               {hasSelection ? (
                 <button
@@ -616,7 +616,7 @@ export default function TicketTable({
                     className={`border-t hover:bg-primary/10 transition ${selectedTickets.has(ticket.id) ? "bg-blue-50" : ""
                       }`}
                   >
-                    {/* Checkbox */}
+                    
                     <td className="px-4 py-4">
                       <input
                         type="checkbox"
@@ -626,7 +626,7 @@ export default function TicketTable({
                       />
                     </td>
 
-                    {/* Ticket ID & Date */}
+                    
                     <td className="px-4 py-4 min-w-[120px]">
                       <button  className="cursor-pointer"  onClick={() => navigate(`/support/manage-ticket/${ticket.id}`)}>
                         <p className="font-bold text-primary hover:underline">TID-{ticket.id}</p>
@@ -636,7 +636,7 @@ export default function TicketTable({
 
                    
 
-                    {/* Customer */}
+                    
                     <td className="px-4 py-4 min-w-[100px]">
                       <div>
                         <span className="font-medium text-nowrap text-gray-900">{ticket.customer}</span>
@@ -645,7 +645,7 @@ export default function TicketTable({
 
                     </td>
 
-                    {/* Job/Project */}
+                   
                     <td className="px-4 py-4">
                       <p className="font-medium text-gray-900">{ticket.jobProject}</p>
                     </td>
@@ -722,7 +722,7 @@ export default function TicketTable({
                       </select>
                     </td>
 
-                    {/* Files - Carousel */}
+                   
                     <td className="px-4 py-4 min-w-[150px]">
                       <ImageCarousel files={ticket.files} />
                     </td>

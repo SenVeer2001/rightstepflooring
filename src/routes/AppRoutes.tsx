@@ -36,6 +36,8 @@ import { InvoiceDetailsPage } from "../components/invoicePages/InvoiceDetailsPag
 import WorkOrderGallery from "../app/work-order/WorkOrderGallery"
 import Tickets from "../app/support/Tickets"
 import TicketView from "../components/ticket/TicketView"
+import FAQ from "../app/faq/FAQ"
+import NotificationsPage from "../app/notifications/Notifications"
 
 
 
@@ -118,8 +120,10 @@ export function AppRoutes() {
                   <Route path="/training/publish" element={<CoursePublish />} />
 
 
-
+                  <Route path="/notifications" element={<NotificationsPage />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/faq" element={<FAQ />} />
+
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </AdminLayout>
