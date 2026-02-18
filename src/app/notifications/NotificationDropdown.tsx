@@ -136,7 +136,7 @@ export default function NotificationDropdown({
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50">
             <div>
-              <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+              <h3 className="text-sm font-semibold text-gray-900">New Notifications</h3>
               <p className="text-xs text-gray-500">
                 {unreadCount > 0 ? `${unreadCount} unread` : "All caught up!"}
               </p>
