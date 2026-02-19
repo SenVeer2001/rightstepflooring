@@ -14,9 +14,9 @@ import {
   Settings,
   AtSign,
   Clock,
-  ExternalLink,
+
 } from "lucide-react";
-import type { Notification, NotificationType, NotificationPriority } from "../../types/notification";
+import type { Notification, NotificationType } from "../../types/notification";
 
 interface NotificationDropdownProps {
   notifications: Notification[];
@@ -176,7 +176,7 @@ export default function NotificationDropdown({
                   return (
                     <div
                       key={notification.id}
-                      onClick={() => handleNotificationClick(notification)}
+                      // onClick={() => handleNotificationClick(notification)}
                       className={`px-4 py-3 cursor-pointer hover:bg-gray-50 transition ${
                         !notification.isRead ? "bg-blue-50/40" : ""
                       } ${notification.priority === "action_required" ? "border-l-3 border-l-red-500" : ""}`}

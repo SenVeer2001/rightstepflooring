@@ -38,6 +38,8 @@ import Tickets from "../app/support/Tickets"
 import TicketView from "../components/ticket/TicketView"
 import FAQ from "../app/faq/FAQ"
 import NotificationsPage from "../app/notifications/Notifications"
+import SubcontractorProfile from "../app/subcontractor/SubcontractorProfile"
+import SubcontractorList from "../app/subcontractor/SubcontractorList"
 
 
 
@@ -118,6 +120,9 @@ export function AppRoutes() {
                   <Route path="/training/courses/view/:id" element={<CourseDetail />} />
                   <Route path="/training/builder/module/:moduleId" element={<ModuleDetail />} />
                   <Route path="/training/publish" element={<CoursePublish />} />
+
+                  <Route path="/subcontractors" element={<SubcontractorList />} />
+<Route path="/subcontractors/:id" element={<SubcontractorProfile />} />
 
 
                   <Route path="/notifications" element={<NotificationsPage />} />

@@ -5,19 +5,19 @@ import {
   Phone,
   Users,
   FileText,
-  CreditCard,
+ 
   LogOut,
   Menu,
   LayoutDashboard,
   CalendarCheck,
   MapPinned,
-  SquareGanttChart,
+
   UserPen,
   BarChart3,
   BookOpen,
   Notebook,
   HandCoins,
-  TrendingUp,
+ 
   BookOpenText,
   ChevronDown,
   ChevronRight,
@@ -26,12 +26,12 @@ import {
   UserX,
   ListChecks,
   ClockArrowUp,
-  GalleryThumbnails,
+  
   Images,
   Ticket,
   TicketPlus,
-  TicketX,
-  TicketMinus,
+  
+  Contact,
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 
@@ -77,7 +77,7 @@ const navItems: NavItem[] = [
   { name: "Map View", path: "/map", icon: MapPinned, section: "Delivery" },
   { name: "Price Book", path: "/products", icon: Notebook, section: "Delivery" },
   { name: "Payout", path: "/rsf-pay", icon: HandCoins, section: "Delivery" },
-  // { name: "Support Ticket", path: "/support-ticket", icon: Ticket, section: "Delivery" },
+  { name: "Subcontractors", path: "/subcontractors", icon: Contact, section: "Delivery" },
 
    { 
     name: "Support Ticket", 
