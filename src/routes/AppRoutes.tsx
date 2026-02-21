@@ -40,6 +40,10 @@ import FAQ from "../app/faq/FAQ"
 import NotificationsPage from "../app/notifications/Notifications"
 import SubcontractorProfile from "../app/subcontractor/SubcontractorProfile"
 import SubcontractorList from "../app/subcontractor/SubcontractorList"
+import StaffList from "../app/staff/staffList"
+import StaffProfile from "../app/staff/StaffProfile"
+import DocumentVault from "../app/documentVault/DocumentVault"
+import CommunicationHub from "../app/communication-hub/CommunicationHub"
 
 
 
@@ -76,11 +80,11 @@ export function AppRoutes() {
                   <Route path="/client/jobs/:jobId" element={<CustomerAndJobModel />} />
                   <Route path="/client/:customerId" element={<ClientModel />} />
 
-                  <Route path="/work-order" element={<WorkOrder/>} />
-                  <Route path="/work-order/:id" element={<WorkOrderDetailsPage/>} />
+                  <Route path="/work-order" element={<WorkOrder />} />
+                  <Route path="/work-order/:id" element={<WorkOrderDetailsPage />} />
 
-                  <Route path="/projects" element={<WorkOrderGallery/>} />
-                  <Route path="/support/manage-ticket" element={<Tickets/>} />
+                  <Route path="/projects" element={<WorkOrderGallery />} />
+                  <Route path="/support/manage-ticket" element={<Tickets />} />
                   <Route path="/support/manage-ticket/:id" element={<TicketView />} />
 
 
@@ -120,9 +124,16 @@ export function AppRoutes() {
                   <Route path="/training/courses/view/:id" element={<CourseDetail />} />
                   <Route path="/training/builder/module/:moduleId" element={<ModuleDetail />} />
                   <Route path="/training/publish" element={<CoursePublish />} />
+                  
 
                   <Route path="/subcontractors" element={<SubcontractorList />} />
-<Route path="/subcontractors/:id" element={<SubcontractorProfile />} />
+                  <Route path="/subcontractors/:id" element={<SubcontractorProfile />} />
+                  <Route path="/staff" element={<StaffList />} />
+                  <Route path="/staff/:id" element={<StaffProfile />} />
+                  <Route path="/document-vault" element={<DocumentVault />} />
+                  <Route path="/communication-hub" element={<CommunicationHub />} />
+
+
 
 
                   <Route path="/notifications" element={<NotificationsPage />} />

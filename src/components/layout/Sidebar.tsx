@@ -32,6 +32,8 @@ import {
   TicketPlus,
   
   Contact,
+  BookUser,
+  FileSearch,
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 
@@ -78,6 +80,8 @@ const navItems: NavItem[] = [
   { name: "Price Book", path: "/products", icon: Notebook, section: "Delivery" },
   { name: "Payout", path: "/rsf-pay", icon: HandCoins, section: "Delivery" },
   { name: "Subcontractors", path: "/subcontractors", icon: Contact, section: "Delivery" },
+  { name: "Staff", path: "/staff", icon:BookUser, section: "Delivery" },
+
 
    { 
     name: "Support Ticket", 
@@ -95,6 +99,7 @@ const navItems: NavItem[] = [
 
 
   // Master
+  { name: "Document Vault", path: "/document-vault", icon: FileSearch, section: "Master" },
   { name: "Team", path: "/team", icon: UserPen, section: "Master" },
   { name: "Training Courses", path: "/training/courses", icon: BookOpen, section: "Master" },
 

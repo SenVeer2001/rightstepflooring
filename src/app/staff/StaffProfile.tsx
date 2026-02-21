@@ -1,14 +1,9 @@
-// pages/SubcontractorProfile.tsx
+// pages/StaffProfile.tsx
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Star,
-  Shield,
-  ShieldAlert,
-  ShieldX,
-  ShieldQuestion,
-  Lock,
   CheckCircle,
   Clock,
   XCircle,
@@ -25,18 +20,23 @@ import {
   Eye,
   Edit,
   TrendingUp,
-  TrendingDown,
-  RefreshCw,
+
   Award,
-  Zap,
   ThumbsUp,
   ThumbsDown,
-  HelpCircle,
   Ticket,
   AlertCircle,
   AlertTriangle,
   Pause,
   ExternalLink,
+  Lock,
+  User,
+  Building,
+  Hash,
+  Target,
+  Percent,
+  Users,
+ 
 } from "lucide-react";
 import {
   LineChart,
@@ -58,15 +58,15 @@ import {
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import {
-  type Subcontractor,
-  type SubcontractorStatus,
-  type InsuranceStatus,
+  type Staff,
+  type StaffStatus,
+  type StaffRole,
   type DocumentStatus,
   type TicketStatus,
   type TicketPriority,
   type TicketCategory,
-  mockSubcontractors,
-} from "../../types/subcontractor";
+  mockStaff,
+} from "../../types/staff";
 
 // Tabs
 type ProfileTab = "overview" | "jobs" | "documents" | "payouts" | "feedback" | "tickets";
@@ -81,20 +81,22 @@ const tabs: { id: ProfileTab; label: string; icon: React.ElementType }[] = [
 ];
 
 // Status config
-const statusConfig: Record<SubcontractorStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
+const statusConfig: Record<StaffStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
   active: { label: "Active", color: "text-green-700", bg: "bg-green-100", icon: CheckCircle },
   inactive: { label: "Inactive", color: "text-gray-600", bg: "bg-gray-100", icon: XCircle },
-  locked: { label: "Locked", color: "text-red-700", bg: "bg-red-100", icon: Lock },
-  pending: { label: "Pending", color: "text-yellow-700", bg: "bg-yellow-100", icon: Clock },
+  on_leave: { label: "On Leave", color: "text-yellow-700", bg: "bg-yellow-100", icon: Clock },
+  terminated: { label: "Terminated", color: "text-red-700", bg: "bg-red-100", icon: Lock },
 };
 
-// Insurance config
-const insuranceConfig: Record<InsuranceStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
-  valid: { label: "Valid", color: "text-green-700", bg: "bg-green-100", icon: Shield },
-  expiring_soon: { label: "Expiring Soon", color: "text-yellow-700", bg: "bg-yellow-100", icon: ShieldAlert },
-  expired: { label: "Expired", color: "text-red-700", bg: "bg-red-100", icon: ShieldX },
-  not_uploaded: { label: "Not Uploaded", color: "text-gray-600", bg: "bg-gray-100", icon: ShieldQuestion },
-  pending: { label: "Pending Review", color: "text-blue-700", bg: "bg-blue-100", icon: HelpCircle },
+// Role config
+const roleConfig: Record<StaffRole, { label: string; color: string; bg: string; icon: React.ElementType }> = {
+  admin: { label: "Admin", color: "text-purple-700", bg: "bg-purple-100", icon: Award },
+  manager: { label: "Manager", color: "text-blue-700", bg: "bg-blue-100", icon: Briefcase },
+  technician: { label: "Technician", color: "text-green-700", bg: "bg-green-100", icon: Users },
+  dispatcher: { label: "Dispatcher", color: "text-orange-700", bg: "bg-orange-100", icon: MapPin },
+  sales: { label: "Sales", color: "text-pink-700", bg: "bg-pink-100", icon: TrendingUp },
+  support: { label: "Support", color: "text-cyan-700", bg: "bg-cyan-100", icon: Users },
+  accounting: { label: "Accounting", color: "text-emerald-700", bg: "bg-emerald-100", icon: Calendar },
 };
 
 // Document status config
@@ -123,21 +125,27 @@ const ticketPriorityConfig: Record<TicketPriority, { label: string; color: strin
 };
 
 const ticketCategoryConfig: Record<TicketCategory, { label: string; color: string; bg: string }> = {
-  quality: { label: "Quality Issue", color: "text-purple-700", bg: "bg-purple-100" },
-  delay: { label: "Delay", color: "text-yellow-700", bg: "bg-yellow-100" },
-  no_show: { label: "No Show", color: "text-red-700", bg: "bg-red-100" },
+  performance: { label: "Performance", color: "text-purple-700", bg: "bg-purple-100" },
+  attendance: { label: "Attendance", color: "text-yellow-700", bg: "bg-yellow-100" },
   behavior: { label: "Behavior", color: "text-orange-700", bg: "bg-orange-100" },
-  damage: { label: "Damage", color: "text-red-700", bg: "bg-red-100" },
-  billing: { label: "Billing", color: "text-green-700", bg: "bg-green-100" },
+  customer_complaint: { label: "Customer Complaint", color: "text-red-700", bg: "bg-red-100" },
+  policy_violation: { label: "Policy Violation", color: "text-red-700", bg: "bg-red-100" },
   other: { label: "Other", color: "text-gray-600", bg: "bg-gray-100" },
 };
 
 const documentTypeLabels: Record<string, string> = {
-  insurance: "Insurance Certificate",
-  w9: "W-9 Form",
-  contract: "Subcontractor Agreement",
-  license: "Trade License",
+  id_proof: "ID Proof",
+  contract: "Employment Contract",
+  certification: "Certification",
+  license: "License",
+  background_check: "Background Check",
   other: "Other Document",
+};
+
+const employmentTypeLabels: Record<string, string> = {
+  full_time: "Full Time",
+  part_time: "Part Time",
+  contract: "Contract",
 };
 
 // Chart Colors
@@ -150,8 +158,6 @@ const CHART_COLORS = {
   info: "#3b82f6",
   gray: "#6b7280",
 };
-
-const PIE_COLORS = ["#22c55e", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 // Format helpers
 const formatDate = (date?: Date): string => {
@@ -182,74 +188,62 @@ const getDaysUntilExpiry = (date?: Date): number | null => {
 };
 
 // Mock Chart Data Generator
-const generateChartData = (subcontractor: Subcontractor) => {
+const generateChartData = (staff: Staff) => {
   // Monthly Performance Data (last 6 months)
   const monthlyPerformance = [
-    { month: "Aug", jobs: 22, earnings: 8500, rating: 4.7, punctuality: 92 },
-    { month: "Sep", jobs: 28, earnings: 11200, rating: 4.8, punctuality: 94 },
-    { month: "Oct", jobs: 25, earnings: 9800, rating: 4.6, punctuality: 91 },
-    { month: "Nov", jobs: 31, earnings: 13500, rating: 4.9, punctuality: 96 },
-    { month: "Dec", jobs: 19, earnings: 7200, rating: 4.7, punctuality: 93 },
-    { month: "Jan", jobs: 26, earnings: 10400, rating: 4.8, punctuality: 95 },
+    { month: "Aug", jobs: Math.floor(staff.totalJobs / 12), earnings: Math.floor(Math.random() * 3000) + 2000, rating: 4.7, punctuality: 92 },
+    { month: "Sep", jobs: Math.floor(staff.totalJobs / 10), earnings: Math.floor(Math.random() * 3000) + 2000, rating: 4.8, punctuality: 94 },
+    { month: "Oct", jobs: Math.floor(staff.totalJobs / 11), earnings: Math.floor(Math.random() * 3000) + 2000, rating: 4.6, punctuality: 91 },
+    { month: "Nov", jobs: Math.floor(staff.totalJobs / 9), earnings: Math.floor(Math.random() * 3000) + 2000, rating: 4.9, punctuality: 96 },
+    { month: "Dec", jobs: Math.floor(staff.totalJobs / 13), earnings: Math.floor(Math.random() * 3000) + 2000, rating: 4.7, punctuality: 93 },
+    { month: "Jan", jobs: Math.floor(staff.totalJobs / 10), earnings: Math.floor(Math.random() * 3000) + 2000, rating: staff.rating, punctuality: staff.punctualityScore },
   ];
 
   // Job Status Distribution
   const jobStatusData = [
-    { name: "Completed", value: subcontractor.completedJobs, color: "#22c55e" },
-    { name: "In Progress", value: Math.max(subcontractor.totalJobs - subcontractor.completedJobs, 0), color: "#3b82f6" },
-    { name: "Scheduled", value: Math.floor(Math.random() * 5) + 2, color: "#f59e0b" },
-    { name: "Cancelled", value: Math.floor(Math.random() * 3), color: "#ef4444" },
-  ];
+    { name: "Completed", value: staff.completedJobs, color: "#22c55e" },
+    { name: "In Progress", value: Math.max(staff.totalJobs - staff.completedJobs, 0), color: "#3b82f6" },
+    { name: "Scheduled", value: staff.jobs.filter(j => j.status === "scheduled").length, color: "#f59e0b" },
+    { name: "Cancelled", value: staff.jobs.filter(j => j.status === "cancelled").length, color: "#ef4444" },
+  ].filter(item => item.value > 0);
 
   // Rating Distribution
   const ratingDistribution = [
-    { rating: "5 Star", count: Math.floor(subcontractor.completedJobs * 0.6) },
-    { rating: "4 Star", count: Math.floor(subcontractor.completedJobs * 0.25) },
-    { rating: "3 Star", count: Math.floor(subcontractor.completedJobs * 0.1) },
-    { rating: "2 Star", count: Math.floor(subcontractor.completedJobs * 0.03) },
-    { rating: "1 Star", count: Math.floor(subcontractor.completedJobs * 0.02) },
-  ];
-
-  // Ticket Category Distribution
-  const ticketCategories = [
-    { name: "Quality", value: subcontractor.tickets.filter(t => t.category === "quality").length, color: "#8b5cf6" },
-    { name: "Delay", value: subcontractor.tickets.filter(t => t.category === "delay").length, color: "#f59e0b" },
-    { name: "No Show", value: subcontractor.tickets.filter(t => t.category === "no_show").length, color: "#ef4444" },
-    { name: "Behavior", value: subcontractor.tickets.filter(t => t.category === "behavior").length, color: "#f97316" },
-    { name: "Damage", value: subcontractor.tickets.filter(t => t.category === "damage").length, color: "#dc2626" },
-    { name: "Billing", value: subcontractor.tickets.filter(t => t.category === "billing").length, color: "#22c55e" },
-    { name: "Other", value: subcontractor.tickets.filter(t => t.category === "other").length, color: "#6b7280" },
-  ].filter(item => item.value > 0);
-
-  // Weekly Earnings (last 8 weeks)
-  const weeklyEarnings = [
-    { week: "W1", earnings: 2100 },
-    { week: "W2", earnings: 2800 },
-    { week: "W3", earnings: 1900 },
-    { week: "W4", earnings: 3200 },
-    { week: "W5", earnings: 2600 },
-    { week: "W6", earnings: 2900 },
-    { week: "W7", earnings: 3100 },
-    { week: "W8", earnings: 2400 },
+    { rating: "5 Star", count: Math.floor(staff.completedJobs * 0.6) },
+    { rating: "4 Star", count: Math.floor(staff.completedJobs * 0.25) },
+    { rating: "3 Star", count: Math.floor(staff.completedJobs * 0.1) },
+    { rating: "2 Star", count: Math.floor(staff.completedJobs * 0.03) },
+    { rating: "1 Star", count: Math.floor(staff.completedJobs * 0.02) },
   ];
 
   // Performance Trend
   const performanceTrend = [
-    { month: "Aug", quality: 94, punctuality: 92, callback: 3.2 },
-    { month: "Sep", quality: 96, punctuality: 94, callback: 2.8 },
-    { month: "Oct", quality: 93, punctuality: 91, callback: 3.5 },
-    { month: "Nov", quality: 98, punctuality: 96, callback: 2.2 },
-    { month: "Dec", quality: 95, punctuality: 93, callback: 2.9 },
-    { month: "Jan", quality: subcontractor.qualityScore, punctuality: subcontractor.punctualityScore, callback: subcontractor.callbackRate },
+    { month: "Aug", quality: 94, punctuality: 92, attendance: 95 },
+    { month: "Sep", quality: 96, punctuality: 94, attendance: 97 },
+    { month: "Oct", quality: 93, punctuality: 91, attendance: 94 },
+    { month: "Nov", quality: 98, punctuality: 96, attendance: 98 },
+    { month: "Dec", quality: 95, punctuality: 93, attendance: 96 },
+    { month: "Jan", quality: staff.qualityScore, punctuality: staff.punctualityScore, attendance: staff.attendanceRate },
+  ];
+
+  // Weekly Hours
+  const weeklyHours = [
+    { week: "W1", hours: 40 },
+    { week: "W2", hours: 42 },
+    { week: "W3", hours: 38 },
+    { week: "W4", hours: 44 },
+    { week: "W5", hours: 40 },
+    { week: "W6", hours: 41 },
+    { week: "W7", hours: 39 },
+    { week: "W8", hours: 40 },
   ];
 
   return {
     monthlyPerformance,
     jobStatusData,
     ratingDistribution,
-    ticketCategories,
-    weeklyEarnings,
     performanceTrend,
+    weeklyHours,
   };
 };
 
@@ -262,7 +256,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-xs" style={{ color: entry.color }}>
             {entry.name}: {entry.value}
-            {entry.name === "earnings" || entry.name === "Earnings" ? "" : ""}
           </p>
         ))}
       </div>
@@ -271,19 +264,19 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export default function SubcontractorProfile() {
+export default function StaffProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ProfileTab>("overview");
 
-  const subcontractor = mockSubcontractors.find((s) => s.id === id);
+  const staffMember = mockStaff.find((s) => s.id === id);
 
-  if (!subcontractor) {
+  if (!staffMember) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-500">Subcontractor not found</p>
-          <button onClick={() => navigate("/subcontractors")} className="mt-4 text-primary hover:underline">
+          <p className="text-gray-500">Staff member not found</p>
+          <button onClick={() => navigate("/staff")} className="mt-4 text-primary hover:underline">
             Back to list
           </button>
         </div>
@@ -291,37 +284,23 @@ export default function SubcontractorProfile() {
     );
   }
 
-  const statusInfo = statusConfig[subcontractor.status];
-  const insuranceInfo = insuranceConfig[subcontractor.insuranceStatus];
-
-  if (!statusInfo || !insuranceInfo) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-500">Error loading data</p>
-          <button onClick={() => navigate("/subcontractors")} className="mt-4 text-primary hover:underline">
-            Back to list
-          </button>
-        </div>
-      </div>
-    );
-  }
-
+  const statusInfo = statusConfig[staffMember.status];
+  const roleInfo = roleConfig[staffMember.role];
   const StatusIcon = statusInfo.icon;
-  const InsuranceIcon = insuranceInfo.icon;
+  const RoleIcon = roleInfo.icon;
 
-  const openTickets = subcontractor.tickets.filter((t) => t.status === "open" || t.status === "in_progress").length;
-  const urgentTickets = subcontractor.tickets.filter((t) => t.priority === "urgent" && t.status !== "closed" && t.status !== "resolved").length;
+  const openTickets = staffMember.tickets.filter((t) => t.status === "open" || t.status === "in_progress").length;
+  const urgentTickets = staffMember.tickets.filter((t) => t.priority === "urgent" && t.status !== "closed" && t.status !== "resolved").length;
 
-  const chartData = generateChartData(subcontractor);
+  const chartData = generateChartData(staffMember);
 
   const getTabCount = (tabId: ProfileTab): number | undefined => {
     switch (tabId) {
-      case "jobs": return subcontractor.jobs.length;
-      case "documents": return subcontractor.documents.length;
-      case "payouts": return subcontractor.payouts.length;
-      case "feedback": return subcontractor.feedback.length;
-      case "tickets": return subcontractor.tickets.length;
+      case "jobs": return staffMember.jobs.length;
+      case "documents": return staffMember.documents.length;
+      case "payouts": return staffMember.payouts.length;
+      case "feedback": return staffMember.feedback.length;
+      case "tickets": return staffMember.tickets.length;
       default: return undefined;
     }
   };
@@ -331,23 +310,23 @@ export default function SubcontractorProfile() {
       <div className="max-w-7xl mx-auto space-y-5">
         {/* Back Button */}
         <button
-          onClick={() => navigate("/subcontractors")}
+          onClick={() => navigate("/staff")}
           className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition"
         >
           <ArrowLeft size={16} />
-          Back to Subcontractors
+          Back to Staff
         </button>
 
         {/* Profile Header */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-shrink-0">
-              {subcontractor.avatar ? (
-                <img src={subcontractor.avatar} alt={subcontractor.name} className="w-24 h-24 rounded-xl object-cover" />
+              {staffMember.avatar ? (
+                <img src={staffMember.avatar} alt={`${staffMember.firstName} ${staffMember.lastName}`} className="w-24 h-24 rounded-xl object-cover" />
               ) : (
                 <div className="w-24 h-24 rounded-xl bg-primary/10 flex items-center justify-center">
                   <span className="text-3xl font-bold text-primary">
-                    {subcontractor.name.split(" ").map((n) => n[0]).join("")}
+                    {staffMember.firstName[0]}{staffMember.lastName[0]}
                   </span>
                 </div>
               )}
@@ -357,14 +336,14 @@ export default function SubcontractorProfile() {
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3 flex-wrap">
-                    <h1 className="text-2xl font-bold text-gray-900">{subcontractor.name}</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">{staffMember.firstName} {staffMember.lastName}</h1>
                     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${statusInfo.bg} ${statusInfo.color}`}>
                       <StatusIcon size={12} />
                       {statusInfo.label}
                     </span>
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${insuranceInfo.bg} ${insuranceInfo.color}`}>
-                      <InsuranceIcon size={12} />
-                      {insuranceInfo.label}
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${roleInfo.bg} ${roleInfo.color}`}>
+                      <RoleIcon size={12} />
+                      {roleInfo.label}
                     </span>
                     {openTickets > 0 && (
                       <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${urgentTickets > 0 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
@@ -375,34 +354,52 @@ export default function SubcontractorProfile() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-4 mt-3">
-                    <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full">
-                      {subcontractor.trade}
+                    <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full flex items-center gap-1">
+                      <Hash size={12} />
+                      {staffMember.employeeId}
                     </span>
-                    <div className="flex items-center gap-1 text-sm">
-                      <Star size={16} className="text-yellow-500 fill-yellow-500" />
-                      <span className="font-semibold text-gray-900">{subcontractor.rating}</span>
-                      <span className="text-gray-500">({subcontractor.completedJobs} jobs)</span>
-                    </div>
+                    <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full flex items-center gap-1">
+                      <Building size={12} />
+                      {staffMember.department}
+                    </span>
+                    {staffMember.rating > 0 && (
+                      <div className="flex items-center gap-1 text-sm">
+                        <Star size={16} className="text-yellow-500 fill-yellow-500" />
+                        <span className="font-semibold text-gray-900">{staffMember.rating}</span>
+                        <span className="text-gray-500">({staffMember.completedJobs} jobs)</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <Mail size={14} className="text-gray-400" />
-                      {subcontractor.email}
+                      {staffMember.email}
                     </span>
                     <span className="flex items-center gap-1">
                       <Phone size={14} className="text-gray-400" />
-                      {subcontractor.phone}
+                      {staffMember.phone}
                     </span>
-                    <span className="flex items-center gap-1">
-                      <MapPin size={14} className="text-gray-400" />
-                      {subcontractor.serviceAreas.join(", ")}
-                    </span>
+                    {staffMember.city && (
+                      <span className="flex items-center gap-1">
+                        <MapPin size={14} className="text-gray-400" />
+                        {staffMember.city}, {staffMember.state}
+                      </span>
+                    )}
                     <span className="flex items-center gap-1">
                       <Calendar size={14} className="text-gray-400" />
-                      Joined {formatDate(subcontractor.joinedAt)}
+                      Joined {formatDate(staffMember.hireDate)}
                     </span>
                   </div>
+
+                  {staffMember.managerName && (
+                    <div className="mt-3 text-sm text-gray-600">
+                      <span className="flex items-center gap-1">
+                        <User size={14} className="text-gray-400" />
+                        Reports to: <span className="font-medium text-gray-900">{staffMember.managerName}</span>
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-2">
@@ -453,7 +450,7 @@ export default function SubcontractorProfile() {
 
           {/* Tab Content */}
           <div className="p-6">
-            {/* Overview Tab with Charts */}
+            {/* Overview Tab */}
             {activeTab === "overview" && (
               <div className="space-y-6">
                 {/* Quick Stats Cards */}
@@ -463,7 +460,7 @@ export default function SubcontractorProfile() {
                       <Briefcase size={20} className="text-blue-600" />
                       <TrendingUp size={14} className="text-green-500" />
                     </div>
-                    <p className="text-2xl font-bold text-gray-900">{subcontractor.totalJobs}</p>
+                    <p className="text-2xl font-bold text-gray-900">{staffMember.totalJobs}</p>
                     <p className="text-xs text-gray-600 mt-1">Total Jobs</p>
                   </div>
 
@@ -471,7 +468,7 @@ export default function SubcontractorProfile() {
                     <div className="flex items-center justify-between mb-2">
                       <Star size={20} className="text-yellow-500 fill-yellow-500" />
                     </div>
-                    <p className="text-2xl font-bold text-gray-900">{subcontractor.rating}</p>
+                    <p className="text-2xl font-bold text-gray-900">{staffMember.rating || "N/A"}</p>
                     <p className="text-xs text-gray-600 mt-1">Average Rating</p>
                   </div>
 
@@ -480,169 +477,191 @@ export default function SubcontractorProfile() {
                       <Award size={20} className="text-purple-600" />
                       <TrendingUp size={14} className="text-green-500" />
                     </div>
-                    <p className="text-2xl font-bold text-gray-900">{subcontractor.qualityScore}%</p>
+                    <p className="text-2xl font-bold text-gray-900">{staffMember.qualityScore}%</p>
                     <p className="text-xs text-gray-600 mt-1">Quality Score</p>
                   </div>
 
                   <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200">
                     <div className="flex items-center justify-between mb-2">
-                      <Ticket size={20} className="text-orange-600" />
+                      <Target size={20} className="text-orange-600" />
                     </div>
-                    <p className="text-2xl font-bold text-gray-900">{subcontractor.tickets.length}</p>
-                    <p className="text-xs text-gray-600 mt-1">Total Tickets</p>
+                    <p className="text-2xl font-bold text-gray-900">{staffMember.attendanceRate}%</p>
+                    <p className="text-xs text-gray-600 mt-1">Attendance Rate</p>
+                  </div>
+                </div>
+
+                {/* Performance Metrics Row */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-white rounded-xl border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Percent size={16} className="text-green-600" />
+                      <span className="text-xs font-medium text-gray-500">Punctuality</span>
+                    </div>
+                    <div className="flex items-end gap-2">
+                      <span className="text-xl font-bold text-gray-900">{staffMember.punctualityScore}%</span>
+                      <TrendingUp size={14} className="text-green-500 mb-1" />
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-xl border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <ThumbsUp size={16} className="text-blue-600" />
+                      <span className="text-xs font-medium text-gray-500">Customer Satisfaction</span>
+                    </div>
+                    <div className="flex items-end gap-2">
+                      <span className="text-xl font-bold text-gray-900">{staffMember.customerSatisfaction}%</span>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-xl border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Briefcase size={16} className="text-purple-600" />
+                      <span className="text-xs font-medium text-gray-500">Employment Type</span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900">{employmentTypeLabels[staffMember.employmentType]}</span>
+                  </div>
+                  <div className="bg-white rounded-xl border border-gray-200 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <DollarSign size={16} className="text-green-600" />
+                      <span className="text-xs font-medium text-gray-500">Compensation</span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900">
+                      {staffMember.hourlyRate ? `$${staffMember.hourlyRate}/hr` : staffMember.salary ? formatCurrency(staffMember.salary) + "/yr" : "N/A"}
+                    </span>
                   </div>
                 </div>
 
                 {/* Charts Row 1 */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Monthly Performance Chart */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-5">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-semibold text-gray-900">Monthly Performance</h3>
-                      <span className="text-xs text-gray-500">Last 6 months</span>
+                {staffMember.totalJobs > 0 && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Job Status Distribution */}
+                    <div className="bg-white rounded-xl border border-gray-200 p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-semibold text-gray-900">Job Status Distribution</h3>
+                      </div>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                          <Pie
+                            data={chartData.jobStatusData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={90}
+                            paddingAngle={3}
+                            dataKey="value"
+                          >
+                            {chartData.jobStatusData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <RechartsTooltip />
+                          <Legend
+                            layout="vertical"
+                            align="right"
+                            verticalAlign="middle"
+                            iconType="circle"
+                            iconSize={8}
+                            wrapperStyle={{ fontSize: "11px" }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
                     </div>
-                    <ResponsiveContainer width="100%" height={250}>
-                      <AreaChart data={chartData.monthlyPerformance}>
-                        <defs>
-                          <linearGradient id="colorJobs" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.3} />
-                            <stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
-                        <RechartsTooltip content={<CustomTooltip />} />
-                        <Area
-                          type="monotone"
-                          dataKey="jobs"
-                          stroke={CHART_COLORS.primary}
-                          strokeWidth={2}
-                          fillOpacity={1}
-                          fill="url(#colorJobs)"
-                          name="Jobs"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
 
-                  {/* Job Status Distribution */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-5">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-semibold text-gray-900">Job Status Distribution</h3>
+                    {/* Performance Trend */}
+                    <div className="bg-white rounded-xl border border-gray-200 p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-semibold text-gray-900">Performance Trend</h3>
+                        <span className="text-xs text-gray-500">Last 6 months</span>
+                      </div>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <LineChart data={chartData.performanceTrend}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} domain={[80, 100]} />
+                          <RechartsTooltip content={<CustomTooltip />} />
+                          <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: "11px" }} />
+                          <Line type="monotone" dataKey="quality" stroke={CHART_COLORS.success} strokeWidth={2} dot={{ r: 4 }} name="Quality" />
+                          <Line type="monotone" dataKey="punctuality" stroke={CHART_COLORS.info} strokeWidth={2} dot={{ r: 4 }} name="Punctuality" />
+                          <Line type="monotone" dataKey="attendance" stroke={CHART_COLORS.warning} strokeWidth={2} dot={{ r: 4 }} name="Attendance" />
+                        </LineChart>
+                      </ResponsiveContainer>
                     </div>
-                    <ResponsiveContainer width="100%" height={250}>
-                      <PieChart>
-                        <Pie
-                          data={chartData.jobStatusData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={90}
-                          paddingAngle={3}
-                          dataKey="value"
-                        >
-                          {chartData.jobStatusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <RechartsTooltip />
-                        <Legend
-                          layout="vertical"
-                          align="right"
-                          verticalAlign="middle"
-                          iconType="circle"
-                          iconSize={8}
-                          wrapperStyle={{ fontSize: "11px" }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
                   </div>
-                </div>
+                )}
 
                 {/* Charts Row 2 */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Weekly Earnings */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-5">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-semibold text-gray-900">Weekly Earnings</h3>
-                      <span className="text-xs text-gray-500">Last 8 weeks</span>
+                {staffMember.totalJobs > 0 && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Monthly Jobs */}
+                    <div className="bg-white rounded-xl border border-gray-200 p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-semibold text-gray-900">Monthly Jobs</h3>
+                        <span className="text-xs text-gray-500">Last 6 months</span>
+                      </div>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <AreaChart data={chartData.monthlyPerformance}>
+                          <defs>
+                            <linearGradient id="colorJobs" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.3} />
+                              <stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
+                          <RechartsTooltip content={<CustomTooltip />} />
+                          <Area type="monotone" dataKey="jobs" stroke={CHART_COLORS.primary} strokeWidth={2} fillOpacity={1} fill="url(#colorJobs)" name="Jobs" />
+                        </AreaChart>
+                      </ResponsiveContainer>
                     </div>
-                    <ResponsiveContainer width="100%" height={250}>
-                      <BarChart data={chartData.weeklyEarnings}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis dataKey="week" tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} tickFormatter={(value) => `$${value}`} />
-                        <RechartsTooltip
-                          formatter={(value: number) => [`$${value.toLocaleString()}`, "Earnings"]}
-                          contentStyle={{ fontSize: "12px" }}
-                        />
-                        <Bar dataKey="earnings" fill={CHART_COLORS.success} radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
 
-                 {/*  */}
-
-                 <div className="bg-white rounded-xl border border-gray-200 p-5">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-semibold text-gray-900">Performance Trend</h3>
-                      <span className="text-xs text-gray-500">Quality & Punctuality</span>
+                    {/* Weekly Hours */}
+                    <div className="bg-white rounded-xl border border-gray-200 p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-semibold text-gray-900">Weekly Hours</h3>
+                        <span className="text-xs text-gray-500">Last 8 weeks</span>
+                      </div>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <BarChart data={chartData.weeklyHours}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis dataKey="week" tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
+                          <RechartsTooltip formatter={(value: number) => [`${value} hrs`, "Hours"]} contentStyle={{ fontSize: "12px" }} />
+                          <Bar dataKey="hours" fill={CHART_COLORS.info} radius={[4, 4, 0, 0]} name="Hours" />
+                        </BarChart>
+                      </ResponsiveContainer>
                     </div>
-                    <ResponsiveContainer width="100%" height={250}>
-                      <LineChart data={chartData.performanceTrend}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "#6b7280" }} axisLine={false} tickLine={false} domain={[80, 100]} />
-                        <RechartsTooltip content={<CustomTooltip />} />
-                        <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: "11px" }} />
-                        <Line
-                          type="monotone"
-                          dataKey="quality"
-                          stroke={CHART_COLORS.success}
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                          name="Quality"
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="punctuality"
-                          stroke={CHART_COLORS.info}
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                          name="Punctuality"
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
                   </div>
-                </div>
+                )}
 
-              
-              
-
-
-                {/* Trades & Service Areas */}
+                {/* Skills & Certifications */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-white rounded-xl border border-gray-200 p-5">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-4">Trades & Skills</h3>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4">Skills</h3>
                     <div className="flex flex-wrap gap-2">
-                      {subcontractor.trades.map((trade) => (
-                        <span key={trade} className="px-3 py-1.5 bg-blue-50 text-blue-700 text-sm font-medium rounded-lg">
-                          {trade}
-                        </span>
-                      ))}
+                      {staffMember.skills.length > 0 ? (
+                        staffMember.skills.map((skill) => (
+                          <span key={skill} className="px-3 py-1.5 bg-blue-50 text-blue-700 text-sm font-medium rounded-lg">
+                            {skill}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-sm text-gray-400">No skills listed</span>
+                      )}
                     </div>
                   </div>
 
                   <div className="bg-white rounded-xl border border-gray-200 p-5">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-4">Service Areas</h3>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4">Certifications</h3>
                     <div className="flex flex-wrap gap-2">
-                      {subcontractor.serviceAreas.map((area) => (
-                        <span key={area} className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg flex items-center gap-1">
-                          <MapPin size={12} />
-                          {area}
-                        </span>
-                      ))}
+                      {staffMember.certifications.length > 0 ? (
+                        staffMember.certifications.map((cert) => (
+                          <span key={cert} className="px-3 py-1.5 bg-green-50 text-green-700 text-sm font-medium rounded-lg flex items-center gap-1">
+                            <Award size={12} />
+                            {cert}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-sm text-gray-400">No certifications</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -652,7 +671,7 @@ export default function SubcontractorProfile() {
             {/* Job History Tab */}
             {activeTab === "jobs" && (
               <div className="space-y-4">
-                {subcontractor.jobs.length === 0 ? (
+                {staffMember.jobs.length === 0 ? (
                   <div className="text-center py-12">
                     <Briefcase size={40} className="mx-auto mb-3 text-gray-300" />
                     <p className="text-sm text-gray-500">No job history yet</p>
@@ -666,18 +685,20 @@ export default function SubcontractorProfile() {
                           <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Title</th>
                           <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Client</th>
                           <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Date</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Role</th>
                           <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Status</th>
-                          <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Amount</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Hours</th>
                           <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Rating</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {subcontractor.jobs.map((job) => (
+                        {staffMember.jobs.map((job) => (
                           <tr key={job.id} className="hover:bg-gray-50">
                             <td className="px-4 py-3 text-sm font-medium text-primary">{job.jobNumber}</td>
                             <td className="px-4 py-3 text-sm text-gray-900">{job.title}</td>
                             <td className="px-4 py-3 text-sm text-gray-600">{job.clientName}</td>
                             <td className="px-4 py-3 text-sm text-gray-600">{formatDate(job.date)}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{job.role}</td>
                             <td className="px-4 py-3">
                               <span className={`px-2 py-1 rounded text-xs font-medium ${
                                 job.status === "completed" ? "bg-green-100 text-green-700" :
@@ -688,9 +709,7 @@ export default function SubcontractorProfile() {
                                 {job.status.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase())}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-sm text-gray-900 text-right font-medium">
-                              {formatCurrency(job.amount)}
-                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{job.hoursWorked || "—"}</td>
                             <td className="px-4 py-3">
                               {job.rating ? (
                                 <div className="flex items-center gap-1">
@@ -714,95 +733,76 @@ export default function SubcontractorProfile() {
             {activeTab === "documents" && (
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-semibold text-gray-900">Required Documents</h3>
+                  <h3 className="text-sm font-semibold text-gray-900">Employee Documents</h3>
                   <button className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition">
                     <Upload size={14} />
                     Upload Document
                   </button>
                 </div>
 
-                <div className="grid gap-4">
-                  <div className="bg-white rounded-xl border border-gray-200 p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 bg-blue-50 rounded-lg">
-                          <Shield size={20} className="text-blue-600" />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-semibold text-gray-900">Liability Insurance</h4>
-                          <p className="text-xs text-gray-500 mt-0.5">Required for all jobs</p>
-                          {subcontractor.insuranceExpiry && (
-                            <div className="flex items-center gap-2 mt-2">
-                              <span className="text-xs text-gray-600">Expires: {formatDate(subcontractor.insuranceExpiry)}</span>
-                              {getDaysUntilExpiry(subcontractor.insuranceExpiry) !== null && (
-                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                                  getDaysUntilExpiry(subcontractor.insuranceExpiry)! > 30 ? "bg-green-100 text-green-700" :
-                                  getDaysUntilExpiry(subcontractor.insuranceExpiry)! > 0 ? "bg-yellow-100 text-yellow-700" :
-                                  "bg-red-100 text-red-700"
-                                }`}>
-                                  {getDaysUntilExpiry(subcontractor.insuranceExpiry)! > 0
-                                    ? `${getDaysUntilExpiry(subcontractor.insuranceExpiry)} days left`
-                                    : "Expired"}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${insuranceConfig[subcontractor.insuranceStatus].bg} ${insuranceConfig[subcontractor.insuranceStatus].color}`}>
-                          {insuranceConfig[subcontractor.insuranceStatus].label}
-                        </span>
-                        <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Eye size={14} className="text-gray-500" /></button>
-                        <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Download size={14} className="text-gray-500" /></button>
-                      </div>
-                    </div>
+                {staffMember.documents.length === 0 ? (
+                  <div className="text-center py-12">
+                    <FileText size={40} className="mx-auto mb-3 text-gray-300" />
+                    <p className="text-sm text-gray-500">No documents uploaded</p>
                   </div>
-
-                  {subcontractor.documents.length > 0 && (
-                    <div className="mt-4">
-                      <h3 className="text-sm font-semibold text-gray-900 mb-4">All Documents</h3>
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Document</th>
-                              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Type</th>
-                              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Uploaded</th>
-                              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Expires</th>
-                              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Status</th>
-                              <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Document</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Type</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Uploaded</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Expires</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Status</th>
+                          <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {staffMember.documents.map((doc) => {
+                          const docStatus = documentStatusConfig[doc.status];
+                          const daysLeft = getDaysUntilExpiry(doc.expiresAt);
+                          return (
+                            <tr key={doc.id} className="hover:bg-gray-50">
+                              <td className="px-4 py-3 text-sm font-medium text-gray-900">{doc.name}</td>
+                              <td className="px-4 py-3 text-sm text-gray-600">{documentTypeLabels[doc.type]}</td>
+                              <td className="px-4 py-3 text-sm text-gray-600">{formatDate(doc.uploadedAt)}</td>
+                              <td className="px-4 py-3">
+                                {doc.expiresAt ? (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm text-gray-600">{formatDate(doc.expiresAt)}</span>
+                                    {daysLeft !== null && (
+                                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                                        daysLeft > 30 ? "bg-green-100 text-green-700" :
+                                        daysLeft > 0 ? "bg-yellow-100 text-yellow-700" :
+                                        "bg-red-100 text-red-700"
+                                      }`}>
+                                        {daysLeft > 0 ? `${daysLeft}d left` : "Expired"}
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-sm text-gray-400">N/A</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${docStatus.bg} ${docStatus.color}`}>
+                                  {docStatus.label}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-right">
+                                <div className="flex items-center justify-end gap-1">
+                                  <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Eye size={14} className="text-gray-500" /></button>
+                                  <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Download size={14} className="text-gray-500" /></button>
+                                </div>
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-100">
-                            {subcontractor.documents.map((doc) => {
-                              const docStatus = documentStatusConfig[doc.status];
-                              return (
-                                <tr key={doc.id} className="hover:bg-gray-50">
-                                  <td className="px-4 py-3 text-sm font-medium text-gray-900">{doc.name}</td>
-                                  <td className="px-4 py-3 text-sm text-gray-600">{documentTypeLabels[doc.type]}</td>
-                                  <td className="px-4 py-3 text-sm text-gray-600">{formatDate(doc.uploadedAt)}</td>
-                                  <td className="px-4 py-3 text-sm text-gray-600">{doc.expiresAt ? formatDate(doc.expiresAt) : "N/A"}</td>
-                                  <td className="px-4 py-3">
-                                    <span className={`px-2 py-1 rounded text-xs font-medium ${docStatus.bg} ${docStatus.color}`}>
-                                      {docStatus.label}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-3 text-right">
-                                    <div className="flex items-center justify-end gap-1">
-                                      <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Eye size={14} className="text-gray-500" /></button>
-                                      <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Download size={14} className="text-gray-500" /></button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
 
@@ -811,24 +811,24 @@ export default function SubcontractorProfile() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <p className="text-2xl font-bold text-gray-900">{formatCurrency(subcontractor.payouts.reduce((sum, p) => sum + p.amount, 0))}</p>
+                    <p className="text-2xl font-bold text-gray-900">{formatCurrency(staffMember.payouts.reduce((sum, p) => sum + p.amount, 0))}</p>
                     <p className="text-xs text-gray-500">Total Paid</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <p className="text-2xl font-bold text-gray-900">{subcontractor.payouts.length}</p>
+                    <p className="text-2xl font-bold text-gray-900">{staffMember.payouts.length}</p>
                     <p className="text-xs text-gray-500">Total Payouts</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <p className="text-2xl font-bold text-green-600">{subcontractor.payouts.filter((p) => p.status === "paid").length}</p>
+                    <p className="text-2xl font-bold text-green-600">{staffMember.payouts.filter((p) => p.status === "paid").length}</p>
                     <p className="text-xs text-gray-500">Completed</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <p className="text-2xl font-bold text-yellow-600">{subcontractor.payouts.filter((p) => p.status === "pending").length}</p>
+                    <p className="text-2xl font-bold text-yellow-600">{staffMember.payouts.filter((p) => p.status === "pending").length}</p>
                     <p className="text-xs text-gray-500">Pending</p>
                   </div>
                 </div>
 
-                {subcontractor.payouts.length === 0 ? (
+                {staffMember.payouts.length === 0 ? (
                   <div className="text-center py-12">
                     <DollarSign size={40} className="mx-auto mb-3 text-gray-300" />
                     <p className="text-sm text-gray-500">No payout history yet</p>
@@ -840,19 +840,29 @@ export default function SubcontractorProfile() {
                         <tr>
                           <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Date</th>
                           <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Reference</th>
-                          <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Job</th>
-                          <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Method</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Type</th>
+                          <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Period</th>
                           <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Status</th>
                           <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Amount</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {subcontractor.payouts.map((payout) => (
+                        {staffMember.payouts.map((payout) => (
                           <tr key={payout.id} className="hover:bg-gray-50">
                             <td className="px-4 py-3 text-sm text-gray-600">{formatDate(payout.date)}</td>
                             <td className="px-4 py-3 text-sm font-medium text-gray-900">{payout.reference || "—"}</td>
-                            <td className="px-4 py-3 text-sm text-primary">{payout.jobNumber || "—"}</td>
-                            <td className="px-4 py-3 text-sm text-gray-600 capitalize">{payout.method.replace("_", " ")}</td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                payout.type === "salary" ? "bg-blue-100 text-blue-700" :
+                                payout.type === "bonus" ? "bg-green-100 text-green-700" :
+                                payout.type === "commission" ? "bg-purple-100 text-purple-700" :
+                                payout.type === "overtime" ? "bg-orange-100 text-orange-700" :
+                                "bg-gray-100 text-gray-700"
+                              }`}>
+                                {payout.type.charAt(0).toUpperCase() + payout.type.slice(1)}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-600">{payout.period || "—"}</td>
                             <td className="px-4 py-3">
                               <span className={`px-2 py-1 rounded text-xs font-medium ${
                                 payout.status === "paid" ? "bg-green-100 text-green-700" :
@@ -878,38 +888,38 @@ export default function SubcontractorProfile() {
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                     <div className="flex items-center gap-2 mb-1">
                       <Star size={20} className="text-yellow-500 fill-yellow-500" />
-                      <p className="text-2xl font-bold text-gray-900">{subcontractor.rating}</p>
+                      <p className="text-2xl font-bold text-gray-900">{staffMember.rating || "N/A"}</p>
                     </div>
                     <p className="text-xs text-gray-500">Average Rating</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <p className="text-2xl font-bold text-gray-900">{subcontractor.feedback.length}</p>
+                    <p className="text-2xl font-bold text-gray-900">{staffMember.feedback.length}</p>
                     <p className="text-xs text-gray-500">Total Reviews</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                     <div className="flex items-center gap-2">
                       <ThumbsUp size={16} className="text-green-500" />
-                      <p className="text-2xl font-bold text-green-600">{subcontractor.feedback.filter((f) => f.type === "positive").length}</p>
+                      <p className="text-2xl font-bold text-green-600">{staffMember.feedback.filter((f) => f.type === "positive").length}</p>
                     </div>
                     <p className="text-xs text-gray-500">Positive</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                     <div className="flex items-center gap-2">
                       <ThumbsDown size={16} className="text-red-500" />
-                      <p className="text-2xl font-bold text-red-600">{subcontractor.feedback.filter((f) => f.type === "negative").length}</p>
+                      <p className="text-2xl font-bold text-red-600">{staffMember.feedback.filter((f) => f.type === "negative").length}</p>
                     </div>
                     <p className="text-xs text-gray-500">Negative</p>
                   </div>
                 </div>
 
-                {subcontractor.feedback.length === 0 ? (
+                {staffMember.feedback.length === 0 ? (
                   <div className="text-center py-12">
                     <MessageSquare size={40} className="mx-auto mb-3 text-gray-300" />
                     <p className="text-sm text-gray-500">No feedback yet</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {subcontractor.feedback.map((fb) => (
+                    {staffMember.feedback.map((fb) => (
                       <div key={fb.id} className="bg-white rounded-xl border border-gray-200 p-4">
                         <div className="flex items-start justify-between">
                           <div>
@@ -924,7 +934,16 @@ export default function SubcontractorProfile() {
                               ))}
                             </div>
                           </div>
-                          <span className="text-xs text-gray-500">{formatDate(fb.date)}</span>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                              fb.type === "positive" ? "bg-green-100 text-green-700" :
+                              fb.type === "negative" ? "bg-red-100 text-red-700" :
+                              "bg-gray-100 text-gray-600"
+                            }`}>
+                              {fb.type.charAt(0).toUpperCase() + fb.type.slice(1)}
+                            </span>
+                            <span className="text-xs text-gray-500">{formatDate(fb.date)}</span>
+                          </div>
                         </div>
                         <p className="text-sm text-gray-600 mt-3">{fb.comment}</p>
                       </div>
@@ -939,20 +958,20 @@ export default function SubcontractorProfile() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <p className="text-2xl font-bold text-gray-900">{subcontractor.tickets.length}</p>
+                    <p className="text-2xl font-bold text-gray-900">{staffMember.tickets.length}</p>
                     <p className="text-xs text-gray-500">Total Tickets</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                     <div className="flex items-center gap-2">
                       <AlertCircle size={16} className="text-blue-500" />
-                      <p className="text-2xl font-bold text-blue-600">{subcontractor.tickets.filter((t) => t.status === "open").length}</p>
+                      <p className="text-2xl font-bold text-blue-600">{staffMember.tickets.filter((t) => t.status === "open").length}</p>
                     </div>
                     <p className="text-xs text-gray-500">Open</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                     <div className="flex items-center gap-2">
                       <Clock size={16} className="text-yellow-500" />
-                      <p className="text-2xl font-bold text-yellow-600">{subcontractor.tickets.filter((t) => t.status === "in_progress").length}</p>
+                      <p className="text-2xl font-bold text-yellow-600">{staffMember.tickets.filter((t) => t.status === "in_progress").length}</p>
                     </div>
                     <p className="text-xs text-gray-500">In Progress</p>
                   </div>
@@ -966,17 +985,17 @@ export default function SubcontractorProfile() {
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                     <div className="flex items-center gap-2">
                       <CheckCircle size={16} className="text-green-500" />
-                      <p className="text-2xl font-bold text-green-600">{subcontractor.tickets.filter((t) => t.status === "resolved" || t.status === "closed").length}</p>
+                      <p className="text-2xl font-bold text-green-600">{staffMember.tickets.filter((t) => t.status === "resolved" || t.status === "closed").length}</p>
                     </div>
                     <p className="text-xs text-gray-500">Resolved</p>
                   </div>
                 </div>
 
-                {subcontractor.tickets.length === 0 ? (
+                {staffMember.tickets.length === 0 ? (
                   <div className="text-center py-12">
                     <Ticket size={40} className="mx-auto mb-3 text-gray-300" />
                     <p className="text-sm text-gray-500 font-medium">No tickets</p>
-                    <p className="text-xs text-gray-400 mt-1">This subcontractor has a clean record!</p>
+                    <p className="text-xs text-gray-400 mt-1">This staff member has a clean record!</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -994,7 +1013,7 @@ export default function SubcontractorProfile() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {subcontractor.tickets.map((ticket) => {
+                        {staffMember.tickets.map((ticket) => {
                           const ticketStatus = ticketStatusConfig[ticket.status];
                           const ticketPriority = ticketPriorityConfig[ticket.priority];
                           const ticketCategory = ticketCategoryConfig[ticket.category];

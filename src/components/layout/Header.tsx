@@ -13,6 +13,7 @@ import {
   ClipboardList,
   Settings,
   Bell,
+  PhoneCall,
 } from "lucide-react"
 import { Tooltip } from "react-tooltip"
 import "react-tooltip/dist/react-tooltip.css"
@@ -144,6 +145,12 @@ export function Header() {
           onClick={() => {}}
         >
           <Search size={20} />
+        </IconButton>
+          <IconButton 
+          tooltip="Communication Hub"
+          onClick={() => {navigate('/communication-hub')}}
+        >
+          <PhoneCall size={20} />
         </IconButton>
 
           <NotificationDropdown
