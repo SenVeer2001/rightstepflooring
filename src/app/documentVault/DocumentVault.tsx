@@ -3,12 +3,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FileText,
-  
   ChevronLeft,
   ChevronRight,
   Download,
   Eye,
-  
   Trash2,
   Upload,
   MoreVertical,
@@ -34,6 +32,11 @@ import {
   AlertCircle,
   Info,
   ChevronDown,
+  ZoomIn,
+  ZoomOut,
+  RotateCw,
+  Maximize2,
+  Image as ImageIcon,
 } from "lucide-react";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
@@ -106,9 +109,271 @@ const tagColorMap: Record<string, { bg: string; text: string; border: string }> 
   gray: { bg: "bg-gray-50", text: "text-gray-700", border: "border-gray-200" },
 };
 
+// Mock document URLs (in production, these would come from your backend)
+const mockDocumentUrls: Record<string, string> = {
+  // PDF examples
+  "DOC-001": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+  "DOC-002": "https://www.africau.edu/images/default/sample.pdf",
+  // Image examples
+  "DOC-003": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800",
+  "DOC-004": "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800",
+  "DOC-005": "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=800",
+};
+
 // Format date
 const formatDate = (date: Date): string => {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+};
+
+// Check if file format is viewable
+const isViewableFormat = (format: FileFormat): boolean => {
+  return ["pdf", "jpg", "png"].includes(format);
+};
+
+// Document Preview Modal
+interface DocumentPreviewModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  document: Document | null;
+}
+
+const DocumentPreviewModal = ({ isOpen, onClose, document }: DocumentPreviewModalProps) => {
+  const [zoom, setZoom] = useState(100);
+  const [rotation, setRotation] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  if (!isOpen || !document) return null;
+
+  const formatConfig = fileFormatConfig[document.fileFormat];
+  const isPDF = document.fileFormat === "pdf";
+  const isImage = ["jpg", "png"].includes(document.fileFormat);
+  
+  // Mock associated images for demonstration
+  const associatedImages = isPDF ? [
+    { id: "img-1", url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800", name: "Page 1" },
+    { id: "img-2", url: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800", name: "Page 2" },
+    { id: "img-3", url: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=800", name: "Page 3" },
+  ] : [];
+
+  const documentUrl = mockDocumentUrls[document.documentId] || "";
+
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 25, 200));
+  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 25, 50));
+  const handleRotate = () => setRotation((prev) => (prev + 90) % 360);
+  const handleReset = () => {
+    setZoom(100);
+    setRotation(0);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Modal */}
+      <div className="relative bg-white w-full h-full max-w-[95vw] max-h-[95vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className={`p-2 rounded-lg ${formatConfig.bg} flex-shrink-0`}>
+              {isPDF ? (
+                <FileText size={20} className={formatConfig.color} />
+              ) : (
+                <ImageIcon size={20} className={formatConfig.color} />
+              )}
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-lg font-bold text-gray-900 truncate">{document.name}</h2>
+              <p className="text-xs text-gray-500 truncate">{document.fileName}</p>
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+            {isImage && (
+              <>
+                <button
+                  onClick={handleZoomOut}
+                  disabled={zoom <= 50}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  data-tooltip-id="preview-tooltip"
+                  data-tooltip-content="Zoom Out"
+                >
+                  <ZoomOut size={18} className="text-gray-600" />
+                </button>
+                <span className="text-xs font-medium text-gray-600 min-w-[50px] text-center">
+                  {zoom}%
+                </span>
+                <button
+                  onClick={handleZoomIn}
+                  disabled={zoom >= 200}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  data-tooltip-id="preview-tooltip"
+                  data-tooltip-content="Zoom In"
+                >
+                  <ZoomIn size={18} className="text-gray-600" />
+                </button>
+                <button
+                  onClick={handleRotate}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition"
+                  data-tooltip-id="preview-tooltip"
+                  data-tooltip-content="Rotate"
+                >
+                  <RotateCw size={18} className="text-gray-600" />
+                </button>
+                <button
+                  onClick={handleReset}
+                  className="px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                >
+                  Reset
+                </button>
+                <div className="w-px h-6 bg-gray-300 mx-2" />
+              </>
+            )}
+            
+            <button
+              className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition"
+              data-tooltip-id="preview-tooltip"
+              data-tooltip-content="Download Document"
+            >
+              <Download size={16} />
+              Download
+            </button>
+            
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-lg transition"
+              data-tooltip-id="preview-tooltip"
+              data-tooltip-content="Close Preview"
+            >
+              <X size={20} className="text-gray-600" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-hidden flex">
+          {/* Main Preview */}
+          <div className="flex-1 bg-gray-100 overflow-auto flex items-center justify-center p-4">
+            {isPDF ? (
+              <div className="w-full h-full bg-white shadow-lg">
+                <iframe
+                  src={documentUrl}
+                  className="w-full h-full border-0"
+                  title={document.name}
+                />
+              </div>
+            ) : isImage ? (
+              <div className="relative">
+                <img
+                  src={documentUrl}
+                  alt={document.name}
+                  className="max-w-full max-h-full object-contain transition-transform duration-200"
+                  style={{
+                    transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <FileText size={48} className="mx-auto mb-4 text-gray-400" />
+                <p className="text-lg font-medium text-gray-700">Preview not available</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  This file format cannot be previewed in the browser
+                </p>
+                <button className="mt-4 flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition mx-auto">
+                  <Download size={16} />
+                  Download to View
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Associated Images Sidebar (for PDFs) */}
+          {isPDF && associatedImages.length > 0 && (
+            <div className="w-64 bg-white border-l border-gray-200 overflow-y-auto flex-shrink-0">
+              <div className="p-4">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <ImageIcon size={14} className="text-gray-500" />
+                  Associated Images ({associatedImages.length})
+                </h3>
+                <div className="space-y-3">
+                  {associatedImages.map((img, index) => (
+                    <div
+                      key={img.id}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`relative rounded-lg overflow-hidden cursor-pointer border-2 transition group ${
+                        currentImageIndex === index
+                          ? "border-primary shadow-md"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <img
+                        src={img.url}
+                        alt={img.name}
+                        className="w-full h-32 object-cover"
+                      />
+                      <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-2 ${
+                        currentImageIndex === index ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      } transition`}>
+                        <p className="text-xs font-medium text-white truncate w-full">
+                          {img.name}
+                        </p>
+                      </div>
+                      {currentImageIndex === index && (
+                        <div className="absolute top-2 right-2">
+                          <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                            <CheckCircle size={14} className="text-white" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Image Preview Modal Trigger */}
+                <button
+                  onClick={() => {
+                    // Open full image gallery viewer
+                  }}
+                  className="w-full mt-4 py-2 text-xs font-medium text-primary hover:bg-primary/5 rounded-lg transition flex items-center justify-center gap-1"
+                >
+                  <Maximize2 size={12} />
+                  View All Images
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Info */}
+        <div className="px-6 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-4 text-xs text-gray-600">
+            <span className="flex items-center gap-1">
+              <FileText size={12} />
+              {formatFileSize(document.fileSize)}
+            </span>
+            <span>•</span>
+            <span className="flex items-center gap-1">
+              <Calendar size={12} />
+              Uploaded {formatDate(document.uploadedAt)}
+            </span>
+            <span>•</span>
+            <span className="flex items-center gap-1">
+              <User size={12} />
+              {document.uploadedBy}
+            </span>
+          </div>
+          
+          {isPDF && associatedImages.length > 0 && (
+            <div className="text-xs text-gray-600">
+              Viewing: {currentImageIndex + 1} of {associatedImages.length}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 // Document Detail Popup
@@ -117,9 +382,10 @@ interface DocumentDetailPopupProps {
   onClose: () => void;
   document: Document | null;
   onDelete: (id: string) => void;
+  onPreview: (doc: Document) => void;
 }
 
-const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete }: DocumentDetailPopupProps) => {
+const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete, onPreview }: DocumentDetailPopupProps) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"details" | "history">("details");
 
@@ -132,6 +398,7 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete }: DocumentDe
   const StatusIcon = statusInfo.icon;
   const EntityIcon = entityConfig.icon;
   const daysUntilExpiry = getDaysUntilExpiry(document.expiresAt);
+  const canPreview = isViewableFormat(document.fileFormat);
 
   const handleViewEntity = () => {
     const entityUrls: Record<EntityType, string> = {
@@ -148,6 +415,11 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete }: DocumentDe
   const handleDelete = () => {
     onDelete(document.id);
     onClose();
+  };
+
+  const handlePreview = () => {
+    onClose();
+    onPreview(document);
   };
 
   return (
@@ -189,6 +461,13 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete }: DocumentDe
                     {document.isRequired && (
                       <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] font-semibold rounded">
                         Required
+                      </span>
+                    )}
+                    {/* Viewable Badge */}
+                    {canPreview && (
+                      <span className="px-2 py-0.5 bg-green-50 text-green-600 text-[10px] font-semibold rounded flex items-center gap-1">
+                        <Eye size={10} />
+                        Viewable
                       </span>
                     )}
                   </div>
@@ -235,6 +514,17 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete }: DocumentDe
         <div className="overflow-y-auto max-h-[calc(90vh-250px)]">
           {activeTab === "details" && (
             <div className="p-6 space-y-5">
+              {/* Preview Button (prominent if viewable) */}
+              {canPreview && (
+                <button
+                  onClick={handlePreview}
+                  className="w-full py-3 bg-gradient-to-r from-primary to-primary/80 text-white rounded-xl font-semibold text-sm hover:shadow-lg transition flex items-center justify-center gap-2"
+                >
+                  <Eye size={16} />
+                  Preview Document
+                </button>
+              )}
+
               {/* Expiry Warning */}
               {(document.status === "expired" || document.status === "expiring_soon") && (
                 <div className={`p-4 rounded-xl border ${
@@ -289,7 +579,7 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete }: DocumentDe
                 </div>
               </div>
 
-              {/* Document Info Grid */}
+              {/* Document Details Grid */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
                   <p className="text-[10px] font-medium text-gray-500 uppercase">Document Type</p>
@@ -439,6 +729,15 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete }: DocumentDe
         {/* Footer Actions */}
         <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
+            {canPreview && (
+              <button
+                onClick={handlePreview}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition"
+              >
+                <Eye size={14} />
+                Preview
+              </button>
+            )}
             <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
               <Download size={14} />
               Download
@@ -474,7 +773,7 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete }: DocumentDe
   );
 };
 
-// Upload Document Modal
+// Upload Document Modal (keeping the existing one)
 interface UploadDocumentModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -719,6 +1018,7 @@ export default function DocumentVault() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const rowsPerPage = 10;
@@ -760,6 +1060,11 @@ export default function DocumentVault() {
     setActiveDropdown(null);
   };
 
+  const handlePreview = (doc: Document) => {
+    setSelectedDocument(doc);
+    setIsPreviewOpen(true);
+  };
+
   const handleDelete = (id: string) => {
     setDocuments((prev) => prev.filter((d) => d.id !== id));
   };
@@ -767,6 +1072,13 @@ export default function DocumentVault() {
   const handleUpload = (doc: Partial<Document>) => {
     // Handle upload logic
     setIsUploadOpen(false);
+  };
+
+  const handleQuickPreview = (e: React.MouseEvent, doc: Document) => {
+    e.stopPropagation();
+    if (isViewableFormat(doc.fileFormat)) {
+      handlePreview(doc);
+    }
   };
 
   return (
@@ -848,7 +1160,6 @@ export default function DocumentVault() {
           <div className="flex flex-col md:flex-row gap-3">
             {/* Search */}
             <div className="relative flex-1">
-              {/* <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" /> */}
               <input
                 type="text"
                 placeholder="Search by name, file, entity, or uploaded by..."
@@ -892,23 +1203,6 @@ export default function DocumentVault() {
               </select>
             </div>
 
-            {/* Status Filter */}
-            {/* <div className="relative">
-              <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as DocumentStatus | "all")}
-                className="pl-9 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none appearance-none bg-white min-w-[150px]"
-              >
-                <option value="all">All Status</option>
-                {(Object.keys(statusConfig) as DocumentStatus[]).map((status) => (
-                  <option key={status} value={status}>
-                    {statusConfig[status].label}
-                  </option>
-                ))}
-              </select>
-            </div> */}
-
             {/* Export Button */}
             <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
               <Download size={14} />
@@ -941,9 +1235,6 @@ export default function DocumentVault() {
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Size
                   </th>
-                  {/* <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
-                  </th> */}
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Uploaded By
                   </th>
@@ -958,7 +1249,7 @@ export default function DocumentVault() {
               <tbody className="divide-y divide-gray-100">
                 {paginatedDocuments.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="px-4 py-12 text-center">
+                    <td colSpan={9} className="px-4 py-12 text-center">
                       <FileText size={40} className="mx-auto mb-3 text-gray-300" />
                       <p className="text-sm text-gray-500 font-medium">No documents found</p>
                       <p className="text-xs text-gray-400 mt-1">Try adjusting your filters or upload a new document</p>
@@ -973,6 +1264,7 @@ export default function DocumentVault() {
                     const StatusIcon = statusInfo.icon;
                     const EntityIcon = entityConfig.icon;
                     const daysUntilExpiry = getDaysUntilExpiry(doc.expiresAt);
+                    const canPreview = isViewableFormat(doc.fileFormat);
 
                     return (
                       <tr
@@ -1002,11 +1294,7 @@ export default function DocumentVault() {
                               <p className="text-sm font-medium text-gray-900 truncate max-w-[150px]">
                                 {doc.entityName}
                               </p>
-                             <div className="flex items-center gap-1 ">
-                                 {/* <p className="text-[11px] text-gray-500">{doc.entityId}</p> */}
                               <p className="text-[12px] text-gray-700">{doc.entityType}</p>
-                             </div>
-
                             </div>
                           </div>
                         </td>
@@ -1030,23 +1318,22 @@ export default function DocumentVault() {
 
                         {/* Format */}
                         <td className="px-4 py-3">
-                          <span className={`px-2 py-1 rounded text-[10px] font-semibold uppercase ${formatConfig.bg} ${formatConfig.color}`}>
-                            {doc.fileFormat}
-                          </span>
+                          <div className="flex items-center gap-1">
+                            <span className={`px-2 py-1 rounded text-[10px] font-semibold uppercase ${formatConfig.bg} ${formatConfig.color}`}>
+                              {doc.fileFormat}
+                            </span>
+                            {canPreview && (
+                              <span className="px-1.5 py-0.5 bg-green-50 text-green-600 text-[8px] font-semibold rounded">
+                                Viewable
+                              </span>
+                            )}
+                          </div>
                         </td>
 
                         {/* Size */}
                         <td className="px-4 py-3">
                           <span className="text-xs text-gray-600">{formatFileSize(doc.fileSize)}</span>
                         </td>
-
-                        {/* Status */}
-                        {/* <td className="px-4 py-3">
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-semibold ${statusInfo.bg} ${statusInfo.color}`}>
-                            <StatusIcon size={10} />
-                            {statusInfo.label}
-                          </span>
-                        </td> */}
 
                         {/* Uploaded By */}
                         <td className="px-4 py-3">
@@ -1076,49 +1363,71 @@ export default function DocumentVault() {
 
                         {/* Actions */}
                         <td className="px-4 py-3 text-right">
-                          <div className="relative inline-block">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActiveDropdown(activeDropdown === doc.id ? null : doc.id);
-                              }}
-                              className="p-1.5 hover:bg-gray-100 rounded-lg transition"
-                            >
-                              <MoreVertical size={16} className="text-gray-500" />
-                            </button>
-
-                            {activeDropdown === doc.id && (
-                              <div
-                                className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10"
-                                onClick={(e) => e.stopPropagation()}
+                          <div className="flex items-center justify-end gap-1">
+                            {canPreview && (
+                              <button
+                                onClick={(e) => handleQuickPreview(e, doc)}
+                                className="p-1.5 hover:bg-blue-50 rounded-lg transition group"
+                                data-tooltip-id="document-tooltip"
+                                data-tooltip-content="Preview Document"
                               >
-                                <button
-                                  onClick={() => handleDocumentClick(doc)}
-                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                  <Eye size={14} />
-                                  View Details
-                                </button>
-                                <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                  <Download size={14} />
-                                  Download
-                                </button>
-                                <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                  <RefreshCw size={14} />
-                                  Replace
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    handleDelete(doc.id);
-                                    setActiveDropdown(null);
-                                  }}
-                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                                >
-                                  <Trash2 size={14} />
-                                  Delete
-                                </button>
-                              </div>
+                                <Eye size={14} className="text-gray-400 group-hover:text-blue-600" />
+                              </button>
                             )}
+                            
+                            <div className="relative inline-block">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveDropdown(activeDropdown === doc.id ? null : doc.id);
+                                }}
+                                className="p-1.5 hover:bg-gray-100 rounded-lg transition"
+                              >
+                                <MoreVertical size={16} className="text-gray-500" />
+                              </button>
+
+                              {activeDropdown === doc.id && (
+                                <div
+                                  className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {canPreview && (
+                                    <button
+                                      onClick={(e) => handleQuickPreview(e, doc)}
+                                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                    >
+                                      <Eye size={14} />
+                                      Preview
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => handleDocumentClick(doc)}
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                  >
+                                    <Info size={14} />
+                                    View Details
+                                  </button>
+                                  <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <Download size={14} />
+                                    Download
+                                  </button>
+                                  <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <RefreshCw size={14} />
+                                    Replace
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleDelete(doc.id);
+                                      setActiveDropdown(null);
+                                    }}
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                                  >
+                                    <Trash2 size={14} />
+                                    Delete
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -1180,6 +1489,12 @@ export default function DocumentVault() {
         place="top"
         className="!bg-gray-800 !text-white !text-[10px] !px-2 !py-1 !rounded"
       />
+      
+      <Tooltip
+        id="preview-tooltip"
+        place="top"
+        className="!bg-gray-800 !text-white !text-[10px] !px-2 !py-1 !rounded"
+      />
 
       {/* Document Detail Popup */}
       <DocumentDetailPopup
@@ -1187,6 +1502,14 @@ export default function DocumentVault() {
         onClose={() => setIsDetailOpen(false)}
         document={selectedDocument}
         onDelete={handleDelete}
+        onPreview={handlePreview}
+      />
+
+      {/* Document Preview Modal */}
+      <DocumentPreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        document={selectedDocument}
       />
 
       {/* Upload Document Modal */}

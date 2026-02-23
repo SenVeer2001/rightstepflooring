@@ -1,4 +1,4 @@
-import { ChevronDown, Info, Upload, X } from 'lucide-react'
+import { Info, Upload, X } from 'lucide-react'
 import React, { useState } from 'react'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
@@ -37,7 +37,7 @@ function Profilepage() {
 
 
     return (
-        <div className=" px-4 lg:px-6 py-6">
+        <div className=" px-4 lg:px-4 py-4">
             {/* <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">User Settings</h1>
                 <button className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-6 py-2 rounded-lg transition">
@@ -45,7 +45,7 @@ function Profilepage() {
                 </button>
             </div> */}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
                 {/* LEFT CARD */}
                 <div className="bg-white border rounded-2xl p-6 space-y-6 shadow-sm">
@@ -146,7 +146,7 @@ function Profilepage() {
                             />
                         </div>
 
-                        {/* HOME ADDRESS */}
+                       
                         <div>
                             <label className="text-sm font-medium text-gray-700 block mb-2">Home address</label>
                             <input

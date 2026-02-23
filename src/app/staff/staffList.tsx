@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Users,
-  
   Filter,
   ChevronLeft,
   ChevronRight,
@@ -26,6 +25,10 @@ import {
   Award,
   Calendar,
   TrendingUp,
+  Mail,
+  Phone,
+  Hash,
+  CalendarDays,
 } from "lucide-react";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
@@ -37,22 +40,22 @@ import {
 } from "../../types/staff";
 
 // Status config
-const statusConfig: Record<StaffStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
-  active: { label: "Active", color: "text-green-700", bg: "bg-green-100", icon: CheckCircle },
-  inactive: { label: "Inactive", color: "text-gray-600", bg: "bg-gray-100", icon: XCircle },
-  on_leave: { label: "On Leave", color: "text-yellow-700", bg: "bg-yellow-100", icon: Clock },
-  terminated: { label: "Terminated", color: "text-red-700", bg: "bg-red-100", icon: Lock },
+const statusConfig: Record<StaffStatus, { label: string; color: string; bg: string; icon: React.ElementType; dot: string }> = {
+  active: { label: "Active", color: "text-green-700", bg: "bg-green-100", icon: CheckCircle, dot: "bg-green-500" },
+  inactive: { label: "Inactive", color: "text-gray-600", bg: "bg-gray-100", icon: XCircle, dot: "bg-gray-400" },
+  on_leave: { label: "On Leave", color: "text-yellow-700", bg: "bg-yellow-100", icon: Clock, dot: "bg-yellow-500" },
+  terminated: { label: "Terminated", color: "text-red-700", bg: "bg-red-100", icon: Lock, dot: "bg-red-500" },
 };
 
 // Role config
-const roleConfig: Record<StaffRole, { label: string; color: string; bg: string; icon: React.ElementType }> = {
-  admin: { label: "Admin", color: "text-purple-700", bg: "bg-purple-100", icon: Award },
-  manager: { label: "Manager", color: "text-blue-700", bg: "bg-blue-100", icon: Briefcase },
-  technician: { label: "Technician", color: "text-green-700", bg: "bg-green-100", icon: Users },
-  dispatcher: { label: "Dispatcher", color: "text-orange-700", bg: "bg-orange-100", icon: MapPin },
-  sales: { label: "Sales", color: "text-pink-700", bg: "bg-pink-100", icon: TrendingUp },
-  support: { label: "Support", color: "text-cyan-700", bg: "bg-cyan-100", icon: Users },
-  accounting: { label: "Accounting", color: "text-emerald-700", bg: "bg-emerald-100", icon: Calendar },
+const roleConfig: Record<StaffRole, { label: string; color: string; bg: string; icon: React.ElementType; gradient: string }> = {
+  admin: { label: "Admin", color: "text-purple-700", bg: "bg-purple-100", icon: Award, gradient: "from-purple-500 to-purple-600" },
+  manager: { label: "Manager", color: "text-blue-700", bg: "bg-blue-100", icon: Briefcase, gradient: "from-blue-500 to-blue-600" },
+  technician: { label: "Technician", color: "text-green-700", bg: "bg-green-100", icon: Users, gradient: "from-green-500 to-green-600" },
+  dispatcher: { label: "Dispatcher", color: "text-orange-700", bg: "bg-orange-100", icon: MapPin, gradient: "from-orange-500 to-orange-600" },
+  sales: { label: "Sales", color: "text-pink-700", bg: "bg-pink-100", icon: TrendingUp, gradient: "from-pink-500 to-pink-600" },
+  support: { label: "Support", color: "text-cyan-700", bg: "bg-cyan-100", icon: Users, gradient: "from-cyan-500 to-cyan-600" },
+  accounting: { label: "Accounting", color: "text-emerald-700", bg: "bg-emerald-100", icon: Calendar, gradient: "from-emerald-500 to-emerald-600" },
 };
 
 // Role options for filter
@@ -260,21 +263,10 @@ const RatingPopup = ({ isOpen, onClose, staff }: RatingPopupProps) => {
                         </div>
                       </div>
                     </div>
-                    <span className="px-2 py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded">
-                      {review.jobType}
-                    </span>
                   </div>
 
                   {/* Review Content */}
                   <p className="mt-3 text-sm text-gray-700 leading-relaxed">{review.comment}</p>
-
-                  {/* Review Actions */}
-                  <div className="mt-3 flex items-center gap-4">
-                    <button className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition">
-                      <ThumbsUp size={14} />
-                      Helpful ({review.helpful})
-                    </button>
-                  </div>
                 </div>
               ))}
             </div>
@@ -292,18 +284,268 @@ const RatingPopup = ({ isOpen, onClose, staff }: RatingPopupProps) => {
   );
 };
 
-// Format relative time
-const formatRelativeTime = (date?: Date): string => {
-  if (!date) return "Never";
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / 86400000);
+// Staff Card Component
+interface StaffCardProps {
+  member: Staff;
+  onViewProfile: (id: string) => void;
+  onRatingClick: (e: React.MouseEvent, member: Staff) => void;
+  onStatusChange: (id: string, status: StaffStatus) => void;
+  onDelete: (id: string) => void;
+  activeDropdown: string | null;
+  setActiveDropdown: (id: string | null) => void;
+  statusDropdown: string | null;
+  setStatusDropdown: (id: string | null) => void;
+}
 
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  return date.toLocaleDateString();
+const StaffCard = ({
+  member,
+  onViewProfile,
+  onRatingClick,
+  onStatusChange,
+  onDelete,
+  activeDropdown,
+  setActiveDropdown,
+  statusDropdown,
+  setStatusDropdown,
+}: StaffCardProps) => {
+  const statusInfo = statusConfig[member.status];
+  const roleInfo = roleConfig[member.role];
+  const StatusIcon = statusInfo.icon;
+  const RoleIcon = roleInfo.icon;
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 hover:border-primary/30 hover:shadow-lg transition-all duration-300 overflow-hidden group">
+      {/* Card Header with Gradient */}
+      <div className={`h-20 bg-gradient-to-r ${roleInfo.gradient} relative`}>
+        {/* Status Indicator */}
+        <div className="absolute top-3 right-3">
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setStatusDropdown(statusDropdown === member.id ? null : member.id);
+              }}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur-sm shadow-sm hover:bg-white transition ${statusInfo.color}`}
+            >
+              <span className={`w-2 h-2 rounded-full ${statusInfo.dot}`} />
+              {statusInfo.label}
+              <ChevronDown size={12} />
+            </button>
+
+            {/* Status Dropdown */}
+            {statusDropdown === member.id && (
+              <div
+                className="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-20"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {(Object.keys(statusConfig) as StaffStatus[]).map((status) => {
+                  const config = statusConfig[status];
+                  const Icon = config.icon;
+                  const isCurrentStatus = member.status === status;
+
+                  return (
+                    <button
+                      key={status}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onStatusChange(member.id, status);
+                      }}
+                      disabled={isCurrentStatus}
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${
+                        isCurrentStatus ? 'bg-gray-50 cursor-not-allowed opacity-60' : ''
+                      }`}
+                    >
+                      <Icon size={14} className={config.color} />
+                      <span className={config.color}>{config.label}</span>
+                      {isCurrentStatus && (
+                        <CheckCircle size={12} className="ml-auto text-green-600" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Actions Menu */}
+        <div className="absolute top-3 left-3">
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveDropdown(activeDropdown === member.id ? null : member.id);
+              }}
+              className="p-1.5 bg-white/20 hover:bg-white/30 rounded-lg transition backdrop-blur-sm"
+            >
+              <MoreVertical size={16} className="text-white" />
+            </button>
+
+            {activeDropdown === member.id && (
+              <div 
+                className="absolute left-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewProfile(member.id);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-t-lg"
+                >
+                  <Eye size={14} />
+                  View Profile
+                </button>
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <Edit size={14} />
+                  Edit
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(member.id);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg"
+                >
+                  <Trash2 size={14} />
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Avatar */}
+      <div className="flex justify-center -mt-10 relative z-10">
+        {member.avatar ? (
+          <img
+            src={member.avatar}
+            alt={`${member.firstName} ${member.lastName}`}
+            className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md"
+          />
+        ) : (
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center border-4 border-white shadow-md">
+            <span className="text-2xl font-bold text-white">
+              {member.firstName[0]}{member.lastName[0]}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Card Content */}
+      <div className="p-4 pt-3">
+        {/* Name & Role */}
+        <div className="text-center mb-4">
+          <h3
+            onClick={() => onViewProfile(member.id)}
+            className="text-lg font-semibold text-gray-900 hover:text-primary cursor-pointer transition"
+          >
+            {member.firstName} {member.lastName}
+          </h3>
+          <div className="flex items-center justify-center gap-2 mt-1">
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${roleInfo.bg} ${roleInfo.color}`}>
+              <RoleIcon size={10} />
+              {roleInfo.label}
+            </span>
+          </div>
+        </div>
+
+        {/* Employee ID */}
+        <div className="flex items-center justify-center gap-1.5 text-xs text-gray-500 mb-4">
+          <Hash size={12} />
+          {member.employeeId}
+        </div>
+
+        {/* Rating */}
+        <div className="flex justify-center mb-4">
+          {member.rating > 0 ? (
+            <button
+              onClick={(e) => onRatingClick(e, member)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-yellow-50 hover:bg-yellow-100 transition group"
+            >
+              <StarRating rating={member.rating} size={14} />
+              <span className="text-sm font-semibold text-gray-900">
+                {member.rating}
+              </span>
+              <span className="text-xs text-gray-500">
+                ({member.completedJobs} reviews)
+              </span>
+            </button>
+          ) : (
+            <span className="text-xs text-gray-400 py-1.5">No ratings yet</span>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-100 my-3" />
+
+        {/* Info Grid */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Department */}
+          <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+            <MapPin size={14} className="text-gray-400 flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wide">Dept</p>
+              <p className="text-xs font-medium text-gray-700 truncate">{member.department}</p>
+            </div>
+          </div>
+
+          {/* Jobs */}
+          <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+            <Briefcase size={14} className="text-gray-400 flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wide">Jobs</p>
+              <p className="text-xs font-medium text-gray-700">
+                {member.completedJobs} / {member.totalJobs}
+              </p>
+            </div>
+          </div>
+
+          {/* Email */}
+          <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg col-span-2">
+            <Mail size={14} className="text-gray-400 flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wide">Email</p>
+              <p className="text-xs font-medium text-gray-700 truncate">{member.email}</p>
+            </div>
+          </div>
+
+          {/* Phone */}
+          <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+            <Phone size={14} className="text-gray-400 flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wide">Phone</p>
+              <p className="text-xs font-medium text-gray-700 truncate">{member.phone}</p>
+            </div>
+          </div>
+
+          {/* Hire Date */}
+          <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+            <CalendarDays size={14} className="text-gray-400 flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wide">Hired</p>
+              <p className="text-xs font-medium text-gray-700">
+                {member.hireDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* View Profile Button */}
+        <button
+          onClick={() => onViewProfile(member.id)}
+          className="w-full mt-4 py-2.5 text-sm font-medium text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition flex items-center justify-center gap-2"
+        >
+          <Eye size={14} />
+          View Full Profile
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default function StaffList() {
@@ -321,7 +563,7 @@ export default function StaffList() {
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   
   const navigate = useNavigate();
-  const rowsPerPage = 10;
+  const rowsPerPage = 12; // Changed to 12 for better grid layout (3x4 or 4x3)
 
   // Filter staff
   const filteredStaff = staff.filter((member) => {
@@ -370,6 +612,11 @@ export default function StaffList() {
       )
     );
     setStatusDropdown(null);
+  };
+
+  const handleDelete = (id: string) => {
+    setStaff((prev) => prev.filter((member) => member.id !== id));
+    setActiveDropdown(null);
   };
 
   const handleCloseDropdown = () => {
@@ -450,7 +697,6 @@ export default function StaffList() {
           <div className="flex flex-col md:flex-row gap-3">
             {/* Search */}
             <div className="relative flex-1">
-              {/* <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" /> */}
               <input
                 type="text"
                 placeholder="Search by name, email, or employee ID..."
@@ -514,280 +760,81 @@ export default function StaffList() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Employee
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Department
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Rating
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Jobs
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Hire Date
-                  </th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {paginatedStaff.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center">
-                      <Users size={40} className="mx-auto mb-3 text-gray-300" />
-                      <p className="text-sm text-gray-500 font-medium">No staff members found</p>
-                      <p className="text-xs text-gray-400 mt-1">Try adjusting your filters</p>
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedStaff.map((member) => {
-                    const statusInfo = statusConfig[member.status];
-                    const roleInfo = roleConfig[member.role];
-                    const StatusIcon = statusInfo.icon;
-                    const RoleIcon = roleInfo.icon;
-
-                    return (
-                      <tr
-                        key={member.id}
-                        className="hover:bg-gray-50 transition"
-                      >
-                        {/* Employee */}
-                        <td className="px-4 py-3" onClick={() => handleViewProfile(member.id)}>
-                          <div className="flex items-center gap-3 cursor-pointer">
-                            {member.avatar ? (
-                              <img
-                                src={member.avatar}
-                                alt={`${member.firstName} ${member.lastName}`}
-                                className="w-10 h-10 rounded-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                <span className="text-sm font-semibold text-primary">
-                                  {member.firstName[0]}{member.lastName[0]}
-                                </span>
-                              </div>
-                            )}
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">
-                                {member.firstName} {member.lastName}
-                              </p>
-                              <p className="text-xs text-gray-500">{member.employeeId}</p>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Role */}
-                        <td className="px-4 py-3" onClick={() => handleViewProfile(member.id)}>
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${roleInfo.bg} ${roleInfo.color} cursor-pointer`}>
-                            <RoleIcon size={12} />
-                            {roleInfo.label}
-                          </span>
-                        </td>
-
-                        {/* Department */}
-                        <td className="px-4 py-3" onClick={() => handleViewProfile(member.id)}>
-                          <span className="text-sm text-gray-600 cursor-pointer">{member.department}</span>
-                        </td>
-
-                        {/* Rating */}
-                        <td className="px-4 py-3">
-                          {member.rating > 0 ? (
-                            <button
-                              onClick={(e) => handleRatingClick(e, member)}
-                              className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-yellow-50 transition group"
-                            >
-                              <Star size={14} className="text-yellow-500 fill-yellow-500" />
-                              <span className="text-sm font-medium text-gray-900 group-hover:text-yellow-700">
-                                {member.rating}
-                              </span>
-                              <span className="text-xs text-gray-400 group-hover:text-yellow-600">
-                                ({member.completedJobs})
-                              </span>
-                            </button>
-                          ) : (
-                            <span className="text-xs text-gray-400">N/A</span>
-                          )}
-                        </td>
-
-                        {/* Jobs */}
-                        <td className="px-4 py-3" onClick={() => handleViewProfile(member.id)}>
-                          <div className="flex items-center gap-2 cursor-pointer">
-                            <span className="text-sm font-medium text-gray-900">{member.completedJobs}</span>
-                            <span className="text-xs text-gray-400">/ {member.totalJobs}</span>
-                          </div>
-                        </td>
-
-                        {/* Status */}
-                        <td className="px-4 py-3">
-                          <div className="relative inline-block">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setStatusDropdown(statusDropdown === member.id ? null : member.id);
-                              }}
-                              className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium ${statusInfo.bg} ${statusInfo.color} hover:opacity-80 transition`}
-                            >
-                              <StatusIcon size={12} />
-                              {statusInfo.label}
-                              <ChevronDown size={12} />
-                            </button>
-
-                            {/* Status Change Dropdown */}
-                            {statusDropdown === member.id && (
-                              <div
-                                className="absolute left-0 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-20"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                {(Object.keys(statusConfig) as StaffStatus[]).map((status) => {
-                                  const config = statusConfig[status];
-                                  const Icon = config.icon;
-                                  const isCurrentStatus = member.status === status;
-
-                                  return (
-                                    <button
-                                      key={status}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleStatusChange(member.id, status);
-                                      }}
-                                      disabled={isCurrentStatus}
-                                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${
-                                        isCurrentStatus ? 'bg-gray-50 cursor-not-allowed opacity-60' : ''
-                                      }`}
-                                    >
-                                      <Icon size={14} className={config.color} />
-                                      <span className={config.color}>{config.label}</span>
-                                      {isCurrentStatus && (
-                                        <CheckCircle size={12} className="ml-auto text-green-600" />
-                                      )}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Hire Date */}
-                        <td className="px-4 py-3" onClick={() => handleViewProfile(member.id)}>
-                          <span className="text-xs text-gray-600 cursor-pointer">
-                            {member.hireDate.toLocaleDateString()}
-                          </span>
-                        </td>
-
-                        {/* Actions */}
-                        <td className="px-4 py-3 text-right">
-                          <div className="relative inline-block">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActiveDropdown(activeDropdown === member.id ? null : member.id);
-                              }}
-                              className="p-1.5 hover:bg-gray-100 rounded-lg transition"
-                            >
-                              <MoreVertical size={16} className="text-gray-500" />
-                            </button>
-
-                            {activeDropdown === member.id && (
-                              <div 
-                                className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleViewProfile(member.id);
-                                  }}
-                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                  <Eye size={14} />
-                                  View Profile
-                                </button>
-                                <button
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                  <Edit size={14} />
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                                >
-                                  <Trash2 size={14} />
-                                  Delete
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {filteredStaff.length > 0 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t bg-gray-50 gap-2">
-              <p className="text-xs text-gray-500">
-                Showing {startIndex + 1} - {Math.min(startIndex + rowsPerPage, filteredStaff.length)} of {filteredStaff.length}
-              </p>
-
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                  className="px-2 py-1 text-xs rounded border bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-                >
-                  First
-                </button>
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="p-1 rounded border bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-                >
-                  <ChevronLeft size={14} />
-                </button>
-                <span className="px-2 py-1 text-xs font-medium">
-                  {currentPage} / {totalPages || 1}
-                </span>
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="p-1 rounded border bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-                >
-                  <ChevronRight size={14} />
-                </button>
-                <button
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="px-2 py-1 text-xs rounded border bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-                >
-                  Last
-                </button>
-              </div>
-            </div>
-          )}
+        {/* Results Count */}
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            Showing <span className="font-medium text-gray-900">{filteredStaff.length}</span> staff members
+          </p>
         </div>
+
+        {/* Grid of Cards */}
+        {paginatedStaff.length === 0 ? (
+          <div className="bg-white border border-gray-200 rounded-xl py-16 text-center">
+            <Users size={48} className="mx-auto mb-4 text-gray-300" />
+            <p className="text-lg font-medium text-gray-500">No staff members found</p>
+            <p className="text-sm text-gray-400 mt-1">Try adjusting your filters</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {paginatedStaff.map((member) => (
+              <StaffCard
+                key={member.id}
+                member={member}
+                onViewProfile={handleViewProfile}
+                onRatingClick={handleRatingClick}
+                onStatusChange={handleStatusChange}
+                onDelete={handleDelete}
+                activeDropdown={activeDropdown}
+                setActiveDropdown={setActiveDropdown}
+                statusDropdown={statusDropdown}
+                setStatusDropdown={setStatusDropdown}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {filteredStaff.length > 0 && (
+          <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-gray-500">
+              Showing {startIndex + 1} - {Math.min(startIndex + rowsPerPage, filteredStaff.length)} of {filteredStaff.length}
+            </p>
+
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+                className="px-2 py-1 text-xs rounded border bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+              >
+                First
+              </button>
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="p-1 rounded border bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+              >
+                <ChevronLeft size={14} />
+              </button>
+              <span className="px-3 py-1 text-xs font-medium">
+                {currentPage} / {totalPages || 1}
+              </span>
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages || totalPages === 0}
+                className="p-1 rounded border bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+              >
+                <ChevronRight size={14} />
+              </button>
+              <button
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages || totalPages === 0}
+                className="px-2 py-1 text-xs rounded border bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+              >
+                Last
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <Tooltip

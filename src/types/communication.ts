@@ -20,6 +20,17 @@ export interface CommunicationTag {
   color: string;
 }
 
+// Contacted By interface
+export interface ContactedBy {
+  id?: string;
+  name: string;
+  avatar?: string;
+  role?: string;
+  department?: string;
+  email?: string;
+  phone?: string;
+}
+
 // Call Record
 export interface CallRecord {
   id: string;
@@ -47,6 +58,7 @@ export interface CallRecord {
     label: string;
   };
   transcription?: string;
+  contactedBy?: ContactedBy; // Added field
 }
 
 // SMS Message
@@ -178,6 +190,15 @@ export const mockCallRecords: CallRecord[] = [
       label: "Kitchen Renovation",
     },
     transcription: "Hi, this is John Smith calling about the kitchen renovation estimate I received...",
+    contactedBy: {
+      id: "STF-003",
+      name: "Sarah Johnson",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+      role: "Sales Manager",
+      department: "Sales",
+      email: "sarah.johnson@servicepro.com",
+      phone: "(555) 999-0001",
+    },
   },
   {
     id: "call-002",
@@ -205,6 +226,15 @@ export const mockCallRecords: CallRecord[] = [
       id: "JOB-2024-015",
       label: "Plumbing Repair",
     },
+    contactedBy: {
+      id: "STF-002",
+      name: "Emily Davis",
+      avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=100&h=100&fit=crop",
+      role: "Customer Service Representative",
+      department: "Customer Service",
+      email: "emily.davis@servicepro.com",
+      phone: "(555) 999-0002",
+    },
   },
   {
     id: "call-003",
@@ -224,6 +254,11 @@ export const mockCallRecords: CallRecord[] = [
       { id: "tag-1", name: "Urgent", color: "red" },
       { id: "tag-2", name: "Follow-up", color: "yellow" },
     ],
+    contactedBy: {
+      name: "Auto Attendant",
+      role: "System",
+      department: "Automated",
+    },
   },
   {
     id: "call-004",
@@ -246,6 +281,15 @@ export const mockCallRecords: CallRecord[] = [
     tags: [
       { id: "tag-4", name: "Important", color: "orange" },
     ],
+    contactedBy: {
+      id: "STF-004",
+      name: "Michael Brown",
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
+      role: "Operations Manager",
+      department: "Operations",
+      email: "michael.brown@servicepro.com",
+      phone: "(555) 999-0003",
+    },
   },
   {
     id: "call-005",
@@ -273,6 +317,15 @@ export const mockCallRecords: CallRecord[] = [
       type: "invoice",
       id: "INV-2024-089",
       label: "Invoice #INV-2024-089",
+    },
+    contactedBy: {
+      id: "STF-003",
+      name: "Sarah Johnson",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+      role: "Sales Manager",
+      department: "Sales",
+      email: "sarah.johnson@servicepro.com",
+      phone: "(555) 999-0001",
     },
   },
   {
@@ -302,6 +355,15 @@ export const mockCallRecords: CallRecord[] = [
       id: "LEAD-456",
       label: "Bathroom Renovation Lead",
     },
+    contactedBy: {
+      id: "STF-006",
+      name: "Alex Thompson",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+      role: "Lead Coordinator",
+      department: "Sales",
+      email: "alex.thompson@servicepro.com",
+      phone: "(555) 999-0004",
+    },
   },
   {
     id: "call-007",
@@ -319,6 +381,15 @@ export const mockCallRecords: CallRecord[] = [
     duration: 0,
     hasRecording: false,
     tags: [],
+    contactedBy: {
+      id: "STF-005",
+      name: "Alex Thompson",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+      role: "Procurement Specialist",
+      department: "Operations",
+      email: "alex.thompson@servicepro.com",
+      phone: "(555) 999-0004",
+    },
   },
   {
     id: "call-008",
@@ -346,6 +417,15 @@ export const mockCallRecords: CallRecord[] = [
       type: "ticket",
       id: "TKT-2024-045",
       label: "HVAC Noise Complaint",
+    },
+    contactedBy: {
+      id: "STF-002",
+      name: "Emily Davis",
+      avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=100&h=100&fit=crop",
+      role: "Customer Service Representative",
+      department: "Customer Service",
+      email: "emily.davis@servicepro.com",
+      phone: "(555) 999-0002",
     },
   },
 ];
@@ -625,7 +705,7 @@ export const mockSMSThreads: SMSThread[] = [
   },
 ];
 
-// Mock Email Threads
+// Mock Email Threads (keeping existing data - no changes needed for emails)
 export const mockEmailThreads: EmailThread[] = [
   {
     id: "email-001",

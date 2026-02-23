@@ -33,6 +33,11 @@ import {
   FileCheck,
   ChevronDown,
   Tag,
+  Upload,
+  DollarSign,
+  Eye,
+  FileText as FileIcon,
+  MoreHorizontal,
 } from "lucide-react";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
@@ -130,6 +135,26 @@ const subTabs: { id: SubTab; label: string; icon: React.ElementType }[] = [
   { id: "actions", label: "Actions", icon: Zap },
   { id: "system", label: "System", icon: Settings },
 ];
+
+// CTA Button Config - Maps action types to button styles and icons
+const ctaButtonConfig: Record<string, { icon: React.ElementType; variant: 'primary' | 'secondary' | 'success' | 'warning' }> = {
+  'View Job': { icon: Eye, variant: 'primary' },
+  'Review Estimate': { icon: FileIcon, variant: 'primary' },
+  'Accept Work Order': { icon: CheckCheck, variant: 'success' },
+  'View Invoice': { icon: CreditCard, variant: 'primary' },
+  'Upload Document': { icon: Upload, variant: 'secondary' },
+  'Approve Payment': { icon: DollarSign, variant: 'success' },
+  'Review Changes': { icon: Eye, variant: 'primary' },
+  'Respond': { icon: MessageSquare, variant: 'secondary' },
+};
+
+// Button variant styles
+const buttonVariants = {
+  primary: 'bg-primary hover:bg-primary/90 text-white',
+  secondary: 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300',
+  success: 'bg-green-600 hover:bg-green-700 text-white',
+  warning: 'bg-orange-500 hover:bg-orange-600 text-white',
+};
 
 // Format helpers
 const formatRelativeTime = (date: Date): string => {
@@ -239,7 +264,231 @@ const RelatedEntityCard = ({ entity, onClick }: RelatedEntityCardProps) => {
   );
 };
 
-// Notification Detail Popup Component
+
+// Notification CTA Button Component
+interface NotificationCTAProps {
+  notification: Notification;
+  onAction: (e: React.MouseEvent) => void;
+  onAccept?: (e: React.MouseEvent) => void;
+  onReject?: (e: React.MouseEvent) => void;
+  showMoreMenu?: boolean;
+}
+
+const NotificationCTA = ({ 
+  notification, 
+  onAction, 
+  onAccept,
+  onReject,
+  showMoreMenu = false 
+}: NotificationCTAProps) => {
+  const [showMenu, setShowMenu] = useState(false);
+
+  if (notification.priority !== 'action_required' || !notification.actionLabel) {
+    return null;
+  }
+
+  // Determine the source type from related entities or source label
+  const getSourceType = (): string => {
+    if (notification.relatedEntities && notification.relatedEntities.length > 0) {
+      return notification.relatedEntities[0].type;
+    }
+    if (notification.sourceLabel) {
+      const lowerLabel = notification.sourceLabel.toLowerCase();
+      if (lowerLabel.includes('invoice') || lowerLabel.includes('inv-')) return 'invoice';
+      if (lowerLabel.includes('estimate') || lowerLabel.includes('est-')) return 'estimate';
+      if (lowerLabel.includes('work') || lowerLabel.includes('wo-')) return 'work_order';
+      if (lowerLabel.includes('job')) return 'job';
+    }
+    return '';
+  };
+
+  const sourceType = getSourceType();
+  
+  // Check if this notification should show Accept/Reject buttons
+  const shouldShowAcceptReject = sourceType !== 'invoice' && 
+    (sourceType === 'estimate' || 
+     sourceType === 'work_order' || 
+     notification.actionLabel.includes('Approve') ||
+     notification.actionLabel.includes('Accept') ||
+     notification.actionLabel.includes('Review'));
+
+  // For estimates, show specific buttons
+  if (sourceType === 'estimate') {
+    return (
+      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onAccept?.(e);
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm bg-green-600 hover:bg-green-700 text-white"
+        >
+          <CheckCheck size={14} />
+          Approve Estimate
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onReject?.(e);
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm bg-red-600 hover:bg-red-700 text-white"
+        >
+          <X size={14} />
+          Reject
+        </button>
+        <button
+          onClick={onAction}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300"
+        >
+          <Eye size={14} />
+          View Details
+        </button>
+      </div>
+    );
+  }
+
+  // For other action required items (except invoices), show Accept/Reject
+  if (shouldShowAcceptReject) {
+    return (
+      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onAccept?.(e);
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm bg-green-600 hover:bg-green-700 text-white"
+        >
+          <CheckCheck size={14} />
+          Accept
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onReject?.(e);
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm bg-red-600 hover:bg-red-700 text-white"
+        >
+          <X size={14} />
+          Reject
+        </button>
+        
+        {showMoreMenu && (
+          <div className="relative ml-auto">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(!showMenu);
+              }}
+              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
+              data-tooltip-id="notification-tooltip"
+              data-tooltip-content="More actions"
+            >
+              <MoreHorizontal size={16} />
+            </button>
+
+            {showMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setShowMenu(false)}
+                />
+                <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMenu(false);
+                      onAction(e);
+                    }}
+                    className="w-full px-3 py-2 text-left text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <Eye size={12} />
+                    View Details
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMenu(false);
+                    }}
+                    className="w-full px-3 py-2 text-left text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <MessageSquare size={12} />
+                    Add Comment
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // For invoices and other notifications, show single action button
+  const config = ctaButtonConfig[notification.actionLabel] || { icon: ArrowRight, variant: 'primary' as const };
+  const Icon = config.icon;
+  const buttonStyle = buttonVariants[config.variant];
+
+  return (
+    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+      <button
+        onClick={onAction}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm ${buttonStyle}`}
+      >
+        <Icon size={14} />
+        {notification.actionLabel}
+      </button>
+
+      {showMoreMenu && (
+        <div className="relative">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMenu(!showMenu);
+            }}
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
+            data-tooltip-id="notification-tooltip"
+            data-tooltip-content="More actions"
+          >
+            <MoreHorizontal size={16} />
+          </button>
+
+          {showMenu && (
+            <>
+              <div
+                className="fixed inset-0 z-10"
+                onClick={() => setShowMenu(false)}
+              />
+              <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                  }}
+                  className="w-full px-3 py-2 text-left text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <Eye size={12} />
+                  View Details
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                  }}
+                  className="w-full px-3 py-2 text-left text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <MessageSquare size={12} />
+                  Add Comment
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
 interface NotificationDetailPopupProps {
   isOpen: boolean;
   onClose: () => void;
@@ -587,8 +836,8 @@ export default function NotificationsPage() {
     }
   };
 
-  // Handlers
-  const handleMarkAsRead = (id: string) => {
+
+    const handleMarkAsRead = (id: string) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
     );
@@ -610,6 +859,58 @@ export default function NotificationsPage() {
     setIsPopupOpen(true);
   };
 
+  const handleCTAClick = (notification: Notification, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (notification.actionUrl) {
+      navigate(notification.actionUrl);
+    }
+  };
+
+  // Handle Accept action
+  const handleAccept = (notification: Notification, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // Mark as read and update priority to completed
+    setNotifications((prev) =>
+      prev.map((n) => 
+        n.id === notification.id 
+          ? { ...n, isRead: true, priority: 'completed' as NotificationPriority } 
+          : n
+      )
+    );
+    
+    // Show success message (you can use toast notification here)
+    console.log(`Accepted: ${notification.title}`);
+    
+    // Optional: Navigate to the source
+    if (notification.actionUrl) {
+      navigate(notification.actionUrl);
+    }
+  };
+
+  // Handle Reject action
+  const handleReject = (notification: Notification, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // Mark as read
+    setNotifications((prev) =>
+      prev.map((n) => 
+        n.id === notification.id 
+          ? { ...n, isRead: true } 
+          : n
+      )
+    );
+    
+    // Show confirmation (you can use a confirmation modal here)
+    const confirmed = window.confirm(`Are you sure you want to reject: ${notification.title}?`);
+    
+    if (confirmed) {
+      // You can either delete the notification or mark it differently
+      handleDelete(notification.id);
+      console.log(`Rejected: ${notification.title}`);
+    }
+  };
+
   const handleClosePopup = () => {
     setIsPopupOpen(false);
     setSelectedNotification(null);
@@ -624,6 +925,8 @@ export default function NotificationsPage() {
     setSubTab(tab);
     setCurrentPage(1);
   };
+
+ 
 
   return (
     <div className="min-h-screen p-4 md:p-4">
@@ -822,6 +1125,14 @@ export default function NotificationsPage() {
                                 </>
                               )}
                             </div>
+
+                            <NotificationCTA
+                              notification={notification}
+                              onAction={(e) => handleCTAClick(notification, e)}
+                              onAccept={(e) => handleAccept(notification, e)}
+                              onReject={(e) => handleReject(notification, e)}
+                              showMoreMenu={false}
+                            />
                           </div>
 
                           {/* Actions */}
