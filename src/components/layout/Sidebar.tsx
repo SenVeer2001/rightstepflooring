@@ -34,6 +34,8 @@ import {
   Contact,
   BookUser,
   FileSearch,
+  ShoppingBag,
+  School,
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 
@@ -73,7 +75,21 @@ const navItems: NavItem[] = [
 
   // Delivery
   { name: "Jobs", path: "/jobs", icon: Calendar, section: "Delivery" },
-  { name: "Work Order", path: "/work-order", icon:ClockArrowUp, section: "Delivery" },
+  // { name: "Work Order", path: "/work-order", icon:ClockArrowUp, section: "Delivery" },
+
+  
+   { 
+    name: "Orders", 
+    path: "/orders", 
+    icon: ClockArrowUp, 
+    section: "Delivery",
+    submenu: [
+      { name: "Work Order", path: "/orders/work-order", icon: School},
+      { name: "Purchase Order", path: "/orders/purchase-order", icon: ShoppingBag },
+
+    
+    ]
+  },
   { name: "Projects", path: "/projects", icon:Images, section: "Delivery" },
   { name: "Schedule", path: "/schedule", icon: CalendarCheck, section: "Delivery" },
   { name: "Map View", path: "/map", icon: MapPinned, section: "Delivery" },
@@ -82,6 +98,7 @@ const navItems: NavItem[] = [
   { name: "Subcontractors", path: "/subcontractors", icon: Contact, section: "Delivery" },
   { name: "Staff", path: "/staff", icon:BookUser, section: "Delivery" },
 
+  
 
    { 
     name: "Support Ticket", 

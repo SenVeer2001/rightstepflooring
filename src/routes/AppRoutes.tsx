@@ -44,6 +44,9 @@ import StaffList from "../app/staff/staffList"
 import StaffProfile from "../app/staff/StaffProfile"
 import DocumentVault from "../app/documentVault/DocumentVault"
 import CommunicationHub from "../app/communication-hub/CommunicationHub"
+import { ClientPurchaseOrder } from "../app/work-order/ClientPurchaseOrder"
+import { staticPurchaseOrders } from "../types/vendor"
+
 
 
 
@@ -80,8 +83,16 @@ export function AppRoutes() {
                   <Route path="/client/jobs/:jobId" element={<CustomerAndJobModel />} />
                   <Route path="/client/:customerId" element={<ClientModel />} />
 
-                  <Route path="/work-order" element={<WorkOrder />} />
-                  <Route path="/work-order/:id" element={<WorkOrderDetailsPage />} />
+                  <Route path="/orders/work-order" element={<WorkOrder />} />
+                  <Route path="/orders/work-order/:id" element={<WorkOrderDetailsPage />} />
+                  <Route path="/orders/purchase-order" element={<ClientPurchaseOrder
+                  
+                    purchaseOrders={staticPurchaseOrders}
+                              onDelete={(id) => {
+                                console.log("Delete PO:", id)
+                              }}
+                  />} />
+
 
                   <Route path="/projects" element={<WorkOrderGallery />} />
                   <Route path="/support/manage-ticket" element={<Tickets />} />

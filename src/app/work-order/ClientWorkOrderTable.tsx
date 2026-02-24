@@ -248,7 +248,7 @@ export default function ClientWorkOrderTable({
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-3">
                       <button
-                        onClick={() => navigate("/work-order/480")}
+                        onClick={() => navigate("/orders/work-order/480")}
                         className="p-2 text-primary hover:bg-primary/10 rounded-md transition"
                         title="View"
                       >
@@ -348,7 +348,7 @@ export default function ClientWorkOrderTable({
 
                   <div className="mt-3 flex gap-3">
                     <button
-                      onClick={() => navigate("/work-order/480")}
+                      onClick={() => navigate("/orders/work-order/480")}
                       className="text-primary font-semibold text-sm flex items-center gap-1"
                     >
                       <Eye size={14} />

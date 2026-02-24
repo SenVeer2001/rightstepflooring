@@ -1,7 +1,9 @@
 import { useMemo, useState, useRef, useEffect } from "react"
 import {
   Search, Eye, Trash2, RefreshCcw, Tag, UserCog, CalendarClock,
-  X, Check, Download
+  X, Check, Download,
+  Edit2,
+  Edit
 } from "lucide-react"
 import type { WorkOrder, WorkOrderStatus } from "../../services/orderdata"
 import { useNavigate } from "react-router-dom"
@@ -308,7 +310,7 @@ export default function WorkOrderTable({
   }
 
   const handleViewOrder = (orderId: string) => {
-    navigate(`/work-order/${orderId}`)
+    navigate(`/orders/work-order/${orderId}`)
   }
 
   return (
@@ -688,6 +690,14 @@ export default function WorkOrderTable({
                       {/* Action */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
+                           <button
+                            onClick={() => handleViewOrder(order.id)}
+                            data-tooltip-id="action-tooltip"
+                            data-tooltip-content="Change Work Order"
+                            className="p-1.5 rounded hover:bg-blue-50 text-blue-600"
+                          >
+                            <Edit size={16} />
+                          </button>
                           <button
                             onClick={() => handleViewOrder(order.id)}
                             data-tooltip-id="action-tooltip"

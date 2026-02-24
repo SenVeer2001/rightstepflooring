@@ -273,6 +273,7 @@ const RecordingPopup = ({ isOpen, onClose, call }: RecordingPopupProps) => {
             {/* Waveform visualization (mock) */}
             <div className="absolute inset-0 flex items-center justify-around px-2">
               {Array.from({ length: 50 }).map((_, i) => {
+
                 const height = Math.random() * 60 + 20;
                 const isPlayed = (i / 50) * 100 <= progressPercent;
                 return (
@@ -324,7 +325,7 @@ const RecordingPopup = ({ isOpen, onClose, call }: RecordingPopupProps) => {
             </button>
           </div>
 
-          {/* Volume & Speed Controls */}
+        
           <div className="flex items-center justify-between gap-4">
             {/* Volume */}
             <div className="flex items-center gap-2 flex-1">
@@ -365,7 +366,7 @@ const RecordingPopup = ({ isOpen, onClose, call }: RecordingPopupProps) => {
           </div>
         </div>
 
-        {/* Transcription (if available) */}
+       
         {call.transcription && (
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
             <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Transcription</p>
@@ -509,7 +510,7 @@ const CallDetailSidePanel = ({ isOpen, onClose, call, onPlayRecording }: CallDet
                       data-tooltip-id="comm-tooltip"
                       data-tooltip-content="View Contact"
                     >
-                      <ExternalLink size={18} className="text-gray-500" />
+                      {/* <ExternalLink size={18} className="text-gray-500" /> */}
                     </button>
                   )}
                 </div>
@@ -519,10 +520,10 @@ const CallDetailSidePanel = ({ isOpen, onClose, call, onPlayRecording }: CallDet
             {/* Contacted By Information */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Users size={16} className="text-gray-500" />
-                Contacted By
+                <User size={16} className="text-gray-500" />
+                Called By
               </h3>
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+              <div className=" rounded-xl p-4 ">
                 <div className="flex items-center gap-4">
                   {call.contactedBy?.avatar ? (
                     <img src={call.contactedBy.avatar} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" />
@@ -552,7 +553,7 @@ const CallDetailSidePanel = ({ isOpen, onClose, call, onPlayRecording }: CallDet
                       data-tooltip-id="comm-tooltip"
                       data-tooltip-content="View Staff Profile"
                     >
-                      <ExternalLink size={18} className="text-blue-600" />
+                      {/* <ExternalLink size={18} className="text-blue-600" /> */}
                     </button>
                   )}
                 </div>
@@ -640,7 +641,7 @@ const CallDetailSidePanel = ({ isOpen, onClose, call, onPlayRecording }: CallDet
                     <p className="text-sm font-semibold text-gray-900">{call.relatedTo.label}</p>
                     <p className="text-xs text-gray-500 uppercase">{call.relatedTo.type} • {call.relatedTo.id}</p>
                   </div>
-                  <ExternalLink size={16} className="text-primary" />
+                  {/* <ExternalLink size={16} className="text-primary" /> */}
                 </div>
               </div>
             )}
@@ -771,7 +772,7 @@ const SMSDetailSidePanel = ({ isOpen, onClose, thread }: SMSDetailSidePanelProps
                   onClick={() => navigate(`/customers/${thread.contactId}`)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition"
                 >
-                  <ExternalLink size={18} className="text-gray-500" />
+                  {/* <ExternalLink size={18} className="text-gray-500" /> */}
                 </button>
               )}
               <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
@@ -814,16 +815,22 @@ const SMSDetailSidePanel = ({ isOpen, onClose, thread }: SMSDetailSidePanelProps
 
           {/* Message Input */}
           <div className="px-4 py-4 border-t border-gray-200 flex-shrink-0 bg-white">
-            <div className="flex items-end gap-2">
-              <div className="flex-1 bg-gray-100 rounded-2xl p-2">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 rounded-2xl p-2">
                 <textarea
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder="Type a message..."
                   rows={1}
-                  className="w-full bg-transparent text-sm resize-none focus:outline-none px-2 py-1"
+                  className="w-full bg-transparent text-sm resize-none focus:outline-none px-2 py-2"
                 />
               </div>
+               <button
+                // disabled={!newMessage.trim()}
+                className="p-3 text-primary border rounded-full border-primary hover:bg-primary/10"
+              >
+                <PhoneCall size={18} />
+              </button>
               <button
                 disabled={!newMessage.trim()}
                 className="p-3 bg-primary text-white rounded-full hover:bg-primary/90 transition disabled:opacity-50"
@@ -838,18 +845,51 @@ const SMSDetailSidePanel = ({ isOpen, onClose, thread }: SMSDetailSidePanelProps
   );
 };
 
-// Email Detail Side Panel
+// Email Detail Side Panel with Navigation
 interface EmailDetailSidePanelProps {
   isOpen: boolean;
   onClose: () => void;
   thread: EmailThread | null;
+  onNext?: () => void;
+  onPrevious?: () => void;
+  hasNext?: boolean;
+  hasPrevious?: boolean;
+  currentIndex?: number;
+  totalCount?: number;
 }
 
-const EmailDetailSidePanel = ({ isOpen, onClose, thread }: EmailDetailSidePanelProps) => {
+const EmailDetailSidePanel = ({ 
+  isOpen, 
+  onClose, 
+  thread,
+  onNext,
+  onPrevious,
+  hasNext = false,
+  hasPrevious = false,
+  currentIndex = 0,
+  totalCount = 0,
+}: EmailDetailSidePanelProps) => {
   const navigate = useNavigate();
 
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+      
+      if (e.key === 'ArrowRight' && hasNext && onNext) {
+        e.preventDefault();
+        onNext();
+      } else if (e.key === 'ArrowLeft' && hasPrevious && onPrevious) {
+        e.preventDefault();
+        onPrevious();
+      } else if (e.key === 'Escape') {
+        onClose();
+      }
+    };
 
-
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, hasNext, hasPrevious, onNext, onPrevious, onClose]);
 
   if (!thread) return null;
 
@@ -866,15 +906,17 @@ const EmailDetailSidePanel = ({ isOpen, onClose, thread }: EmailDetailSidePanelP
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+        className={`fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         onClick={onClose}
       />
 
       {/* Side Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-full max-w-2xl bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+        className={`fixed top-0 right-0 h-full w-full max-w-2xl bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
       >
         <div className="h-full flex flex-col">
           {/* Header */}
@@ -892,15 +934,59 @@ const EmailDetailSidePanel = ({ isOpen, onClose, thread }: EmailDetailSidePanelP
                       Attachments
                     </span>
                   )}
+                  {/* Counter */}
+                  {totalCount > 0 && (
+                    <span className="text-xs text-gray-500 font-medium ml-auto">
+                      {currentIndex + 1} / {totalCount}
+                    </span>
+                  )}
                 </div>
               </div>
-              <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition flex-shrink-0">
-                <X size={20} className="text-gray-500" />
-              </button>
+
+              {/* Navigation & Close Buttons */}
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {/* Previous Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onPrevious?.();
+                  }}
+                  disabled={!hasPrevious}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
+                  data-tooltip-id="email-tooltip"
+                  data-tooltip-content="Previous Email (←)"
+                >
+                  <ChevronLeft size={20} className="text-gray-500" />
+                </button>
+
+                {/* Next Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNext?.();
+                  }}
+                  disabled={!hasNext}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
+                  data-tooltip-id="email-tooltip"
+                  data-tooltip-content="Next Email (→)"
+                >
+                  <ChevronRight size={20} className="text-gray-500" />
+                </button>
+
+                
+                <button 
+                  onClick={onClose} 
+                  className="p-2 hover:bg-gray-100 rounded-lg transition ml-1"
+                  data-tooltip-id="email-tooltip"
+                  data-tooltip-content="Close (Esc)"
+                >
+                  <X size={20} className="text-gray-500" />
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Email Messages */}
+         
           <div className="flex-1 overflow-y-auto">
             {thread.messages.map((email, index) => (
               <div key={email.id} className={`px-6 py-5 ${index !== thread.messages.length - 1 ? "border-b border-gray-100" : ""}`}>
@@ -944,6 +1030,8 @@ const EmailDetailSidePanel = ({ isOpen, onClose, thread }: EmailDetailSidePanelP
 
           {/* Footer */}
           <div className="px-6 py-4 border-t border-gray-200 flex items-center gap-2 flex-shrink-0">
+           
+            
             <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition">
               <Reply size={16} />
               Reply
@@ -955,6 +1043,13 @@ const EmailDetailSidePanel = ({ isOpen, onClose, thread }: EmailDetailSidePanelP
           </div>
         </div>
       </div>
+
+      {/* Tooltip */}
+      <Tooltip
+        id="email-tooltip"
+        place="top"
+        className="!bg-gray-800 !text-white !text-[10px] !px-2 !py-1 !rounded"
+      />
     </>
   );
 };
@@ -978,6 +1073,7 @@ export default function CommunicationHub() {
   const [selectedCall, setSelectedCall] = useState<CallRecord | null>(null);
   const [selectedSMS, setSelectedSMS] = useState<SMSThread | null>(null);
   const [selectedEmail, setSelectedEmail] = useState<EmailThread | null>(null);
+    const [selectedEmailIndex, setSelectedEmailIndex] = useState<number>(0);
 
   const navigate = useNavigate();
   const rowsPerPage = 10;
@@ -1048,9 +1144,34 @@ export default function CommunicationHub() {
     setSMSPanelOpen(true);
   };
 
-  const handleViewEmail = (thread: EmailThread) => {
-    setSelectedEmail(thread);
-    setEmailPanelOpen(true);
+ const handleViewEmail = (thread: EmailThread, index: number) => {  // Add index parameter
+  setSelectedEmail(thread);
+  setSelectedEmailIndex(index);
+  setEmailPanelOpen(true);
+};
+
+   const handleNextEmail = () => {
+    const nextIndex = selectedEmailIndex + 1;
+    if (nextIndex < filteredEmails.length) {
+      const nextEmail = filteredEmails[nextIndex];
+      setSelectedEmail(nextEmail);
+      setSelectedEmailIndex(nextIndex);
+    }
+  };
+
+  const handlePreviousEmail = () => {
+    const prevIndex = selectedEmailIndex - 1;
+    if (prevIndex >= 0) {
+      const prevEmail = filteredEmails[prevIndex];
+      setSelectedEmail(prevEmail);
+      setSelectedEmailIndex(prevIndex);
+    }
+  };
+
+  const handleCloseEmailPanel = () => {
+    setEmailPanelOpen(false);
+    setSelectedEmail(null);
+    setSelectedEmailIndex(0);
   };
 
   return (
@@ -1139,6 +1260,7 @@ export default function CommunicationHub() {
                 <option value="all">All Time</option>
                 <option value="today">Today</option>
                 <option value="week">This Week</option>
+
                 <option value="month">This Month</option>
               </select>
             </div>
@@ -1164,7 +1286,7 @@ export default function CommunicationHub() {
             Phone
           </th>
           <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            Contacted By
+           Called By
           </th>
           <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
             Direction
@@ -1237,7 +1359,7 @@ export default function CommunicationHub() {
                     {call.contactedBy?.avatar ? (
                       <img src={call.contactedBy.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full  flex items-center justify-center">
                         <User size={14} className="text-blue-600" />
                       </div>
                     )}
@@ -1418,60 +1540,60 @@ export default function CommunicationHub() {
 
         {/* Email List */}
         {activeTab === "email" && (
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-            <div className="divide-y divide-gray-100">
-              {filteredEmails.length === 0 ? (
-                <div className="py-12 text-center">
-                  <Mail size={40} className="mx-auto mb-3 text-gray-300" />
-                  <p className="text-sm text-gray-500 font-medium">No emails found</p>
-                </div>
-              ) : (
-                filteredEmails.map((thread) => {
-                  const contactConfig = contactTypeConfig[thread.contactType];
-                  const ContactIcon = contactConfig.icon;
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+          <div className="divide-y divide-gray-100">
+            {filteredEmails.length === 0 ? (
+              <div className="py-12 text-center">
+                <Mail size={40} className="mx-auto mb-3 text-gray-300" />
+                <p className="text-sm text-gray-500 font-medium">No emails found</p>
+              </div>
+            ) : (
+              filteredEmails.map((thread, index) => {
+                const contactConfig = contactTypeConfig[thread.contactType];
+                const ContactIcon = contactConfig.icon;
 
-                  return (
-                    <div
-                      key={thread.id}
-                      onClick={() => handleViewEmail(thread)}
-                      className={`p-4 hover:bg-gray-50 cursor-pointer transition ${thread.unreadCount > 0 ? "bg-blue-50/30" : ""}`}
-                    >
-                      <div className="flex items-center gap-3">
-                        {thread.contactAvatar ? (
-                          <img src={thread.contactAvatar} alt="" className="w-10 h-10 rounded-full object-cover" />
-                        ) : (
-                          <div className={`w-10 h-10 rounded-full ${contactConfig.bg} flex items-center justify-center`}>
-                            <ContactIcon size={16} className={contactConfig.color} />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className={`text-sm ${thread.unreadCount > 0 ? "font-bold" : "font-medium"} text-gray-900`}>
-                              {thread.contactName}
-                            </p>
-                            <div className="flex items-center gap-2">
-                              {thread.hasAttachments && <Paperclip size={12} className="text-gray-400" />}
-                              <span className="text-xs text-gray-400">{formatRelativeTime(thread.lastMessageTime)}</span>
-                            </div>
-                          </div>
-                          <p className={`text-xs ${thread.unreadCount > 0 ? "font-semibold text-gray-900" : "text-gray-700"}`}>
-                            {thread.subject}
-                          </p>
-                          <p className="text-xs text-gray-500 truncate">{thread.lastMessage}</p>
+                return (
+                  <div
+                    key={thread.id}
+                    onClick={() => handleViewEmail(thread, index)} // Pass index here
+                    className={`p-4 hover:bg-gray-50 cursor-pointer transition ${thread.unreadCount > 0 ? "bg-blue-50/30" : ""}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      {thread.contactAvatar ? (
+                        <img src={thread.contactAvatar} alt="" className="w-10 h-10 rounded-full object-cover" />
+                      ) : (
+                        <div className={`w-10 h-10 rounded-full ${contactConfig.bg} flex items-center justify-center`}>
+                          <ContactIcon size={16} className={contactConfig.color} />
                         </div>
-                        {thread.unreadCount > 0 && (
-                          <span className="w-5 h-5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                            {thread.unreadCount}
-                          </span>
-                        )}
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className={`text-sm ${thread.unreadCount > 0 ? "font-bold" : "font-medium"} text-gray-900`}>
+                            {thread.contactName}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            {thread.hasAttachments && <Paperclip size={12} className="text-gray-400" />}
+                            <span className="text-xs text-gray-400">{formatRelativeTime(thread.lastMessageTime)}</span>
+                          </div>
+                        </div>
+                        <p className={`text-xs ${thread.unreadCount > 0 ? "font-semibold text-gray-900" : "text-gray-700"}`}>
+                          {thread.subject}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">{thread.lastMessage}</p>
                       </div>
+                      {thread.unreadCount > 0 && (
+                        <span className="w-5 h-5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                          {thread.unreadCount}
+                        </span>
+                      )}
                     </div>
-                  );
-                })
-              )}
-            </div>
+                  </div>
+                );
+              })
+            )}
           </div>
-        )}
+        </div>
+      )}
       </div>
 
       {/* Recording Popup */}
@@ -1496,11 +1618,16 @@ export default function CommunicationHub() {
         thread={selectedSMS}
       />
 
-      {/* Email Detail Side Panel */}
-      <EmailDetailSidePanel
+       <EmailDetailSidePanel
         isOpen={emailPanelOpen}
-        onClose={() => setEmailPanelOpen(false)}
+        onClose={handleCloseEmailPanel}
         thread={selectedEmail}
+        onNext={handleNextEmail}
+        onPrevious={handlePreviousEmail}
+        hasNext={selectedEmailIndex < filteredEmails.length - 1}
+        hasPrevious={selectedEmailIndex > 0}
+        currentIndex={selectedEmailIndex}
+        totalCount={filteredEmails.length}
       />
 
       {/* Tooltips */}

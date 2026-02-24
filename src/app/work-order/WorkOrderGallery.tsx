@@ -183,7 +183,7 @@ export default function WorkOrderGallery() {
   }
 
   const handleWorkOrderClick = (workOrderId: string) => {
-    navigate(`/work-order/${workOrderId}`)
+    navigate(`/orders/work-order${workOrderId}`)
   }
 
   return (

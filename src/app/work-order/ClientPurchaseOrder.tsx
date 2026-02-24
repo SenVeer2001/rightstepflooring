@@ -2,14 +2,13 @@
 
 import { Download, Eye, Layers, Trash2 } from "lucide-react"
 import { useState, useEffect } from "react"
-import type { PurchaseOrderTableItem } from "../../../../types/vendor"
-import { PurchaseOrderFormModal, type Item } from "../PurchaseOrderFormModal"
-
+import type { PurchaseOrderTableItem } from "../../types/vendor"
+import { PurchaseOrderFormModal, type Item } from "../../components/customerPages/clientPages/PurchaseOrderFormModal"
 
 // ===================== STATUS TYPES =====================
 type POStatus = "po_created" | "po_approved" | "item_dispatched" | "item_received"
 
-// ===================== STATUS LABELS =====================
+
 const PO_STATUS_LABELS: Record<POStatus, string> = {
   po_created: "PO Created",
   po_approved: "PO Approved",
@@ -33,7 +32,7 @@ interface PurchaseOrderTableProps {
   onUpdate?: (updatedPO: any) => void
 }
 
-export function ClientPurchaseOrderTab({
+export function ClientPurchaseOrder({
   purchaseOrders: initialOrders,
   jobItems = [],
   onDelete,
@@ -162,10 +161,19 @@ export function ClientPurchaseOrderTab({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4">
 
       {/* HEADER */}
-     
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-3xl font-bold flex gap-2 text-gray-900">
+            Purchase Order
+            {/* <Layers className="text-primary" /> */}
+          </h2>
+         
+        </div>
+
+      </div>
 
       {/* ===================== STATUS TABS ===================== */}
       <div className="flex gap-3 overflow-x-auto pb-2 thin-scrollbar">
@@ -346,6 +354,7 @@ export function ClientPurchaseOrderTab({
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
                           {/* VIEW/EDIT BUTTON */}
+                          
                           <button
                             onClick={() => handleViewPO(order)}
                             className="p-2 text-white border bg-primary rounded-md"
@@ -400,7 +409,7 @@ export function ClientPurchaseOrderTab({
         </div>
       )}
 
-      {/* ===================== VIEW/EDIT MODAL ===================== */}
+      
       <PurchaseOrderFormModal
         isOpen={isModalOpen}
         mode="edit"

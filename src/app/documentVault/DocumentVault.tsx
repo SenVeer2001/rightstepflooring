@@ -52,6 +52,9 @@ import {
   formatFileSize,
   getDaysUntilExpiry,
 } from "../../types/document";
+import DocumentPreviewModal from "./DocumentPreviewModal";
+
+// ... (keep all the config objects - entityTypeConfig, documentTypeConfig, statusConfig, fileFormatConfig, tagColorMap)
 
 // Entity type config
 const entityTypeConfig: Record<EntityType, { label: string; icon: React.ElementType; color: string; bg: string }> = {
@@ -109,17 +112,6 @@ const tagColorMap: Record<string, { bg: string; text: string; border: string }> 
   gray: { bg: "bg-gray-50", text: "text-gray-700", border: "border-gray-200" },
 };
 
-// Mock document URLs (in production, these would come from your backend)
-const mockDocumentUrls: Record<string, string> = {
-  // PDF examples
-  "DOC-001": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-  "DOC-002": "https://www.africau.edu/images/default/sample.pdf",
-  // Image examples
-  "DOC-003": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800",
-  "DOC-004": "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800",
-  "DOC-005": "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=800",
-};
-
 // Format date
 const formatDate = (date: Date): string => {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -128,252 +120,6 @@ const formatDate = (date: Date): string => {
 // Check if file format is viewable
 const isViewableFormat = (format: FileFormat): boolean => {
   return ["pdf", "jpg", "png"].includes(format);
-};
-
-// Document Preview Modal
-interface DocumentPreviewModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  document: Document | null;
-}
-
-const DocumentPreviewModal = ({ isOpen, onClose, document }: DocumentPreviewModalProps) => {
-  const [zoom, setZoom] = useState(100);
-  const [rotation, setRotation] = useState(0);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  if (!isOpen || !document) return null;
-
-  const formatConfig = fileFormatConfig[document.fileFormat];
-  const isPDF = document.fileFormat === "pdf";
-  const isImage = ["jpg", "png"].includes(document.fileFormat);
-  
-  // Mock associated images for demonstration
-  const associatedImages = isPDF ? [
-    { id: "img-1", url: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800", name: "Page 1" },
-    { id: "img-2", url: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800", name: "Page 2" },
-    { id: "img-3", url: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=800", name: "Page 3" },
-  ] : [];
-
-  const documentUrl = mockDocumentUrls[document.documentId] || "";
-
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 25, 200));
-  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 25, 50));
-  const handleRotate = () => setRotation((prev) => (prev + 90) % 360);
-  const handleReset = () => {
-    setZoom(100);
-    setRotation(0);
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={onClose} />
-
-      {/* Modal */}
-      <div className="relative bg-white w-full h-full max-w-[95vw] max-h-[95vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className={`p-2 rounded-lg ${formatConfig.bg} flex-shrink-0`}>
-              {isPDF ? (
-                <FileText size={20} className={formatConfig.color} />
-              ) : (
-                <ImageIcon size={20} className={formatConfig.color} />
-              )}
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-lg font-bold text-gray-900 truncate">{document.name}</h2>
-              <p className="text-xs text-gray-500 truncate">{document.fileName}</p>
-            </div>
-          </div>
-
-          {/* Controls */}
-          <div className="flex items-center gap-2 flex-shrink-0 ml-4">
-            {isImage && (
-              <>
-                <button
-                  onClick={handleZoomOut}
-                  disabled={zoom <= 50}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  data-tooltip-id="preview-tooltip"
-                  data-tooltip-content="Zoom Out"
-                >
-                  <ZoomOut size={18} className="text-gray-600" />
-                </button>
-                <span className="text-xs font-medium text-gray-600 min-w-[50px] text-center">
-                  {zoom}%
-                </span>
-                <button
-                  onClick={handleZoomIn}
-                  disabled={zoom >= 200}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  data-tooltip-id="preview-tooltip"
-                  data-tooltip-content="Zoom In"
-                >
-                  <ZoomIn size={18} className="text-gray-600" />
-                </button>
-                <button
-                  onClick={handleRotate}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition"
-                  data-tooltip-id="preview-tooltip"
-                  data-tooltip-content="Rotate"
-                >
-                  <RotateCw size={18} className="text-gray-600" />
-                </button>
-                <button
-                  onClick={handleReset}
-                  className="px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition"
-                >
-                  Reset
-                </button>
-                <div className="w-px h-6 bg-gray-300 mx-2" />
-              </>
-            )}
-            
-            <button
-              className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition"
-              data-tooltip-id="preview-tooltip"
-              data-tooltip-content="Download Document"
-            >
-              <Download size={16} />
-              Download
-            </button>
-            
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition"
-              data-tooltip-id="preview-tooltip"
-              data-tooltip-content="Close Preview"
-            >
-              <X size={20} className="text-gray-600" />
-            </button>
-          </div>
-        </div>
-
-        {/* Content Area */}
-        <div className="flex-1 overflow-hidden flex">
-          {/* Main Preview */}
-          <div className="flex-1 bg-gray-100 overflow-auto flex items-center justify-center p-4">
-            {isPDF ? (
-              <div className="w-full h-full bg-white shadow-lg">
-                <iframe
-                  src={documentUrl}
-                  className="w-full h-full border-0"
-                  title={document.name}
-                />
-              </div>
-            ) : isImage ? (
-              <div className="relative">
-                <img
-                  src={documentUrl}
-                  alt={document.name}
-                  className="max-w-full max-h-full object-contain transition-transform duration-200"
-                  style={{
-                    transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <FileText size={48} className="mx-auto mb-4 text-gray-400" />
-                <p className="text-lg font-medium text-gray-700">Preview not available</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  This file format cannot be previewed in the browser
-                </p>
-                <button className="mt-4 flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition mx-auto">
-                  <Download size={16} />
-                  Download to View
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Associated Images Sidebar (for PDFs) */}
-          {isPDF && associatedImages.length > 0 && (
-            <div className="w-64 bg-white border-l border-gray-200 overflow-y-auto flex-shrink-0">
-              <div className="p-4">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <ImageIcon size={14} className="text-gray-500" />
-                  Associated Images ({associatedImages.length})
-                </h3>
-                <div className="space-y-3">
-                  {associatedImages.map((img, index) => (
-                    <div
-                      key={img.id}
-                      onClick={() => setCurrentImageIndex(index)}
-                      className={`relative rounded-lg overflow-hidden cursor-pointer border-2 transition group ${
-                        currentImageIndex === index
-                          ? "border-primary shadow-md"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <img
-                        src={img.url}
-                        alt={img.name}
-                        className="w-full h-32 object-cover"
-                      />
-                      <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-2 ${
-                        currentImageIndex === index ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                      } transition`}>
-                        <p className="text-xs font-medium text-white truncate w-full">
-                          {img.name}
-                        </p>
-                      </div>
-                      {currentImageIndex === index && (
-                        <div className="absolute top-2 right-2">
-                          <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                            <CheckCircle size={14} className="text-white" />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Image Preview Modal Trigger */}
-                <button
-                  onClick={() => {
-                    // Open full image gallery viewer
-                  }}
-                  className="w-full mt-4 py-2 text-xs font-medium text-primary hover:bg-primary/5 rounded-lg transition flex items-center justify-center gap-1"
-                >
-                  <Maximize2 size={12} />
-                  View All Images
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer Info */}
-        <div className="px-6 py-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-4 text-xs text-gray-600">
-            <span className="flex items-center gap-1">
-              <FileText size={12} />
-              {formatFileSize(document.fileSize)}
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1">
-              <Calendar size={12} />
-              Uploaded {formatDate(document.uploadedAt)}
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1">
-              <User size={12} />
-              {document.uploadedBy}
-            </span>
-          </div>
-          
-          {isPDF && associatedImages.length > 0 && (
-            <div className="text-xs text-gray-600">
-              Viewing: {currentImageIndex + 1} of {associatedImages.length}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
 };
 
 // Document Detail Popup
@@ -417,9 +163,11 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete, onPreview }:
     onClose();
   };
 
-  const handlePreview = () => {
-    onClose();
-    onPreview(document);
+  const handlePreviewClick = () => {
+    if (canPreview) {
+      onPreview(document);
+      onClose();
+    }
   };
 
   return (
@@ -448,32 +196,19 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete, onPreview }:
                     <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-medium rounded">
                       {document.documentId}
                     </span>
-                    {/* Status */}
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold ${statusInfo.bg} ${statusInfo.color}`}>
-                      <StatusIcon size={10} />
-                      {statusInfo.label}
-                    </span>
-                    {/* Version */}
-                    <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-medium rounded">
-                      v{document.version}
-                    </span>
-                    {/* Required */}
+                  
+                  
                     {document.isRequired && (
                       <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] font-semibold rounded">
                         Required
                       </span>
                     )}
-                    {/* Viewable Badge */}
-                    {canPreview && (
-                      <span className="px-2 py-0.5 bg-green-50 text-green-600 text-[10px] font-semibold rounded flex items-center gap-1">
-                        <Eye size={10} />
-                        Viewable
-                      </span>
-                    )}
+                    
+                   
                   </div>
                 </div>
 
-                {/* Close Button */}
+                
                 <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-lg transition flex-shrink-0">
                   <X size={20} className="text-gray-500" />
                 </button>
@@ -485,24 +220,21 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete, onPreview }:
           <div className="flex gap-1 mt-4">
             <button
               onClick={() => setActiveTab("details")}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                activeTab === "details" ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-100"
-              }`}
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${activeTab === "details" ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-100"
+                }`}
             >
               Details
             </button>
             <button
               onClick={() => setActiveTab("history")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                activeTab === "history" ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-100"
-              }`}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition ${activeTab === "history" ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-100"
+                }`}
             >
               <History size={12} />
               History
               {document.previousVersions && document.previousVersions.length > 0 && (
-                <span className={`px-1.5 py-0.5 rounded text-[9px] ${
-                  activeTab === "history" ? "bg-white/20" : "bg-gray-200"
-                }`}>
+                <span className={`px-1.5 py-0.5 rounded text-[9px] ${activeTab === "history" ? "bg-white/20" : "bg-gray-200"
+                  }`}>
                   {document.previousVersions.length}
                 </span>
               )}
@@ -514,39 +246,28 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete, onPreview }:
         <div className="overflow-y-auto max-h-[calc(90vh-250px)]">
           {activeTab === "details" && (
             <div className="p-6 space-y-5">
-              {/* Preview Button (prominent if viewable) */}
-              {canPreview && (
-                <button
-                  onClick={handlePreview}
-                  className="w-full py-3 bg-gradient-to-r from-primary to-primary/80 text-white rounded-xl font-semibold text-sm hover:shadow-lg transition flex items-center justify-center gap-2"
-                >
-                  <Eye size={16} />
-                  Preview Document
-                </button>
-              )}
+              
+             
 
               {/* Expiry Warning */}
-              {(document.status === "expired" || document.status === "expiring_soon") && (
-                <div className={`p-4 rounded-xl border ${
-                  document.status === "expired" 
-                    ? "bg-red-50 border-red-200" 
-                    : "bg-yellow-50 border-yellow-200"
-                }`}>
+              {/* {(document.status === "expired" || document.status === "expiring_soon") && (
+                <div className={`p-4 rounded-xl border ${document.status === "expired"
+                  ? "bg-red-50 border-red-200"
+                  : "bg-yellow-50 border-yellow-200"
+                  }`}>
                   <div className="flex items-start gap-3">
                     <AlertTriangle size={18} className={
                       document.status === "expired" ? "text-red-600" : "text-yellow-600"
                     } />
                     <div>
-                      <p className={`text-sm font-semibold ${
-                        document.status === "expired" ? "text-red-800" : "text-yellow-800"
-                      }`}>
-                        {document.status === "expired" 
-                          ? "This document has expired" 
+                      <p className={`text-sm font-semibold ${document.status === "expired" ? "text-red-800" : "text-yellow-800"
+                        }`}>
+                        {document.status === "expired"
+                          ? "This document has expired"
                           : `This document expires in ${daysUntilExpiry} days`}
                       </p>
-                      <p className={`text-xs mt-1 ${
-                        document.status === "expired" ? "text-red-600" : "text-yellow-600"
-                      }`}>
+                      <p className={`text-xs mt-1 ${document.status === "expired" ? "text-red-600" : "text-yellow-600"
+                        }`}>
                         {document.status === "expired"
                           ? "Please upload a renewed version immediately."
                           : "Consider renewing this document before expiration."}
@@ -554,7 +275,7 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete, onPreview }:
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Entity Info */}
               <div>
@@ -731,21 +452,15 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete, onPreview }:
           <div className="flex items-center gap-2">
             {canPreview && (
               <button
-                onClick={handlePreview}
+                onClick={handlePreviewClick}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition"
               >
                 <Eye size={14} />
                 Preview
               </button>
             )}
-            <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
-              <Download size={14} />
-              Download
-            </button>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition">
-              <Copy size={14} />
-              Copy Link
-            </button>
+           
+           
             <button
               onClick={handleDelete}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
@@ -762,10 +477,7 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete, onPreview }:
             >
               Close
             </button>
-            <button className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition">
-              <RefreshCw size={12} />
-              Replace Document
-            </button>
+           
           </div>
         </div>
       </div>
@@ -773,7 +485,7 @@ const DocumentDetailPopup = ({ isOpen, onClose, document, onDelete, onPreview }:
   );
 };
 
-// Upload Document Modal (keeping the existing one)
+// Upload Document Modal (keeping the existing one - no changes needed)
 interface UploadDocumentModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -845,11 +557,10 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload }: UploadDocumentModalP
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-xl p-8 text-center transition ${
-              dragActive
-                ? "border-primary bg-primary/5"
-                : "border-gray-300 bg-gray-50 hover:border-gray-400"
-            }`}
+            className={`border-2 border-dashed rounded-xl p-8 text-center transition ${dragActive
+              ? "border-primary bg-primary/5"
+              : "border-gray-300 bg-gray-50 hover:border-gray-400"
+              }`}
           >
             <Upload size={40} className="mx-auto mb-3 text-gray-400" />
             <p className="text-sm font-medium text-gray-700">
@@ -877,16 +588,14 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload }: UploadDocumentModalP
                   <button
                     key={type}
                     onClick={() => setSelectedEntityType(type)}
-                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border transition ${
-                      selectedEntityType === type
-                        ? "border-primary bg-primary/5"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border transition ${selectedEntityType === type
+                      ? "border-primary bg-primary/5"
+                      : "border-gray-200 hover:border-gray-300"
+                      }`}
                   >
                     <Icon size={18} className={selectedEntityType === type ? "text-primary" : "text-gray-500"} />
-                    <span className={`text-[10px] font-medium ${
-                      selectedEntityType === type ? "text-primary" : "text-gray-600"
-                    }`}>
+                    <span className={`text-[10px] font-medium ${selectedEntityType === type ? "text-primary" : "text-gray-600"
+                      }`}>
                       {config.label}
                     </span>
                   </button>
@@ -962,11 +671,10 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload }: UploadDocumentModalP
                   <button
                     key={tag.id}
                     onClick={() => toggleTag(tag)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition ${
-                      isSelected
-                        ? `${colors.bg} ${colors.text} ${colors.border}`
-                        : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
-                    }`}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition ${isSelected
+                      ? `${colors.bg} ${colors.text} ${colors.border}`
+                      : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+                      }`}
                   >
                     {tag.name}
                   </button>
@@ -1018,9 +726,10 @@ export default function DocumentVault() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  
   const rowsPerPage = 10;
 
   // Filter documents
@@ -1061,8 +770,10 @@ export default function DocumentVault() {
   };
 
   const handlePreview = (doc: Document) => {
-    setSelectedDocument(doc);
-    setIsPreviewOpen(true);
+    if (isViewableFormat(doc.fileFormat)) {
+      setSelectedDocument(doc);
+      setIsPreviewOpen(true);
+    }
   };
 
   const handleDelete = (id: string) => {
@@ -1074,10 +785,20 @@ export default function DocumentVault() {
     setIsUploadOpen(false);
   };
 
+  const handleDocumentNameClick = (e: React.MouseEvent, doc: Document) => {
+    e.stopPropagation();
+    if (isViewableFormat(doc.fileFormat)) {
+      handlePreview(doc);
+    } else {
+      handleDocumentClick(doc);
+    }
+  };
+
   const handleQuickPreview = (e: React.MouseEvent, doc: Document) => {
     e.stopPropagation();
     if (isViewableFormat(doc.fileFormat)) {
       handlePreview(doc);
+      setActiveDropdown(null);
     }
   };
 
@@ -1299,14 +1020,25 @@ export default function DocumentVault() {
                           </div>
                         </td>
 
-                        {/* Document Name */}
+                        {/* Document Name - UPDATED: Now clickable for preview */}
                         <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <div className={`p-1.5 rounded ${formatConfig.bg}`}>
-                              <FileText size={12} className={formatConfig.color} />
+                          <div 
+                            className="flex items-center gap-2 group cursor-pointer"
+                            onClick={(e) => handleDocumentNameClick(e, doc)}
+                          >
+                            <div className={`p-1.5 rounded ${formatConfig.bg} group-hover:scale-110 transition`}>
+                              {canPreview ? (
+                                <Eye size={12} className={formatConfig.color} />
+                              ) : (
+                                <FileText size={12} className={formatConfig.color} />
+                              )}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-gray-900 truncate max-w-[180px]">
+                              <p className={`text-sm font-medium truncate max-w-[180px] ${
+                                canPreview 
+                                  ? 'text-primary group-hover:underline' 
+                                  : 'text-gray-900 group-hover:text-primary'
+                              }`}>
                                 {doc.name}
                               </p>
                               <p className="text-[10px] text-gray-500 truncate max-w-[180px]">
@@ -1364,17 +1096,8 @@ export default function DocumentVault() {
                         {/* Actions */}
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-1">
-                            {canPreview && (
-                              <button
-                                onClick={(e) => handleQuickPreview(e, doc)}
-                                className="p-1.5 hover:bg-blue-50 rounded-lg transition group"
-                                data-tooltip-id="document-tooltip"
-                                data-tooltip-content="Preview Document"
-                              >
-                                <Eye size={14} className="text-gray-400 group-hover:text-blue-600" />
-                              </button>
-                            )}
                             
+
                             <div className="relative inline-block">
                               <button
                                 onClick={(e) => {
@@ -1489,12 +1212,6 @@ export default function DocumentVault() {
         place="top"
         className="!bg-gray-800 !text-white !text-[10px] !px-2 !py-1 !rounded"
       />
-      
-      <Tooltip
-        id="preview-tooltip"
-        place="top"
-        className="!bg-gray-800 !text-white !text-[10px] !px-2 !py-1 !rounded"
-      />
 
       {/* Document Detail Popup */}
       <DocumentDetailPopup
@@ -1505,12 +1222,16 @@ export default function DocumentVault() {
         onPreview={handlePreview}
       />
 
-      {/* Document Preview Modal */}
-      <DocumentPreviewModal
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-        document={selectedDocument}
-      />
+      {/* Document Preview Modal - UPDATED: Uses actual document data */}
+      {selectedDocument && (
+        <DocumentPreviewModal
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          pdfUrl={selectedDocument.fileUrl || "/documents/sample.pdf"}
+          documentName={selectedDocument.name}
+          totalPages={selectedDocument.pageCount || 1}
+        />
+      )}
 
       {/* Upload Document Modal */}
       <UploadDocumentModal

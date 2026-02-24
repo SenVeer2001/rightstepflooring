@@ -53,6 +53,7 @@ export interface Document {
     uploadedAt: Date;
     uploadedBy: string;
   }[];
+  pageCount?: number; // For PDFs
 }
 
 // Mock Tags

@@ -24,20 +24,20 @@ import {
   X,
   User,
   ArrowRight,
-  Link2,
   Info,
   AlertCircle,
-  Building,
   Users,
   Ticket,
   FileCheck,
-  ChevronDown,
-  Tag,
   Upload,
   DollarSign,
   Eye,
   FileText as FileIcon,
   MoreHorizontal,
+  Inbox,
+  Building2,
+  UserCircle,
+  Archive,
 } from "lucide-react";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
@@ -45,18 +45,16 @@ import {
   type Notification,
   type NotificationType,
   type NotificationPriority,
-  type SourceType,
-  type RelatedEntity,
   mockNotifications,
 } from "../../types/notification";
+import { NotificationDetailPopup } from "./NotificationDetailPopup";
 
 // Main tab types
 type MainTab = "all" | "unread";
 
 // Sub tab types
-type SubTab = "all" | "updates" | "actions" | "system";
+type SubTab = "all" | "updates" | "actions" | "system" | "requests" | "clients" | "team" | "archived";
 
-// Icon mapping
 const typeIcons: Record<NotificationType, React.ElementType> = {
   assignment: Briefcase,
   payment: CreditCard,
@@ -68,7 +66,6 @@ const typeIcons: Record<NotificationType, React.ElementType> = {
   reminder: Clock,
 };
 
-// Color mapping
 const typeColors: Record<NotificationType, { bg: string; icon: string; border: string }> = {
   assignment: { bg: "bg-blue-50", icon: "text-blue-600", border: "border-blue-200" },
   payment: { bg: "bg-green-50", icon: "text-green-600", border: "border-green-200" },
@@ -80,63 +77,28 @@ const typeColors: Record<NotificationType, { bg: string; icon: string; border: s
   reminder: { bg: "bg-yellow-50", icon: "text-yellow-600", border: "border-yellow-200" },
 };
 
-// Priority config
 const priorityConfig: Record<NotificationPriority, { label: string; color: string; bg: string; icon: React.ElementType; border: string }> = {
   action_required: { label: "Action Required", color: "text-red-700", bg: "bg-red-100", icon: AlertCircle, border: "border-l-red-500" },
   informational: { label: "Informational", color: "text-blue-700", bg: "bg-blue-100", icon: Info, border: "border-l-blue-400" },
   completed: { label: "Completed", color: "text-green-700", bg: "bg-green-100", icon: CheckCheck, border: "border-l-green-500" },
 };
 
-// Entity type icons
-const entityIcons: Record<SourceType, React.ElementType> = {
-  job: Briefcase,
-  lead: Users,
-  invoice: CreditCard,
-  estimate: FileText,
-  customer: User,
-  staff: Users,
-  work_order: FileCheck,
-  ticket: Ticket,
-};
-
-// Entity type colors
-const entityColors: Record<SourceType, { bg: string; icon: string }> = {
-  job: { bg: "bg-blue-50", icon: "text-blue-600" },
-  lead: { bg: "bg-purple-50", icon: "text-purple-600" },
-  invoice: { bg: "bg-green-50", icon: "text-green-600" },
-  estimate: { bg: "bg-orange-50", icon: "text-orange-600" },
-  customer: { bg: "bg-cyan-50", icon: "text-cyan-600" },
-  staff: { bg: "bg-indigo-50", icon: "text-indigo-600" },
-  work_order: { bg: "bg-yellow-50", icon: "text-yellow-600" },
-  ticket: { bg: "bg-red-50", icon: "text-red-600" },
-};
-
-// Status color mapping
-const statusColorMap: Record<string, { bg: string; text: string }> = {
-  green: { bg: "bg-green-100", text: "text-green-700" },
-  yellow: { bg: "bg-yellow-100", text: "text-yellow-700" },
-  red: { bg: "bg-red-100", text: "text-red-700" },
-  blue: { bg: "bg-blue-100", text: "text-blue-700" },
-  gray: { bg: "bg-gray-100", text: "text-gray-700" },
-  orange: { bg: "bg-orange-100", text: "text-orange-700" },
-  purple: { bg: "bg-purple-100", text: "text-purple-700" },
-};
-
-// Main tabs config
 const mainTabs: { id: MainTab; label: string; icon: React.ElementType }[] = [
   { id: "all", label: "All", icon: Bell },
   { id: "unread", label: "Unread", icon: Mail },
 ];
 
-// Sub tabs config
-const subTabs: { id: SubTab; label: string; icon: React.ElementType }[] = [
+const subTabs: { id: SubTab; label: string; icon: React.ElementType; color?: string }[] = [
   { id: "all", label: "All", icon: Bell },
   { id: "updates", label: "Updates", icon: RefreshCw },
-  { id: "actions", label: "Actions", icon: Zap },
+  { id: "actions", label: "Actions", icon: Zap, color: "text-red-600" },
+  { id: "requests", label: "Requests", icon: Inbox, color: "text-orange-600" },
+  { id: "clients", label: "Clients", icon: Building2, color: "text-blue-600" },
+  { id: "team", label: "Team", icon: Users, color: "text-purple-600" },
   { id: "system", label: "System", icon: Settings },
+  { id: "archived", label: "Archived", icon: Archive, color: "text-gray-500" },
 ];
 
-// CTA Button Config - Maps action types to button styles and icons
 const ctaButtonConfig: Record<string, { icon: React.ElementType; variant: 'primary' | 'secondary' | 'success' | 'warning' }> = {
   'View Job': { icon: Eye, variant: 'primary' },
   'Review Estimate': { icon: FileIcon, variant: 'primary' },
@@ -148,7 +110,6 @@ const ctaButtonConfig: Record<string, { icon: React.ElementType; variant: 'prima
   'Respond': { icon: MessageSquare, variant: 'secondary' },
 };
 
-// Button variant styles
 const buttonVariants = {
   primary: 'bg-primary hover:bg-primary/90 text-white',
   secondary: 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300',
@@ -156,7 +117,6 @@ const buttonVariants = {
   warning: 'bg-orange-500 hover:bg-orange-600 text-white',
 };
 
-// Format helpers
 const formatRelativeTime = (date: Date): string => {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -181,27 +141,7 @@ const formatAbsoluteTime = (date: Date): string => {
   });
 };
 
-const formatDateTime = (date: Date): string => {
-  return date.toLocaleString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const formatDate = (date?: Date): string => {
-  if (!date) return "N/A";
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-};
-
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
-};
-
-// Helper functions
+// Helper functions for filtering
 const isUpdateType = (type: NotificationType): boolean => {
   return ["assignment", "payment", "message", "document", "mention", "reminder"].includes(type);
 };
@@ -214,58 +154,43 @@ const isSystemType = (type: NotificationType): boolean => {
   return type === "system" || type === "alert";
 };
 
-// Related Entity Card Component
-interface RelatedEntityCardProps {
-  entity: RelatedEntity;
-  onClick: () => void;
-}
-
-const RelatedEntityCard = ({ entity, onClick }: RelatedEntityCardProps) => {
-  const Icon = entityIcons[entity.type];
-  const colors = entityColors[entity.type];
-  const statusColors = entity.statusColor ? statusColorMap[entity.statusColor] : null;
-
-  return (
-    <div
-      onClick={onClick}
-      className="bg-white rounded-lg border border-gray-200 p-3 hover:border-primary/50 hover:shadow-sm transition cursor-pointer group"
-    >
-      <div className="flex items-start gap-3">
-        <div className={`p-2 rounded-lg ${colors.bg} flex-shrink-0`}>
-          <Icon size={14} className={colors.icon} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-gray-900 group-hover:text-primary transition truncate">
-                {entity.title}
-              </p>
-              {entity.subtitle && (
-                <p className="text-[10px] text-gray-500 mt-0.5 truncate">{entity.subtitle}</p>
-              )}
-            </div>
-            <ExternalLink size={12} className="text-gray-400 group-hover:text-primary transition flex-shrink-0 mt-0.5" />
-          </div>
-          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            {entity.status && statusColors && (
-              <span className={`px-1.5 py-0.5 rounded text-[9px] font-semibold ${statusColors.bg} ${statusColors.text}`}>
-                {entity.status}
-              </span>
-            )}
-            {entity.amount !== undefined && (
-              <span className="text-[10px] font-semibold text-gray-900">
-                {formatCurrency(entity.amount)}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+const isRequestType = (notification: Notification): boolean => {
+  const requestTypes = ['estimate', 'work_order', 'job'];
+  if (notification.relatedEntities) {
+    return notification.relatedEntities.some(entity => requestTypes.includes(entity.type));
+  }
+  if (notification.sourceLabel) {
+    const label = notification.sourceLabel.toLowerCase();
+    return label.includes('est-') || label.includes('wo-') || label.includes('request');
+  }
+  return notification.type === 'assignment' && notification.priority === 'action_required';
 };
 
+const isClientType = (notification: Notification): boolean => {
+  const clientTypes = ['customer', 'invoice', 'lead'];
+  if (notification.relatedEntities) {
+    return notification.relatedEntities.some(entity => clientTypes.includes(entity.type));
+  }
+  if (notification.sourceLabel) {
+    const label = notification.sourceLabel.toLowerCase();
+    return label.includes('cust-') || label.includes('inv-') || label.includes('lead-');
+  }
+  return notification.type === 'payment' || notification.type === 'message';
+};
 
-// Notification CTA Button Component
+const isTeamType = (notification: Notification): boolean => {
+  if (notification.relatedEntities) {
+    return notification.relatedEntities.some(entity => entity.type === 'staff');
+  }
+  return notification.type === 'mention' || notification.type === 'assignment';
+};
+
+const isArchivedType = (notification: Notification): boolean => {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  return notification.priority === 'completed' || notification.timestamp < thirtyDaysAgo;
+};
+
 interface NotificationCTAProps {
   notification: Notification;
   onAction: (e: React.MouseEvent) => void;
@@ -287,7 +212,6 @@ const NotificationCTA = ({
     return null;
   }
 
-  // Determine the source type from related entities or source label
   const getSourceType = (): string => {
     if (notification.relatedEntities && notification.relatedEntities.length > 0) {
       return notification.relatedEntities[0].type;
@@ -304,15 +228,14 @@ const NotificationCTA = ({
 
   const sourceType = getSourceType();
   
-  // Check if this notification should show Accept/Reject buttons
   const shouldShowAcceptReject = sourceType !== 'invoice' && 
     (sourceType === 'estimate' || 
      sourceType === 'work_order' || 
+     sourceType === 'job' ||
      notification.actionLabel.includes('Approve') ||
      notification.actionLabel.includes('Accept') ||
      notification.actionLabel.includes('Review'));
 
-  // For estimates, show specific buttons
   if (sourceType === 'estimate') {
     return (
       <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
@@ -347,7 +270,6 @@ const NotificationCTA = ({
     );
   }
 
-  // For other action required items (except invoices), show Accept/Reject
   if (shouldShowAcceptReject) {
     return (
       <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
@@ -380,18 +302,13 @@ const NotificationCTA = ({
                 setShowMenu(!showMenu);
               }}
               className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
-              data-tooltip-id="notification-tooltip"
-              data-tooltip-content="More actions"
             >
               <MoreHorizontal size={16} />
             </button>
 
             {showMenu && (
               <>
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setShowMenu(false)}
-                />
+                <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
                 <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
                   <button
                     onClick={(e) => {
@@ -404,16 +321,6 @@ const NotificationCTA = ({
                     <Eye size={12} />
                     View Details
                   </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowMenu(false);
-                    }}
-                    className="w-full px-3 py-2 text-left text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                  >
-                    <MessageSquare size={12} />
-                    Add Comment
-                  </button>
                 </div>
               </>
             )}
@@ -423,7 +330,6 @@ const NotificationCTA = ({
     );
   }
 
-  // For invoices and other notifications, show single action button
   const config = ctaButtonConfig[notification.actionLabel] || { icon: ArrowRight, variant: 'primary' as const };
   const Icon = config.icon;
   const buttonStyle = buttonVariants[config.variant];
@@ -437,336 +343,6 @@ const NotificationCTA = ({
         <Icon size={14} />
         {notification.actionLabel}
       </button>
-
-      {showMoreMenu && (
-        <div className="relative">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowMenu(!showMenu);
-            }}
-            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
-            data-tooltip-id="notification-tooltip"
-            data-tooltip-content="More actions"
-          >
-            <MoreHorizontal size={16} />
-          </button>
-
-          {showMenu && (
-            <>
-              <div
-                className="fixed inset-0 z-10"
-                onClick={() => setShowMenu(false)}
-              />
-              <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowMenu(false);
-                  }}
-                  className="w-full px-3 py-2 text-left text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <Eye size={12} />
-                  View Details
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowMenu(false);
-                  }}
-                  className="w-full px-3 py-2 text-left text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <MessageSquare size={12} />
-                  Add Comment
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
-
-
-interface NotificationDetailPopupProps {
-  isOpen: boolean;
-  onClose: () => void;
-  notification: Notification | null;
-  onMarkAsRead: (id: string) => void;
-  onDelete: (id: string) => void;
-}
-
-const NotificationDetailPopup = ({
-  isOpen,
-  onClose,
-  notification,
-  onMarkAsRead,
-  onDelete,
-}: NotificationDetailPopupProps) => {
-  const navigate = useNavigate();
-
-  if (!isOpen || !notification) return null;
-
-  const Icon = typeIcons[notification.type];
-  const colors = typeColors[notification.type];
-  const priorityInfo = priorityConfig[notification.priority];
-  const PriorityIcon = priorityInfo.icon;
-
-  const handleEntityClick = (url: string) => {
-    onClose();
-    navigate(url);
-  };
-
-  const handleSourceClick = () => {
-    if (notification.actionUrl) {
-      onClose();
-      navigate(notification.actionUrl);
-    }
-  };
-
-  const handleDelete = () => {
-    onDelete(notification.id);
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Popup */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        {/* Header */}
-        <div className={`px-6 py-4 border-b ${colors.bg} ${colors.border}`}>
-          <div className="flex items-start gap-4">
-            {/* Icon */}
-            <div className="p-3 bg-white rounded-xl shadow-sm flex-shrink-0">
-              <Icon size={24} className={colors.icon} />
-            </div>
-
-            {/* Title & Meta */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-lg font-bold text-gray-900 line-clamp-2">
-                    {notification.title}
-                  </h2>
-                  <div className="flex items-center gap-2 mt-2 flex-wrap">
-                    {/* Priority Badge */}
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold ${priorityInfo.bg} ${priorityInfo.color}`}>
-                      <PriorityIcon size={10} />
-                      {priorityInfo.label}
-                    </span>
-                    
-                    {/* Source Label */}
-                    {notification.sourceLabel && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-white rounded-lg text-[10px] font-medium text-gray-600 border border-gray-200">
-                        #{notification.sourceLabel}
-                      </span>
-                    )}
-
-                    {/* Expiring Badge */}
-                    {notification.isExpiring && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-lg text-[10px] font-semibold">
-                        <AlertTriangle size={10} />
-                        Expires {formatDate(notification.expiresAt)}
-                      </span>
-                    )}
-
-                    {/* Read Status */}
-                    {notification.isRead && (
-                      <span className="inline-flex items-center gap-1 text-[10px] text-green-600">
-                        <CheckCheck size={12} />
-                        Read
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Close Button */}
-                <button
-                  onClick={onClose}
-                  className="p-2 hover:bg-white/50 rounded-lg transition flex-shrink-0"
-                >
-                  <X size={20} className="text-gray-500" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Timestamp */}
-          <div className="flex items-center gap-3 mt-4 pt-3 border-t border-gray-200/50">
-            <Clock size={14} className="text-gray-400" />
-            <span className="text-xs text-gray-600">{formatRelativeTime(notification.timestamp)}</span>
-            <span className="text-gray-300">•</span>
-            <span className="text-xs text-gray-500">{formatDateTime(notification.timestamp)}</span>
-          </div>
-        </div>
-
-        {/* Content - Scrollable */}
-        <div className="overflow-y-auto max-h-[calc(90vh-200px)]">
-          {/* Full Message */}
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h3 className="text-xs font-semibold text-gray-900 mb-2 flex items-center gap-2">
-              <MessageSquare size={12} className="text-gray-400" />
-              Full Message
-            </h3>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
-                {notification.fullMessage || notification.description}
-              </p>
-            </div>
-          </div>
-
-          {/* Activity Context */}
-          {notification.activityContext && (
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h3 className="text-xs font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                <Zap size={12} className="text-gray-400" />
-                Activity Context
-              </h3>
-              <div className="bg-gradient-to-br from-primary/5 to-white rounded-xl p-4 border border-primary/10">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                    <Info size={14} className="text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">
-                      This was triggered when...
-                    </p>
-                    <p className="text-sm font-medium text-gray-900 mt-1">
-                      {notification.activityContext.trigger}
-                    </p>
-                    <p className="text-xs text-gray-600 mt-2 leading-relaxed">
-                      {notification.activityContext.description}
-                    </p>
-
-                    {/* Actor */}
-                    {notification.activityContext.actor && (
-                      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
-                        {notification.activityContext.actor.avatar ? (
-                          <img
-                            src={notification.activityContext.actor.avatar}
-                            alt={notification.activityContext.actor.name}
-                            className="w-7 h-7 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center">
-                            <User size={12} className="text-gray-500" />
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-xs font-medium text-gray-900">
-                            {notification.activityContext.actor.name}
-                          </p>
-                          {notification.activityContext.actor.role && (
-                            <p className="text-[10px] text-gray-500">
-                              {notification.activityContext.actor.role}
-                            </p>
-                          )}
-                        </div>
-                        <span className="text-[10px] text-gray-400 ml-auto">
-                          {formatRelativeTime(notification.activityContext.timestamp)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Related Entities */}
-          {notification.relatedEntities && notification.relatedEntities.length > 0 && (
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h3 className="text-xs font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Link2 size={12} className="text-gray-400" />
-                Related Records
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {notification.relatedEntities.map((entity, index) => (
-                  <RelatedEntityCard
-                    key={`${entity.type}-${entity.id}-${index}`}
-                    entity={entity}
-                    onClick={() => handleEntityClick(entity.url)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Source Link */}
-          {notification.actionUrl && (
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h3 className="text-xs font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                <ExternalLink size={12} className="text-gray-400" />
-                Source Record
-              </h3>
-              <button
-                onClick={handleSourceClick}
-                className="w-full flex items-center justify-between p-3 bg-primary/5 hover:bg-primary/10 rounded-xl border border-primary/20 transition group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <ExternalLink size={14} className="text-primary" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-900">
-                      {notification.actionLabel || `View ${notification.sourceLabel || "Record"}`}
-                    </p>
-                    <p className="text-[10px] text-gray-500">{notification.actionUrl}</p>
-                  </div>
-                </div>
-                <ArrowRight size={16} className="text-primary group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Footer Actions */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            {!notification.isRead && (
-              <button
-                onClick={() => onMarkAsRead(notification.id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
-              >
-                <Check size={14} />
-                Mark as read
-              </button>
-            )}
-            <button
-              onClick={handleDelete}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-            >
-              <Trash2 size={14} />
-              Delete
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-            >
-              Close
-            </button>
-            {notification.actionUrl && (
-              <button
-                onClick={handleSourceClick}
-                className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition"
-              >
-                {notification.actionLabel || "View Details"}
-                <ExternalLink size={12} />
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
@@ -774,19 +350,23 @@ const NotificationDetailPopup = ({
 // Main Notifications Page Component
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [archivedNotifications, setArchivedNotifications] = useState<Notification[]>([]);
   const [mainTab, setMainTab] = useState<MainTab>("all");
   const [subTab, setSubTab] = useState<SubTab>("all");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [selectedNotificationIndex, setSelectedNotificationIndex] = useState<number>(0);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const navigate = useNavigate();
   const rowsPerPage = 10;
 
-  // Filter notifications
-  const filteredNotifications = notifications.filter((notification) => {
+  // Filter notifications based on tabs
+  const filteredNotifications = (subTab === 'archived' ? archivedNotifications : notifications).filter((notification) => {
+    // Main tab filter
     if (mainTab === "unread" && notification.isRead) return false;
 
+    // Sub tab filter
     switch (subTab) {
       case "updates":
         if (!isUpdateType(notification.type)) return false;
@@ -797,8 +377,21 @@ export default function NotificationsPage() {
       case "system":
         if (!isSystemType(notification.type)) return false;
         break;
+      case "requests":
+        if (!isRequestType(notification)) return false;
+        break;
+      case "clients":
+        if (!isClientType(notification)) return false;
+        break;
+      case "team":
+        if (!isTeamType(notification)) return false;
+        break;
+      case "archived":
+        // Already using archivedNotifications
+        break;
     }
 
+    // Search filter
     if (search) {
       const searchLower = search.toLowerCase();
       if (
@@ -822,23 +415,30 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const getSubTabCount = (subTabId: SubTab): number => {
-    let baseNotifications = notifications;
+    let baseNotifications = subTabId === 'archived' ? archivedNotifications : notifications;
     if (mainTab === "unread") {
-      baseNotifications = notifications.filter((n) => !n.isRead);
+      baseNotifications = baseNotifications.filter((n) => !n.isRead);
     }
 
     switch (subTabId) {
-      case "all": return baseNotifications.length;
+      case "all": return notifications.length;
       case "updates": return baseNotifications.filter((n) => isUpdateType(n.type)).length;
       case "actions": return baseNotifications.filter((n) => isActionRequired(n.priority)).length;
       case "system": return baseNotifications.filter((n) => isSystemType(n.type)).length;
+      case "requests": return baseNotifications.filter((n) => isRequestType(n)).length;
+      case "clients": return baseNotifications.filter((n) => isClientType(n)).length;
+      case "team": return baseNotifications.filter((n) => isTeamType(n)).length;
+      case "archived": return archivedNotifications.length;
       default: return 0;
     }
   };
 
-
-    const handleMarkAsRead = (id: string) => {
+  // Handlers
+  const handleMarkAsRead = (id: string) => {
     setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+    );
+    setArchivedNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
     );
   };
@@ -849,14 +449,53 @@ export default function NotificationsPage() {
 
   const handleDelete = (id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
+    setArchivedNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
-  const handleNotificationClick = (notification: Notification) => {
+  const handleArchive = (id: string) => {
+    const notificationToArchive = notifications.find(n => n.id === id);
+    if (notificationToArchive) {
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      setArchivedNotifications((prev) => [...prev, { ...notificationToArchive, isRead: true }]);
+    }
+  };
+
+  const handleRestore = (id: string) => {
+    const notificationToRestore = archivedNotifications.find(n => n.id === id);
+    if (notificationToRestore) {
+      setArchivedNotifications((prev) => prev.filter((n) => n.id !== id));
+      setNotifications((prev) => [...prev, notificationToRestore]);
+    }
+  };
+
+  const handleNotificationClick = (notification: Notification, index: number) => {
     if (!notification.isRead) {
       handleMarkAsRead(notification.id);
     }
     setSelectedNotification(notification);
+    setSelectedNotificationIndex(index);
     setIsPopupOpen(true);
+  };
+
+  const handleNextNotification = () => {
+    const nextIndex = selectedNotificationIndex + 1;
+    if (nextIndex < filteredNotifications.length) {
+      const nextNotification = filteredNotifications[nextIndex];
+      if (!nextNotification.isRead) {
+        handleMarkAsRead(nextNotification.id);
+      }
+      setSelectedNotification(nextNotification);
+      setSelectedNotificationIndex(nextIndex);
+    }
+  };
+
+  const handlePreviousNotification = () => {
+    const prevIndex = selectedNotificationIndex - 1;
+    if (prevIndex >= 0) {
+      const prevNotification = filteredNotifications[prevIndex];
+      setSelectedNotification(prevNotification);
+      setSelectedNotificationIndex(prevIndex);
+    }
   };
 
   const handleCTAClick = (notification: Notification, e: React.MouseEvent) => {
@@ -866,11 +505,8 @@ export default function NotificationsPage() {
     }
   };
 
-  // Handle Accept action
   const handleAccept = (notification: Notification, e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    // Mark as read and update priority to completed
     setNotifications((prev) =>
       prev.map((n) => 
         n.id === notification.id 
@@ -878,34 +514,19 @@ export default function NotificationsPage() {
           : n
       )
     );
-    
-    // Show success message (you can use toast notification here)
     console.log(`Accepted: ${notification.title}`);
-    
-    // Optional: Navigate to the source
     if (notification.actionUrl) {
       navigate(notification.actionUrl);
     }
   };
 
-  // Handle Reject action
   const handleReject = (notification: Notification, e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    // Mark as read
     setNotifications((prev) =>
-      prev.map((n) => 
-        n.id === notification.id 
-          ? { ...n, isRead: true } 
-          : n
-      )
+      prev.map((n) => n.id === notification.id ? { ...n, isRead: true } : n)
     );
-    
-    // Show confirmation (you can use a confirmation modal here)
     const confirmed = window.confirm(`Are you sure you want to reject: ${notification.title}?`);
-    
     if (confirmed) {
-      // You can either delete the notification or mark it differently
       handleDelete(notification.id);
       console.log(`Rejected: ${notification.title}`);
     }
@@ -914,6 +535,7 @@ export default function NotificationsPage() {
   const handleClosePopup = () => {
     setIsPopupOpen(false);
     setSelectedNotification(null);
+    setSelectedNotificationIndex(0);
   };
 
   const handleMainTabChange = (tab: MainTab) => {
@@ -925,8 +547,6 @@ export default function NotificationsPage() {
     setSubTab(tab);
     setCurrentPage(1);
   };
-
- 
 
   return (
     <div className="min-h-screen p-4 md:p-4">
@@ -996,17 +616,22 @@ export default function NotificationsPage() {
         <div className="flex gap-2 overflow-x-auto pb-1">
           {subTabs.map((tab) => {
             const count = getSubTabCount(tab.id);
+            const TabIcon = tab.icon;
 
             return (
               <button
                 key={tab.id}
                 onClick={() => handleSubTabChange(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap ${
                   subTab === tab.id
                     ? "bg-primary text-white"
                     : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
                 }`}
               >
+                <TabIcon 
+                  size={14} 
+                  className={subTab === tab.id ? "text-white" : tab.color || "text-gray-500"} 
+                />
                 {tab.label}
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] ${
@@ -1027,7 +652,7 @@ export default function NotificationsPage() {
           <span>Showing:</span>
           <span className="font-medium text-gray-700">
             {mainTab === "unread" ? "Unread" : "All"} →{" "}
-            {subTab === "all" ? "All Categories" : subTab.charAt(0).toUpperCase() + subTab.slice(1)}
+            {subTab === "all" ? "All Categories" : subTabs.find(t => t.id === subTab)?.label}
           </span>
           <span className="text-gray-400">({filteredNotifications.length} results)</span>
         </div>
@@ -1039,14 +664,17 @@ export default function NotificationsPage() {
               <MailOpen size={40} className="mx-auto mb-3 text-gray-300" />
               <p className="text-sm text-gray-500 font-medium">No notifications found</p>
               <p className="text-xs text-gray-400 mt-1">
-                {mainTab === "unread"
+                {subTab === "archived"
+                  ? "No archived notifications"
+                  : mainTab === "unread"
                   ? "You've read all your notifications in this category"
                   : "No notifications match your current filters"}
               </p>
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
-              {paginatedNotifications.map((notification) => {
+              {paginatedNotifications.map((notification, index) => {
+                const actualIndex = startIndex + index;
                 const Icon = typeIcons[notification.type];
                 const colors = typeColors[notification.type];
                 const priorityInfo = priorityConfig[notification.priority];
@@ -1054,7 +682,7 @@ export default function NotificationsPage() {
                 return (
                   <div
                     key={notification.id}
-                    onClick={() => handleNotificationClick(notification)}
+                    onClick={() => handleNotificationClick(notification, actualIndex)}
                     className={`p-4 hover:bg-gray-50 transition border-l-4 cursor-pointer ${
                       priorityInfo.border
                     } ${!notification.isRead ? "bg-blue-50/30" : ""}`}
@@ -1126,6 +754,7 @@ export default function NotificationsPage() {
                               )}
                             </div>
 
+                            {/* CTA Buttons */}
                             <NotificationCTA
                               notification={notification}
                               onAction={(e) => handleCTAClick(notification, e)}
@@ -1148,6 +777,31 @@ export default function NotificationsPage() {
                                 className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
                               >
                                 <Check size={16} />
+                              </button>
+                            )}
+                            {subTab !== 'archived' ? (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleArchive(notification.id);
+                                }}
+                                data-tooltip-id="notification-tooltip"
+                                data-tooltip-content="Archive"
+                                className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition"
+                              >
+                                <Archive size={16} />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRestore(notification.id);
+                                }}
+                                data-tooltip-id="notification-tooltip"
+                                data-tooltip-content="Restore"
+                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                              >
+                                <RefreshCw size={16} />
                               </button>
                             )}
                             <button
@@ -1233,6 +887,12 @@ export default function NotificationsPage() {
         notification={selectedNotification}
         onMarkAsRead={handleMarkAsRead}
         onDelete={handleDelete}
+        onNext={handleNextNotification}
+        onPrevious={handlePreviousNotification}
+        hasNext={selectedNotificationIndex < filteredNotifications.length - 1}
+        hasPrevious={selectedNotificationIndex > 0}
+        currentIndex={selectedNotificationIndex}
+        totalCount={filteredNotifications.length}
       />
     </div>
   );
