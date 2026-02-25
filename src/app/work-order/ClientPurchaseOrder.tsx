@@ -173,7 +173,7 @@ export function ClientPurchaseOrder({
          
         </div>
 
-      </div>
+      </div>  
 
       {/* ===================== STATUS TABS ===================== */}
       <div className="flex gap-3 overflow-x-auto pb-2 thin-scrollbar">
