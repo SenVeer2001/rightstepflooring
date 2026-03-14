@@ -718,7 +718,7 @@ export default function WorkOrderTable({
                       </td>
                     </tr>
                   )
-                })  // ← Added missing closing parenthesis here
+                })  
               )}
             </tbody>
           </table>

@@ -46,12 +46,8 @@ import DocumentVault from "../app/documentVault/DocumentVault"
 import CommunicationHub from "../app/communication-hub/CommunicationHub"
 import { ClientPurchaseOrder } from "../app/work-order/ClientPurchaseOrder"
 import { staticPurchaseOrders } from "../types/vendor"
-
-
-
-
-
-
+import { Payments } from "../app/payments/PaymentDashboard"
+import { InvoicePaymentDetailsPage } from "../app/payments/InvoicePage"
 
 
 
@@ -104,6 +100,10 @@ export function AppRoutes() {
                   <Route path="/technicians" element={<Technicians />} />
                   <Route path="/invoices" element={<Invoices />} />
                   <Route path="/invoices/:invoiceId" element={<InvoiceDetailsPage />} />
+                  
+
+                   <Route path="/payments" element={<Payments />} />
+      <Route path="/invoice/:invoiceId" element={<InvoicePaymentDetailsPage />} />
                   {/* <Route path="/estimates" element={<Estimates />} /> */}
                   <Route
                     path="/estimates"

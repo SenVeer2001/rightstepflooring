@@ -722,7 +722,7 @@ export default function StaffList() {
               </select>
             </div>
 
-            {/* Department Filter */}
+          
             <div className="relative">
               <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <select
@@ -736,7 +736,7 @@ export default function StaffList() {
               </select>
             </div>
 
-            {/* Status Filter */}
+           
             <div className="relative">
               <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <select
@@ -752,7 +752,7 @@ export default function StaffList() {
               </select>
             </div>
 
-            {/* Export Button */}
+           
             <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
               <Download size={14} />
               Export
@@ -760,14 +760,13 @@ export default function StaffList() {
           </div>
         </div>
 
-        {/* Results Count */}
+       
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-500">
             Showing <span className="font-medium text-gray-900">{filteredStaff.length}</span> staff members
           </p>
         </div>
 
-        {/* Grid of Cards */}
         {paginatedStaff.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-xl py-16 text-center">
             <Users size={48} className="mx-auto mb-4 text-gray-300" />

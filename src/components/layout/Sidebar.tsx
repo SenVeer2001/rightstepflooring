@@ -36,6 +36,7 @@ import {
   FileSearch,
   ShoppingBag,
   School,
+  CreditCard,
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 
@@ -70,6 +71,7 @@ const navItems: NavItem[] = [
   },
   { name: "Estimates", path: "/estimates", icon: BookOpenText, section: "CRM" },
   { name: "Invoices", path: "/invoices", icon: FileText, section: "CRM" },
+  { name: "Payments", path: "/payments", icon: CreditCard, section: "CRM" },
   { name: "Client", path: "/client", icon: Users, section: "CRM" },
   { name: "CRM Calls", path: "/phone", icon: Phone, section: "CRM" },
 
