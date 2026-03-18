@@ -1,4 +1,4 @@
-type CustomerJobTabKey = "details" | "items" | "payments" | "estimates" | "attachments" | "tasks" | "equipment" | "workOrder" |"purchase"
+type CustomerJobTabKey = "client" | "items" | "payments" | "estimates"|"changeOrder" | "attachments" | "tasks" | "equipment" | "workOrder" |"purchase"
 
 interface CustomerJobTab {
   key: CustomerJobTabKey
@@ -14,10 +14,11 @@ function CustomerJobTabs({
   onChange: (tab: CustomerJobTabKey) => void
 }) {
   const tabs: CustomerJobTab[] = [
-    { key: "details", label: "Details" },
+    { key: "client", label: "Client" },
     { key: "items", label: "Items", count: 2 },
     { key: "payments", label: "Payments", count: 0 },
     { key: "estimates", label: "Estimates", count: 1 },
+    { key: "changeOrder", label: "Change Order", count: 1 },
     { key: "attachments", label: "Attachments", count: 0 },
     { key: "tasks", label: "Tasks", count: 0 },
     { key: "equipment", label: "Equipment", count: 0 },
@@ -27,7 +28,7 @@ function CustomerJobTabs({
   ]
 
   return (
-    <div className="flex gap-6 overflow-x-auto ml-2 border-b border-gray-200">
+    <div className="flex gap-4 overflow-x-auto ml-2 border-b border-gray-200">
       {tabs.map(tab => (
         <button
           key={tab.key}

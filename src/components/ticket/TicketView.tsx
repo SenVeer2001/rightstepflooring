@@ -826,7 +826,9 @@ export default function TicketView() {
         }));
     };
 
-    // Get full address
+
+
+  
     const getFullAddress = () => {
         const { address, city, state, zipCode } = ticket.customer;
         return `${address}, ${city}, ${state} ${zipCode}`;

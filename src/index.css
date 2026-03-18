@@ -644,3 +644,31 @@ aside nav {
 .ql-snow .ql-toolbar button.ql-active .ql-fill {
   fill: var(--primary);
 }
+
+
+/* Red Line for Deleted Rows */
+.deleted-row {
+  position: relative;
+}
+
+.deleted-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 3px;
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  box-shadow: 0 1px 4px rgba(239, 68, 68, 0.5);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.deleted-row td {
+  opacity: 0.3;
+}
+
+.deleted-row td:last-child {
+  opacity: 1;
+}

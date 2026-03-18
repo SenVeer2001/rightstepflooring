@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, Upload, Plus, Trash2, ChevronDown, MoreVertical, Info, RefreshCw, Send, File, FileSymlinkIcon, Layers2, Save, Edit2, X, SignatureIcon, Paperclip, PlusCircle, CopyIcon, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Upload, Plus, Trash2, ChevronDown, MoreVertical, Info, RefreshCw, Send, File, FileSymlinkIcon, Layers2, Save, Edit2, X, SignatureIcon, Paperclip, PlusCircle, CopyIcon } from 'lucide-react'
 import { PriceBookModal } from '../../PriceBookModal'
 import { useNavigate, useLocation } from "react-router-dom"
 import { AddItemSearchModal } from '../AddItemSearchModal'
@@ -457,16 +457,16 @@ export function EstimatesView() {
       items.map(item =>
         item.id === itemId
           ? {
-              ...item,
-              isDeleted: true,
-              originalData: item.originalData || { ...item }  // Store original if not already
-            }
+            ...item,
+            isDeleted: true,
+            originalData: item.originalData || { ...item }  // Store original if not already
+          }
           : item
       )
 
     if (activeTab === 'view' && selectedEstimate) {
       const updatedItems = updateItems(selectedEstimate.items)
-      
+
       // Add to change order history
       const changeRecord: ChangeOrderRecord = {
         id: Date.now().toString(),
@@ -536,11 +536,11 @@ export function EstimatesView() {
     const previewUrl = URL.createObjectURL(file)
     setUploadedImage(previewUrl)
   }
-  
+
   const handleRemoveImage = () => {
     setUploadedImage(null)
   }
-  
+
   const handleAddItem = () => {
     if (!newItem.description || !newItem.quantity || !newItem.price) return
 
@@ -591,8 +591,8 @@ export function EstimatesView() {
 
   const handleEditItem = (item: LineItem) => {
     setEditingItemId(item.id)
-    setEditingItemData({ 
-      ...item, 
+    setEditingItemData({
+      ...item,
       taxPercent: 0,
       originalData: item.originalData || { ...item }  // Store original
     })
@@ -601,10 +601,10 @@ export function EstimatesView() {
   // 👇 UPDATED: Track modifications
   const handleSaveItem = () => {
     if (!editingItemData) return
-    
+
     const updatedItems = (activeTab === "view" && selectedEstimate ? selectedEstimate.items : newEstimate.items || []).map(item => {
       if (item.id === editingItemData.id) {
-        const hasChanged = 
+        const hasChanged =
           item.quantity !== editingItemData.quantity ||
           item.price !== editingItemData.price ||
           item.description !== editingItemData.description
@@ -637,8 +637,8 @@ export function EstimatesView() {
         newValue: editingItemData,
       }
 
-      setSelectedEstimate({ 
-        ...selectedEstimate, 
+      setSelectedEstimate({
+        ...selectedEstimate,
         items: updatedItems,
         hasChangeOrder: true,
         changeOrderHistory: [...(selectedEstimate.changeOrderHistory || []), changeRecord]
@@ -693,7 +693,6 @@ export function EstimatesView() {
   const currentData = activeTab === 'view' && selectedEstimate ? selectedEstimate : newEstimate
 
 
-  // 👇 UPDATED: Calculate excluding deleted items
   const itemCost = (currentData.items || [])
     .filter(item => !item.isDeleted)
     .reduce((sum, item) => sum + item.amount, 0)
@@ -709,7 +708,7 @@ export function EstimatesView() {
   return (
     <div className="flex flex-col h-screen ">
       {/* Breadcrumb */}
-      <div className="px-6 pt-2 pb-2 text-xs text-gray-600 uppercase tracking-wider ">
+      <div className="px-6 pt-2 pb-2 text-xs text-gray-500 uppercase tracking-wider ">
         CALLS # TEXT MESSAGES # LEAD (1182) # LEADS # LEAD ({selectedEstimate?.leadId || '1134'}) # ESTIMATE ({activeTab === 'view' ? selectedEstimate?.id : 'NEW'})
       </div>
 
@@ -725,7 +724,7 @@ export function EstimatesView() {
             <h2 className="text-xl font-semibold text-gray-900">
               {activeTab === 'view' && selectedEstimate ? `Lead ID: ${selectedEstimate.leadId}` : 'Create New Estimate'}
             </h2>
-            
+
             {/* 👇 ADDED: Change Order Badge */}
             {selectedEstimate?.hasChangeOrder && (
               <span className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full">
@@ -835,7 +834,7 @@ export function EstimatesView() {
                       <>
                         {/* UPLOAD ICON */}
                         <Upload size={28} className="text-primary" />
-   
+
 
                         <input
                           type="file"
@@ -970,372 +969,435 @@ export function EstimatesView() {
           </div>
 
           {/* Items Section */}
-          {/* ========== ITEMS TABLE ========== */}
-<div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-  <div className="px-6 py-4 border-b border-gray-200 flex items-center gap-1">
-    <h3 className="text-lg font-semibold text-gray-900">Items</h3>
-    <Layers2 className='text-primary h-5' />
-  </div>
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center gap-1">
+              <h3 className="text-lg font-semibold text-gray-900">Items</h3>
+              <Layers2 className='text-primary h-5' />
+            </div>
 
-  <div className="overflow-x-auto">
-    <table className="w-full text-sm hidden md:table">
-      <thead className="bg-gray-50 border-b border-gray-200">
-        <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Item</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Quantity</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Price</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Cost</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Amount</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Taxable</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Color</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
-        </tr>
-      </thead>
+            {/* Items Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm hidden md:table">
 
-      <tbody className="divide-y divide-gray-200">
-        {currentData.items && currentData.items.length > 0 ? (
-          currentData.items.map((item) => (
-            <tr 
-              key={item.id} 
-              className={`
-                ${item.isDeleted ? '' : 'hover:bg-gray-50'} 
-                ${item.isModified ? 'bg-yellow-50' : ''}
-              `}
-              style={{ position: 'relative' }}
-            >
-              {/* DESCRIPTION */}
-              <td className={`px-2.5 py-3 min-w-[230px] ${item.isDeleted ? 'opacity-30' : ''}`}>
-                <div className='flex items-center gap-2'>
-                  <img 
-                    src={item?.image} 
-                    alt="" 
-                    height={20} 
-                    width={70} 
-                    className="max-h-15 w-15 rounded-md" 
-                  />
-                  <div>
-                    <span className='text-gray-800 font-semibold text-xs'>Paint Estimate</span>
-                    {editingItemId === item.id ? (
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Item</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Quantity</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Price</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Cost</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Amount</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Taxable</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Color</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {currentData.items && currentData.items.length > 0 ? (
+                    currentData.items.map((item) => (
+                      <tr
+                        key={item.id}
+                        className={`hover:bg-gray-50 ${item.isDeleted ? 'bg-red-50 opacity-60' : ''
+                          } ${item.isModified ? 'bg-yellow-50' : ''
+                          }`}
+                      >
+                        {/* DESCRIPTION */}
+                        <td className="px-2.5 py-3 min-w-[230px]">
+                          <div className='flex items-center gap-2'>
+                            <img src={item?.image} alt="" height={20} width={70} className="max-h-15 w-15 rounded-md" />
+                            <div className='relative'>
+                              <span className='text-gray-800 font-semibold text-xs'>Paint Estimate</span>
+                              {editingItemId === item.id ? (
+                                <textarea
+                                  value={editingItemData?.description || ""}
+                                  onChange={e =>
+                                    setEditingItemData({ ...editingItemData!, description: e.target.value })
+                                  }
+                                  className="w-full h-14 px-3 py-2 border rounded-md text-xs
+                   focus:ring-1 focus:ring-primary"
+                                />
+                              ) : (
+                                <p className={`text-xs text-gray-700 whitespace-pre-wrap ${item.isDeleted ? 'line-through' : ''
+                                  }`}>
+                                  {item.description}
+                                </p>
+                              )}
+
+                             
+                              {item.isModified && (
+                                <span className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-500 rounded-full" />
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* QUANTITY */}
+                        <td className="px-6 py-3">
+                          {editingItemId === item.id ? (
+                            <input
+                              type="number"
+                              value={editingItemData?.quantity}
+                              onChange={e =>
+                                setEditingItemData({ ...editingItemData!, quantity: Number(e.target.value) })
+                              }
+                              min={0}
+                              className="w-20 px-2 py-1 border rounded-md text-xs focus:ring-1 focus:ring-primary"
+                            />
+                          ) : (
+                            <span className={item.isDeleted ? 'line-through text-gray-400' : ''}>
+                              {item.quantity.toFixed(2)}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* PRICE */}
+                        <td className="px-6 py-3">
+                          {editingItemId === item.id ? (
+                            <input
+                              type="number"
+                              value={editingItemData?.price}
+                              onChange={e =>
+                                setEditingItemData({ ...editingItemData!, price: Number(e.target.value) })
+                              }
+                              min={0}
+                              className="w-20 px-2 py-1 border rounded-md text-xs focus:ring-1 focus:ring-primary"
+                            />
+                          ) : (
+                            <span className={item.isDeleted ? 'line-through text-gray-400' : ''}>
+                              ${item.price.toFixed(2)}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* COST */}
+                        <td className="px-6 py-3">
+                          {editingItemId === item.id ? (
+                            <input
+                              type="number"
+                              value={editingItemData?.cost}
+                              onChange={e =>
+                                setEditingItemData({ ...editingItemData!, cost: Number(e.target.value) })
+                              }
+                              min={0}
+                              className="w-20 px-2 py-1 border rounded-md text-xs focus:ring-1 focus:ring-primary"
+                            />
+                          ) : (
+                            <span className={item.isDeleted ? 'line-through text-gray-400' : ''}>
+                              ${item.cost.toFixed(2)}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* AMOUNT */}
+                        <td className="px-6 py-3 font-semibold">
+                          <span className={item.isDeleted ? 'line-through text-gray-400' : ''}>
+                            ${(item.quantity * item.price).toFixed(2)}
+                          </span>
+                        </td>
+
+                        {/* TAX */}
+                        <td className="px-6 py-3">
+                          {editingItemId === item.id ? (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={editingItemData?.taxable}
+                                onChange={e =>
+                                  setEditingItemData({
+                                    ...editingItemData!,
+                                    taxable: e.target.checked,
+                                    taxPercent: e.target.checked ? editingItemData?.taxPercent || 0 : 0,
+                                  })
+                                }
+                                className="accent-primary"
+                              />
+                              {editingItemData?.taxable && (
+                                <input
+                                  type="number"
+                                  value={editingItemData.taxPercent || ""}
+                                  onChange={e =>
+                                    setEditingItemData({
+                                      ...editingItemData!,
+                                      taxPercent: Number(e.target.value),
+                                    })
+                                  }
+                                  placeholder="%"
+                                  className="w-14 px-2 py-1 border rounded-md text-xs"
+                                />
+                              )}
+                            </div>
+                          ) : (
+                            <span className={item.isDeleted ? 'line-through text-gray-400' : ''}>
+                              {item.taxable ? "Yes" : "No"}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* COLOR */}
+                        <td className="px-6 py-3">
+                          {editingItemId === item.id ? (
+                            <input
+                              value={editingItemData?.color || ""}
+                              onChange={e =>
+                                setEditingItemData({ ...editingItemData!, color: e.target.value })
+                              }
+                              className="w-20 px-2 py-1 border rounded-md text-xs"
+                            />
+                          ) : (
+                            <span className={item.isDeleted ? 'line-through text-gray-400' : ''}>
+                              {item.color || "-"}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* ACTIONS */}
+                        <td className="px-6 py-3 text-center flex gap-2">
+                          {editingItemId === item.id ? (
+                            <>
+                              <button
+                                onClick={handleSaveItem}
+                                className="text-green-600 font-semibold p-1 rounded-sm bg-primary"
+                              >
+                                <Save className='w-4 h-5 text-white' />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingItemId(null)
+                                  setEditingItemData(null)
+                                }}
+                                className="text-gray-200 p-1 rounded-sm bg-gray-800"
+                              >
+                                <X className='w-4 h-5 ' />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              {!item.isDeleted && (
+                                <button
+                                  onClick={() => handleEditItem(item)}
+                                  className="text-white  p-1 rounded-sm bg-primary"
+                                >
+                                  <Edit2 className='w-4 h-5 ' />
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleRemoveItem(item.id)}
+                                className={`text-white px-1 p-1 rounded-sm ${item.isDeleted ? 'bg-green-500' : 'bg-red-500'
+                                  }`}
+                                title={item.isDeleted ? 'Restore item' : 'Delete item'}
+                              >
+                                {item.isDeleted ? (
+                                  <RefreshCw className='w-4 h-5' />
+                                ) : (
+                                  <Trash2 className='w-4 h-5' />
+                                )}
+                              </button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+
+
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                        No items added yet
+                      </td>
+                    </tr>
+                  )}
+
+                  {/* Add Item Row */}
+                  <tr className="bg-[#f6faf4] border-t-2 border-primary/20">
+                    {/* DESCRIPTION */}
+                    <td className="px-6 py-3">
                       <textarea
-                        value={editingItemData?.description || ""}
-                        onChange={e => setEditingItemData({ ...editingItemData!, description: e.target.value })}
-                        className="w-full h-14 px-3 py-2 border rounded-md text-xs focus:ring-1 focus:ring-primary"
+                        value={newItem.description || ""}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, description: e.target.value })
+                        }
+                        placeholder="Item description..."
+                        className="w-full h-16 px-3 py-2 border border-gray-300 rounded-md
+                 text-xs resize-none bg-white
+                 focus:outline-none focus:ring-1 focus:ring-primary"
                       />
-                    ) : (
-                      <p className="text-xs text-gray-700 whitespace-pre-wrap">
-                        {item.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </td>
+                    </td>
 
-              {/* QUANTITY */}
-              <td className={`px-6 py-3 ${item.isDeleted ? 'opacity-30' : ''}`}>
-                {editingItemId === item.id ? (
-                  <input
-                    type="number"
-                    value={editingItemData?.quantity}
-                    onChange={e => setEditingItemData({ ...editingItemData!, quantity: Number(e.target.value) })}
-                    min={0}
-                    className="w-20 px-2 py-1 border rounded-md text-xs focus:ring-1 focus:ring-primary"
-                  />
-                ) : (
-                  item.quantity.toFixed(2)
-                )}
-              </td>
-
-              {/* PRICE */}
-              <td className={`px-6 py-3 ${item.isDeleted ? 'opacity-30' : ''}`}>
-                {editingItemId === item.id ? (
-                  <input
-                    type="number"
-                    value={editingItemData?.price}
-                    onChange={e => setEditingItemData({ ...editingItemData!, price: Number(e.target.value) })}
-                    min={0}
-                    className="w-20 px-2 py-1 border rounded-md text-xs focus:ring-1 focus:ring-primary"
-                  />
-                ) : (
-                  `$${item.price.toFixed(2)}`
-                )}
-              </td>
-
-              {/* COST */}
-              <td className={`px-6 py-3 ${item.isDeleted ? 'opacity-30' : ''}`}>
-                {editingItemId === item.id ? (
-                  <input
-                    type="number"
-                    value={editingItemData?.cost}
-                    onChange={e => setEditingItemData({ ...editingItemData!, cost: Number(e.target.value) })}
-                    min={0}
-                    className="w-20 px-2 py-1 border rounded-md text-xs focus:ring-1 focus:ring-primary"
-                  />
-                ) : (
-                  `$${item.cost.toFixed(2)}`
-                )}
-              </td>
-
-              {/* AMOUNT */}
-              <td className={`px-6 py-3 font-semibold ${item.isDeleted ? 'opacity-30' : ''}`}>
-                ${(item.quantity * item.price).toFixed(2)}
-              </td>
-
-              {/* TAX */}
-              <td className={`px-6 py-3 ${item.isDeleted ? 'opacity-30' : ''}`}>
-                {editingItemId === item.id ? (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={editingItemData?.taxable}
-                      onChange={e => setEditingItemData({
-                        ...editingItemData!,
-                        taxable: e.target.checked,
-                        taxPercent: e.target.checked ? editingItemData?.taxPercent || 0 : 0,
-                      })}
-                      className="accent-primary"
-                    />
-                    {editingItemData?.taxable && (
+                    {/* QUANTITY */}
+                    <td className="px-6 py-3">
                       <input
                         type="number"
-                        value={editingItemData.taxPercent || ""}
-                        onChange={e => setEditingItemData({
-                          ...editingItemData!,
-                          taxPercent: Number(e.target.value),
-                        })}
-                        placeholder="%"
-                        className="w-14 px-2 py-1 border rounded-md text-xs"
+                        value={newItem.quantity || ""}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, quantity: Number(e.target.value) })
+                        }
+                        placeholder="0"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md
+                 text-xs bg-white focus:ring-1 focus:ring-primary"
                       />
+                    </td>
+
+                    {/* PRICE */}
+                    <td className="px-6 py-3">
+                      <input
+                        type="number"
+                        value={newItem.price || ""}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, price: Number(e.target.value) })
+                        }
+                        placeholder="0"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md
+                 text-xs bg-white focus:ring-1 focus:ring-primary"
+                      />
+                    </td>
+
+                    {/* COST */}
+                    <td className="px-6 py-3">
+                      <input
+                        type="number"
+                        value={newItem.cost || ""}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, cost: Number(e.target.value) })
+                        }
+                        placeholder="0"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md
+                 text-xs bg-white focus:ring-1 focus:ring-primary"
+                      />
+                    </td>
+
+                    {/* AMOUNT */}
+                    <td className="px-6 py-3 text-sm font-semibold text-gray-900">
+                      ${((newItem.quantity || 0) * (newItem.price || 0)).toFixed(2)}
+                    </td>
+
+                    {/* TAXABLE */}
+                    <td className="px-6 py-3">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={newItem.taxable || false}
+                          onChange={(e) =>
+                            setNewItem({
+                              ...newItem,
+                              taxable: e.target.checked,
+                              taxPercent: e.target.checked ? newItem.taxPercent || 0 : 0,
+                            })
+                          }
+                          className="rounded accent-primary"
+                        />
+
+                        {newItem.taxable && (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              value={newItem.taxPercent || ""}
+                              onChange={(e) =>
+                                setNewItem({
+                                  ...newItem,
+                                  taxPercent: Number(e.target.value),
+                                })
+                              }
+                              placeholder="%"
+                              className="w-14 px-2 py-1 border border-gray-300 rounded-md
+                       text-xs bg-white focus:ring-1 focus:ring-primary"
+                            />
+                            <span className="text-xs text-gray-600">%</span>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* COLOR */}
+                    <td className="px-6 py-3">
+                      <input
+                        type="text"
+                        value={newItem.color || ""}
+                        onChange={(e) =>
+                          setNewItem({ ...newItem, color: e.target.value })
+                        }
+                        placeholder="Color"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md
+                 text-xs bg-white focus:ring-1 focus:ring-primary"
+                      />
+                    </td>
+
+                    {/* ADD BUTTON */}
+                    <td className="px-6 py-3 text-center">
+                      <button
+                        onClick={handleAddItem}
+                        className="bg-primary hover:bg-[#2c621b] text-white
+                 px-4 py-2 rounded-md text-xs font-semibold transition"
+                      >
+                        Add
+                      </button>
+                    </td>
+                  </tr>
+
+                </tbody>
+              </table>
+
+
+
+
+
+
+              <div className="md:hidden space-y-4">
+                {/* @ts-ignore */}
+                {currentData.items.map(item => (
+                  <div
+                    key={item.id}
+                    className={`border rounded-lg p-4 space-y-2 ${item.isDeleted ? 'bg-red-50 opacity-60' : 'bg-white'
+                      } ${item.isModified ? 'border-yellow-400' : ''
+                      }`}
+                  >
+                    <div className="flex justify-between">
+                      <h4 className={`font-semibold text-sm ${item.isDeleted ? 'line-through text-gray-400' : ''
+                        }`}>
+                        {item.description}
+                      </h4>
+                      <button
+                        onClick={() => setEditingItemId(item.id)}
+                        className="text-primary"
+                      >
+                        ✏️
+                      </button>
+                    </div>
+
+                    <div className={`text-sm text-gray-600 ${item.isDeleted ? 'line-through' : ''
+                      }`}>
+                      Qty: {item.quantity} | Price: ${item.price}
+                    </div>
+
+                    <div className={`font-semibold ${item.isDeleted ? 'line-through text-gray-400' : ''
+                      }`}>
+                      Total: ${item.amount.toFixed(2)}
+                    </div>
+
+                    {item.isDeleted && (
+                      <span className="text-xs text-red-600 font-semibold">
+                        ❌ Marked for deletion
+                      </span>
+                    )}
+
+                    {item.isModified && (
+                      <span className="text-xs text-yellow-600 font-semibold">
+                        ⚠️ Modified
+                      </span>
                     )}
                   </div>
-                ) : (
-                  item.taxable ? "Yes" : "No"
-                )}
-              </td>
+                ))}
+              </div>
 
-              {/* COLOR */}
-              <td className={`px-6 py-3 ${item.isDeleted ? 'opacity-30' : ''}`}>
-                {editingItemId === item.id ? (
-                  <input
-                    value={editingItemData?.color || ""}
-                    onChange={e => setEditingItemData({ ...editingItemData!, color: e.target.value })}
-                    className="w-20 px-2 py-1 border rounded-md text-xs"
-                  />
-                ) : (
-                  item.color || "-"
-                )}
-              </td>
-
-              {/* ACTIONS + RED LINE */}
-              <td className="px-6 py-3 text-center relative">
-                {/* 🔴 RED LINE - Inside last cell, spans full row */}
-                {item.isDeleted && (
-                  <div 
-                    className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none"
-                    style={{
-                      width: 'calc(100vw)',
-                      marginLeft: '-100vw',
-                      paddingLeft: '100vw',
-                      height: '2px',
-                      background: 'linear-gradient(90deg, #ef4444, #dc2626)',
-                      boxShadow: '0 1px 3px rgba(239, 68, 68, 0.4)',
-                      zIndex: 5,
-                    }}
-                  />
-                )}
-
-                <div className="flex gap-2 relative z-10">
-                  {editingItemId === item.id ? (
-                    <>
-                      <button
-                        onClick={handleSaveItem}
-                        className="text-green-600 font-semibold p-1 rounded-sm bg-primary"
-                      >
-                        <Save className='w-4 h-5 text-white' />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditingItemId(null)
-                          setEditingItemData(null)
-                        }}
-                        className="text-gray-200 p-1 rounded-sm bg-gray-800"
-                      >
-                        <X className='w-4 h-5' />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      {!item.isDeleted && (
-                        <button
-                          onClick={() => handleEditItem(item)}
-                          className="text-white p-1 rounded-sm bg-primary"
-                        >
-                          <Edit2 className='w-4 h-5' />
-                        </button>
-                      )}
-                      
-                      <button
-                        onClick={() => handleRemoveItem(item.id)}
-                        className={`text-white px-1 p-1 rounded-sm transition-colors ${
-                          item.isDeleted 
-                            ? 'bg-green-500 hover:bg-green-600' 
-                            : 'bg-red-500 hover:bg-red-600'
-                        }`}
-                        title={item.isDeleted ? 'Restore item' : 'Delete item'}
-                      >
-                        {item.isDeleted ? (
-                          <RotateCcw className='w-4 h-5' />
-                        ) : (
-                          <Trash2 className='w-4 h-5' />
-                        )}
-                      </button>
-                    </>
-                  )}
-                </div>
-              </td>
-            </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
-              No items added yet
-            </td>
-          </tr>
-        )}
-
-        {/* Add Item Row */}
-        <tr className="bg-[#f6faf4] border-t-2 border-primary/20">
-          <td className="px-6 py-3">
-            <textarea
-              value={newItem.description || ""}
-              onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-              placeholder="Item description..."
-              className="w-full h-16 px-3 py-2 border border-gray-300 rounded-md text-xs resize-none bg-white focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </td>
-          <td className="px-6 py-3">
-            <input
-              type="number"
-              value={newItem.quantity || ""}
-              onChange={(e) => setNewItem({ ...newItem, quantity: Number(e.target.value) })}
-              placeholder="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-xs bg-white focus:ring-1 focus:ring-primary"
-            />
-          </td>
-          <td className="px-6 py-3">
-            <input
-              type="number"
-              value={newItem.price || ""}
-              onChange={(e) => setNewItem({ ...newItem, price: Number(e.target.value) })}
-              placeholder="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-xs bg-white focus:ring-1 focus:ring-primary"
-            />
-          </td>
-          <td className="px-6 py-3">
-            <input
-              type="number"
-              value={newItem.cost || ""}
-              onChange={(e) => setNewItem({ ...newItem, cost: Number(e.target.value) })}
-              placeholder="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-xs bg-white focus:ring-1 focus:ring-primary"
-            />
-          </td>
-          <td className="px-6 py-3 text-sm font-semibold text-gray-900">
-            ${((newItem.quantity || 0) * (newItem.price || 0)).toFixed(2)}
-          </td>
-          <td className="px-6 py-3">
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={newItem.taxable || false}
-                onChange={(e) => setNewItem({
-                  ...newItem,
-                  taxable: e.target.checked,
-                  taxPercent: e.target.checked ? newItem.taxPercent || 0 : 0,
-                })}
-                className="rounded accent-primary"
-              />
-              {newItem.taxable && (
-                <div className="flex items-center gap-1">
-                  <input
-                    type="number"
-                    value={newItem.taxPercent || ""}
-                    onChange={(e) => setNewItem({ ...newItem, taxPercent: Number(e.target.value) })}
-                    placeholder="%"
-                    className="w-14 px-2 py-1 border border-gray-300 rounded-md text-xs bg-white focus:ring-1 focus:ring-primary"
-                  />
-                  <span className="text-xs text-gray-600">%</span>
-                </div>
-              )}
             </div>
-          </td>
-          <td className="px-6 py-3">
-            <input
-              type="text"
-              value={newItem.color || ""}
-              onChange={(e) => setNewItem({ ...newItem, color: e.target.value })}
-              placeholder="Color"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-xs bg-white focus:ring-1 focus:ring-primary"
-            />
-          </td>
-          <td className="px-6 py-3 text-center">
-            <button
-              onClick={handleAddItem}
-              className="bg-primary hover:bg-[#2c621b] text-white px-4 py-2 rounded-md text-xs font-semibold transition"
-            >
-              Add
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
 
-    {/* Mobile View */}
-    <div className="md:hidden space-y-4 p-4">
-      {currentData.items?.map(item => (
-        <div
-          key={item.id}
-          className={`border rounded-lg p-4 space-y-2 relative overflow-hidden bg-white ${
-            item.isModified ? 'border-yellow-400' : ''
-          }`}
-        >
-          {/* 🔴 RED LINE - Mobile */}
-          {item.isDeleted && (
-            <div 
-              className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[3px] bg-red-500 pointer-events-none z-10"
-              style={{ boxShadow: '0 1px 3px rgba(239, 68, 68, 0.4)' }}
-            />
-          )}
 
-          <div className={item.isDeleted ? 'opacity-30' : ''}>
-            <div className="flex justify-between">
-              <h4 className="font-semibold text-sm">{item.description}</h4>
-              {!item.isDeleted && (
-                <button onClick={() => handleEditItem(item)} className="text-primary">
-                  ✏️
-                </button>
-              )}
-            </div>
-            <div className="text-sm text-gray-600">
-              Qty: {item.quantity} | Price: ${item.price}
-            </div>
-            <div className="font-semibold">
-              Total: ${item.amount.toFixed(2)}
-            </div>
+
+
+            
+
+
+
+
           </div>
-
-          <button
-            onClick={() => handleRemoveItem(item.id)}
-            className={`mt-2 w-full py-2 rounded text-white text-xs font-semibold relative z-20 ${
-              item.isDeleted ? 'bg-green-500' : 'bg-red-500'
-            }`}
-          >
-            {item.isDeleted ? '↩️ Restore Item' : '🗑️ Delete Item'}
-          </button>
-        </div>
-      ))}
-    </div>
-  </div>
-</div>
 
           {/* Action Buttons */}
           {activeTab === 'add' && (

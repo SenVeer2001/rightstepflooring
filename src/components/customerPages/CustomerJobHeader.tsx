@@ -22,7 +22,7 @@ function CustomerJobHeader({ customerName, customerId, jobNumber, clientPhone }:
       </button>
 
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">{customerName}</h1>
+        <h1 className="text-3xl font-bold text-gray-900"><a href={`/client/${customerId}`} className="text-gray-700 hover:text-gray-800">{customerName}</a></h1>
         <p className="text-sm text-gray-600 mt-1">
           {jobNumber && `Job ID: ${jobNumber} • `}
           Customer ID: {customerId}

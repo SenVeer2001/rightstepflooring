@@ -48,6 +48,8 @@ import { ClientPurchaseOrder } from "../app/work-order/ClientPurchaseOrder"
 import { staticPurchaseOrders } from "../types/vendor"
 import { Payments } from "../app/payments/PaymentDashboard"
 import { InvoicePaymentDetailsPage } from "../app/payments/InvoicePage"
+import ChangeOrderList from "../app/changeOrder/ChangeOrderList"
+import ChangeOrderView from "../app/changeOrder/ChangeOrderView"
 
 
 
@@ -82,11 +84,11 @@ export function AppRoutes() {
                   <Route path="/orders/work-order" element={<WorkOrder />} />
                   <Route path="/orders/work-order/:id" element={<WorkOrderDetailsPage />} />
                   <Route path="/orders/purchase-order" element={<ClientPurchaseOrder
-                  
+
                     purchaseOrders={staticPurchaseOrders}
-                              onDelete={(id) => {
-                                console.log("Delete PO:", id)
-                              }}
+                    onDelete={(id) => {
+                      console.log("Delete PO:", id)
+                    }}
                   />} />
 
 
@@ -100,10 +102,10 @@ export function AppRoutes() {
                   <Route path="/technicians" element={<Technicians />} />
                   <Route path="/invoices" element={<Invoices />} />
                   <Route path="/invoices/:invoiceId" element={<InvoiceDetailsPage />} />
-                  
 
-                   <Route path="/payments" element={<Payments />} />
-      <Route path="/invoice/:invoiceId" element={<InvoicePaymentDetailsPage />} />
+
+                  <Route path="/payments" element={<Payments />} />
+                  <Route path="/invoice/:invoiceId" element={<InvoicePaymentDetailsPage />} />
                   {/* <Route path="/estimates" element={<Estimates />} /> */}
                   <Route
                     path="/estimates"
@@ -135,7 +137,7 @@ export function AppRoutes() {
                   <Route path="/training/courses/view/:id" element={<CourseDetail />} />
                   <Route path="/training/builder/module/:moduleId" element={<ModuleDetail />} />
                   <Route path="/training/publish" element={<CoursePublish />} />
-                  
+
 
                   <Route path="/subcontractors" element={<SubcontractorList />} />
                   <Route path="/subcontractors/:id" element={<SubcontractorProfile />} />
@@ -143,6 +145,11 @@ export function AppRoutes() {
                   <Route path="/staff/:id" element={<StaffProfile />} />
                   <Route path="/document-vault" element={<DocumentVault />} />
                   <Route path="/communication-hub" element={<CommunicationHub />} />
+
+
+                  <Route path="/change-orders" element={<ChangeOrderList />} />
+<Route path="/change-orders/:id" element={<ChangeOrderView />} />
+<Route path="/change-orders/new" element={<ChangeOrderView />} />
 
 
 

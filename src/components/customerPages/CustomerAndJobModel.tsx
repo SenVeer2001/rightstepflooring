@@ -16,11 +16,13 @@ import { ClientPurchaseOrderTab } from './clientPages/tabs/ClientPurchaseOrderTa
 import { staticPurchaseOrders } from '../../types/vendor'
 import WorkOrder from '../../app/work-order/WorkOrder'
 import ClientWorkOrder from '../../app/work-order/ClientWorkOrder'
+import ChangeOrderList from '../../app/changeOrder/ChangeOrderList'
+import ChangeOrderView from '../../app/changeOrder/ChangeOrderView'
 
 
 /* ===================== TYPES ===================== */
 
-type CustomerJobTabKey = "details" | "items" | "payments" | "estimates" | "attachments" | "tasks" | "equipment" | "purchase" | "workOrder"
+type CustomerJobTabKey = "client" | "items" | "payments" | "estimates" |"changeOrder"| "attachments" | "tasks" | "equipment" | "purchase" | "workOrder"
 
 interface JobData {
   id: string
@@ -178,7 +180,7 @@ const MOCK_JOBS: JobData[] = [
 
 function CustomerAndJobModel() {
   const { jobId } = useParams<{ jobId: string }>()
-  const [activeTab, setActiveTab] = useState<CustomerJobTabKey>("details")
+  const [activeTab, setActiveTab] = useState<CustomerJobTabKey>("client")
   const [selectedTags, setSelectedTags] = useState<TagOption[]>([])
   const [currentStatus, setCurrentStatus] = useState<string>("")
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false)
@@ -503,7 +505,7 @@ function CustomerAndJobModel() {
 
       {/* Tab Content */}
       <div className=" rounded-lg">
-        {activeTab === "details" && (
+        {activeTab === "client" && (
           <DetailsTab customerId={jobData.id} customerData={customerData} />
         )}
 
@@ -517,6 +519,9 @@ function CustomerAndJobModel() {
 
         {activeTab === "estimates" && (
           <EstimatesSection />
+        )}
+          {activeTab === "changeOrder" && (
+          <ChangeOrderView />
         )}
 
         {activeTab === "attachments" && (
