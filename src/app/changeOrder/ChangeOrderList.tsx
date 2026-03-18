@@ -338,10 +338,10 @@ export default function ChangeOrderList() {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Project</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Owner</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Original $</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Change $</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">New Total $</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase text-nowrap">Status</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase text-nowrap">Original $</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase text-nowrap">Change $</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase text-nowrap">New Total $</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Days</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Items</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Actions</th>
