@@ -835,7 +835,7 @@ export default function TicketView() {
     return (
         <div className="">
             {/* Header */}
-            <div className="bg-white border-b sticky top-0 z-40 shadow-sm mb-4">
+            <div className="bg-white border-b sticky top-0 z-10 shadow-sm mb-4">
                 <div className="max-w-8xl mx-auto px-4 sm:px-6 py-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-start sm:items-center gap-4">
