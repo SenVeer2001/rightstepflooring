@@ -37,6 +37,7 @@ import {
   ShoppingBag,
   School,
   CreditCard,
+  ListOrdered,
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 
@@ -77,7 +78,7 @@ const navItems: NavItem[] = [
 
   // Delivery
   { name: "Jobs", path: "/jobs", icon: Calendar, section: "Delivery" },
-  // { name: "Work Order", path: "/work-order", icon:ClockArrowUp, section: "Delivery" },
+  { name: "Change Order", path: "/change-orders", icon:ListOrdered, section: "Delivery" },
 
   
    { 
