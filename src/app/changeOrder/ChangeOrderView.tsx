@@ -15,13 +15,16 @@ import CalculationBreakdownModal from './CalculationBreakdownModal'
 interface ChangeItem {
   id: string
   currentItem: string
-  quantity: number
+  itemTitle: string
   description: string
+  quantity: number
+  scopeOfWork: string
   currentPrice: number
   newPrice: number
   costImpact: number
   timeImpact: number
   type: 'delete' | 'modify' | 'add'
+  image?: string
 }
 
 interface ChangeOrderData {
@@ -48,7 +51,7 @@ interface ChangeOrderData {
   notes: string
 }
 
-// Static data
+// Static data - matches estimate items
 const changeOrderData: ChangeOrderData = {
   id: "1",
   orderNumber: "CO-1134-001",
@@ -63,36 +66,45 @@ const changeOrderData: ChangeOrderData = {
   items: [
     {
       id: "1",
-      currentItem: "Carpet Installation",
-      quantity: 500,
-      description: "Remove carpet installation - Client decided to keep existing carpet",
-      currentPrice: 1.67,
+      itemTitle: "Paint Estimate",
+      currentItem: "Paint - Labor",
+      description: "Paint - Labor\nPatching small holes\nPrep walls / sanding\nPrime all walls\nPaint walls (2 coats)\nPaint baseboard trim",
+      quantity: 2000,
+      scopeOfWork: "Remove paint labor from scope - Client decided to handle painting internally",
+      currentPrice: 2.5,
       newPrice: 0,
-      costImpact: -835,
-      timeImpact: -2,
+      costImpact: -5000,
+      timeImpact: -3,
       type: "delete",
+      image: "https://images.pexels.com/photos/1249611/pexels-photo-1249611.jpeg"
     },
     {
       id: "2",
-      currentItem: "Paint - Labor (2000 sqft to 2500 sqft)",
+      itemTitle: "Carpet Services",
+      currentItem: "Carpet Installation",
+      description: "Carpet Installation\nRemove old carpet\nInstall new padding\nInstall carpet",
       quantity: 500,
-      description: "Additional 500 sqft added to painting scope - Extended to include garage",
-      currentPrice: 2.5,
-      newPrice: 2.5,
-      costImpact: 1250,
+      scopeOfWork: "Additional 200 sqft added to carpet scope - Extended to include hallway",
+      currentPrice: 1.67,
+      newPrice: 1.67,
+      costImpact: 835,
       timeImpact: 1,
       type: "modify",
+      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
     },
     {
       id: "3",
-      currentItem: "Crown Molding Installation",
-      quantity: 200,
-      description: "New item added - Crown molding for living room and dining room",
+      itemTitle: "Flooring",
+      currentItem: "LVP Installation",
+      description: "LVP Installation\nSubfloor preparation\nMoisture barrier\nLVP plank installation",
+      quantity: 800,
+      scopeOfWork: "New item added - LVP flooring for basement and family room",
       currentPrice: 0,
-      newPrice: 4.5,
-      costImpact: 900,
-      timeImpact: 1,
+      newPrice: 2.5,
+      costImpact: 2000,
+      timeImpact: 2,
       type: "add",
+      image: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea"
     },
   ],
   ownerApproval: undefined,
@@ -192,8 +204,8 @@ export default function ChangeOrderView() {
             <table className="w-full text-sm border-collapse">
               <thead className="bg-gray-50 border-b">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase border border-gray-200">Current Item /  New Item</th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase border border-gray-200 text-nowrap">Action Type</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase border border-gray-200">Current Item / New item</th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase border  text-nowrap border-gray-200">Action Type</th>
                   <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase border border-gray-200">Quantity</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase border border-gray-200">Description / Scope of Work</th>
                   <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase border border-gray-200">Cost Impact ($)</th>
@@ -235,14 +247,39 @@ export default function ChangeOrderView() {
                         isModified ? 'bg-yellow-50/50' : ''
                       }
                     >
-                      <td className={`px-4 py-3 border border-gray-200 ${isDeleted ? 'opacity-70' : ''}`} style={deletedCellStyle}>
+                      {/* Current Item - Full Details */}
+                      <td
+                        className={`px-4 py-3 border border-gray-200 min-w-[220px] ${isDeleted ? 'opacity-70' : ''}`}
+                        style={deletedCellStyle}
+                      >
                         {isDeleted && <RedLine />}
-                        <span className={`text-sm text-gray-900 ${isDeleted ? 'line-through' : ''}`}>
-                          {item.currentItem}
-                        </span>
+                        <div className="flex items-start gap-3">
+                          {/* Image */}
+                          {item.image && (
+                            <img 
+                              src={item.image} 
+                              alt="" 
+                              className="w-14 h-14 rounded-md object-cover flex-shrink-0 mt-0.5"
+                            />
+                          )}
+                          <div>
+                            {/* Title */}
+                            <span className={`text-xs font-bold text-gray-800 block ${isDeleted ? 'line-through' : ''}`}>
+                              {item.itemTitle}
+                            </span>
+                            {/* Description - Multi Line */}
+                            <p className={`text-xs text-gray-600 whitespace-pre-wrap mt-1 ${isDeleted ? 'line-through' : ''}`}>
+                              {item.description}
+                            </p>
+                          </div>
+                        </div>
                       </td>
 
-                      <td className="px-4 py-3 text-center border border-gray-200" style={deletedCellStyle}>
+                      {/* Type Badge */}
+                      <td
+                        className="px-4 py-3 text-center border border-gray-200"
+                        style={deletedCellStyle}
+                      >
                         {isDeleted && <RedLine />}
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${config.bg} ${config.text}`}>
                           <TypeIcon className="w-3 h-3" />
@@ -250,24 +287,40 @@ export default function ChangeOrderView() {
                         </span>
                       </td>
 
-                      <td className={`px-4 py-3 text-center border border-gray-200 ${isDeleted ? 'opacity-70' : ''}`} style={deletedCellStyle}>
+                      {/* Quantity */}
+                      <td
+                        className={`px-4 py-3 text-center border border-gray-200 ${isDeleted ? 'opacity-70' : ''}`}
+                        style={deletedCellStyle}
+                      >
                         {isDeleted && <RedLine />}
-                        <span className="text-sm text-gray-900">{item.quantity}</span>
+                        <span className="text-sm text-gray-900">{item.quantity.toLocaleString()}</span>
                       </td>
 
-                      <td className={`px-4 py-3 border border-gray-200 ${isDeleted ? 'opacity-70' : ''}`} style={deletedCellStyle}>
+                      {/* Scope of Work */}
+                      <td
+                        className={`px-4 py-3 border border-gray-200 ${isDeleted ? 'opacity-70' : ''}`}
+                        style={deletedCellStyle}
+                      >
                         {isDeleted && <RedLine />}
-                        <span className="text-sm text-gray-700">{item.description}</span>
+                        <span className="text-sm text-gray-700">{item.scopeOfWork}</span>
                       </td>
 
-                      <td className="px-4 py-3 text-center border border-gray-200" style={deletedCellStyle}>
+                      {/* Cost Impact */}
+                      <td
+                        className="px-4 py-3 text-center border border-gray-200"
+                        style={deletedCellStyle}
+                      >
                         {isDeleted && <RedLine />}
                         <span className={`text-sm font-semibold ${item.costImpact >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {item.costImpact >= 0 ? '+' : ''}${item.costImpact.toLocaleString()}
                         </span>
                       </td>
 
-                      <td className="px-4 py-3 text-center border border-gray-200" style={deletedCellStyle}>
+                      {/* Time Impact */}
+                      <td
+                        className="px-4 py-3 text-center border border-gray-200"
+                        style={deletedCellStyle}
+                      >
                         {isDeleted && <RedLine />}
                         <span className={`text-sm font-semibold ${
                           item.timeImpact > 0 ? 'text-orange-600' :
