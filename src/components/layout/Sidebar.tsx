@@ -97,7 +97,7 @@ const navItems: NavItem[] = [
   { name: "Schedule", path: "/schedule", icon: CalendarCheck, section: "Delivery" },
   { name: "Map View", path: "/map", icon: MapPinned, section: "Delivery" },
   { name: "Price Book", path: "/products", icon: Notebook, section: "Delivery" },
-  { name: "Payout", path: "/rsf-pay", icon: HandCoins, section: "Delivery" },
+  { name: "Payout", path: "/payouts", icon: HandCoins, section: "Delivery" },
   { name: "Subcontractors", path: "/subcontractors", icon: Contact, section: "Delivery" },
   { name: "Staff", path: "/staff", icon:BookUser, section: "Delivery" },
 

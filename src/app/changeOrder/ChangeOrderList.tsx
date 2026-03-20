@@ -295,7 +295,7 @@ export default function ChangeOrderList() {
               placeholder="Search by order #, project, owner, job #..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
@@ -358,12 +358,12 @@ export default function ChangeOrderList() {
                     className="hover:bg-gray-50 cursor-pointer transition"
                     onClick={() => navigate(`/change-orders/${order.id}`)}
                   >
-                    {/* Order Number */}
+                    
                     <td className="px-4 py-3 text-nowrap">
                       <span className="font-semibold text-green-600">{order.orderNumber}</span>
                     </td>
                     
-                    {/* Project */}
+                   
                     <td className="px-4 py-3">
                       <div>
                         <p className="font-medium text-gray-900">{order.projectType}</p>
@@ -371,7 +371,7 @@ export default function ChangeOrderList() {
                       </div>
                     </td>
                     
-                    {/* Owner */}
+                   
                     <td className="px-4 py-3">
                       <div>
                         <p className="text-gray-900">{order.owner}</p>
@@ -379,7 +379,7 @@ export default function ChangeOrderList() {
                       </div>
                     </td>
                     
-                    {/* Date */}
+                    
                     <td className="px-4 py-3 text-gray-700">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3 text-gray-400" />
@@ -387,7 +387,7 @@ export default function ChangeOrderList() {
                       </div>
                     </td>
                     
-                    {/* Status */}
+                   
                     <td className="px-4 py-3 text-center">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${statusConfig[order.status].bg} ${statusConfig[order.status].text}`}>
                         <StatusIcon className="w-3 h-3" />
