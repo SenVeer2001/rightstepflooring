@@ -413,6 +413,11 @@ export default function PayoutDetailsBySubcontractor() {
         }
     }
 
+
+     const handleViewOrder = (orderId: string) => {
+    navigate(`/orders/work-order/${orderId}`)
+  }
+
     /* ===================== CALENDAR HANDLERS ===================== */
 
     const handlePrevMonth = () => {
@@ -1117,7 +1122,7 @@ export default function PayoutDetailsBySubcontractor() {
                                                                 <tr key={order.id} className="border-t border-gray-200 hover:bg-white">
                                                                     <td className="py-3">
                                                                         <button
-                                                                            onClick={() => navigate(`/payouts/${order.id}`)}
+                                                                            onClick={() => navigate(`/orders/work-order/${order.id}`)}
                                                                             className="font-semibold text-primary hover:underline"
                                                                         >
                                                                             #{order.id}
