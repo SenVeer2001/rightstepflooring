@@ -183,7 +183,7 @@ const getDaysUntilExpiry = (date?: Date): number | null => {
 
 // Mock Chart Data Generator
 const generateChartData = (subcontractor: Subcontractor) => {
-  // Monthly Performance Data (last 6 months)
+  
   const monthlyPerformance = [
     { month: "Aug", jobs: 22, earnings: 8500, rating: 4.7, punctuality: 92 },
     { month: "Sep", jobs: 28, earnings: 11200, rating: 4.8, punctuality: 94 },
@@ -193,7 +193,7 @@ const generateChartData = (subcontractor: Subcontractor) => {
     { month: "Jan", jobs: 26, earnings: 10400, rating: 4.8, punctuality: 95 },
   ];
 
-  // Job Status Distribution
+  
   const jobStatusData = [
     { name: "Completed", value: subcontractor.completedJobs, color: "#22c55e" },
     { name: "In Progress", value: Math.max(subcontractor.totalJobs - subcontractor.completedJobs, 0), color: "#3b82f6" },
@@ -201,7 +201,7 @@ const generateChartData = (subcontractor: Subcontractor) => {
     { name: "Cancelled", value: Math.floor(Math.random() * 3), color: "#ef4444" },
   ];
 
-  // Rating Distribution
+  
   const ratingDistribution = [
     { rating: "5 Star", count: Math.floor(subcontractor.completedJobs * 0.6) },
     { rating: "4 Star", count: Math.floor(subcontractor.completedJobs * 0.25) },
@@ -210,7 +210,7 @@ const generateChartData = (subcontractor: Subcontractor) => {
     { rating: "1 Star", count: Math.floor(subcontractor.completedJobs * 0.02) },
   ];
 
-  // Ticket Category Distribution
+  
   const ticketCategories = [
     { name: "Quality", value: subcontractor.tickets.filter(t => t.category === "quality").length, color: "#8b5cf6" },
     { name: "Delay", value: subcontractor.tickets.filter(t => t.category === "delay").length, color: "#f59e0b" },
@@ -495,7 +495,7 @@ export default function SubcontractorProfile() {
 
                 {/* Charts Row 1 */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Monthly Performance Chart */}
+                 
                   <div className="bg-white rounded-xl border border-gray-200 p-5">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-sm font-semibold text-gray-900">Monthly Performance</h3>
@@ -526,7 +526,7 @@ export default function SubcontractorProfile() {
                     </ResponsiveContainer>
                   </div>
 
-                  {/* Job Status Distribution */}
+                 
                   <div className="bg-white rounded-xl border border-gray-200 p-5">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-sm font-semibold text-gray-900">Job Status Distribution</h3>
@@ -582,8 +582,7 @@ export default function SubcontractorProfile() {
                     </ResponsiveContainer>
                   </div>
 
-                 {/*  */}
-
+                
                  <div className="bg-white rounded-xl border border-gray-200 p-5">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-sm font-semibold text-gray-900">Performance Trend</h3>

@@ -1190,6 +1190,7 @@ export default function PayoutDetailsBySubcontractor() {
             />
 
             {/* Detail Popup */}
+            
             <SubcontractorDetailPopup />
         </div>
     )

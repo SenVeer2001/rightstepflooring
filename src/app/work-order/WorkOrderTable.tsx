@@ -315,11 +315,6 @@ export default function WorkOrderTable({
 
   return (
     <div className="space-y-6 p-2 min-h-screen">
-
-
-
-
-
       <div className="flex gap-3 overflow-x-auto pb-2 thin-scrollbar">
         {workOrderStatusTabs.map((tab) => {
           const isActive = activeStatus === tab.id

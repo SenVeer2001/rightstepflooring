@@ -129,12 +129,12 @@ export default function CalculationBreakdownModal({
                 </td>
               </tr>
               
-              {/* Divider */}
+              
               <tr className="bg-gray-200">
                 <td colSpan={2} className="px-4 py-1 border border-gray-200"></td>
               </tr>
               
-              {/* Original Contract */}
+             
               <tr>
                 <td className="px-4 py-3 text-sm font-medium text-gray-700 border border-gray-200">
                   Original Contract Value
@@ -144,7 +144,7 @@ export default function CalculationBreakdownModal({
                 </td>
               </tr>
               
-              {/* Change Amount */}
+              
               <tr>
                 <td className="px-4 py-3 text-sm font-medium text-gray-700 border border-gray-200">
                   Change Order Amount
@@ -156,7 +156,7 @@ export default function CalculationBreakdownModal({
                 </td>
               </tr>
               
-              {/* New Total */}
+        
               <tr className="bg-blue-50">
                 <td className="px-4 py-4 text-sm font-bold text-gray-900 border border-gray-200">
                   New Project Total
@@ -169,7 +169,7 @@ export default function CalculationBreakdownModal({
           </table>
         </div>
 
-        {/* Footer */}
+   
         <div className="flex justify-end px-4 py-3 border-t bg-gray-50">
           <button 
             onClick={onClose}

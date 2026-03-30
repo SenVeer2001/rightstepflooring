@@ -37,7 +37,7 @@ export function WorkOrderFormModal({
   const [isItemSelectorOpen, setIsItemSelectorOpen] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState<any[]>([])
 
-  /* ---------------- PREFILL EDIT ---------------- */
+  
 
   useEffect(() => {
     if (!isOpen) return
@@ -90,7 +90,7 @@ export function WorkOrderFormModal({
           <button onClick={onClose}>✕</button>
         </div>
 
-        {/* TEAM + DATE */}
+       
         <div className="grid grid-cols-2 gap-4 mb-4">
 
           <Select
@@ -111,7 +111,7 @@ export function WorkOrderFormModal({
 
         </div>
 
-        {/* ADD ITEMS */}
+       
         <div className="flex gap-3 mb-4">
           <select
             className="flex-1 border rounded-md px-3 py-2 text-sm"

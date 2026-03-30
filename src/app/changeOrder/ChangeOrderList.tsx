@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { 
-  Plus, 
-  Search, 
-  Eye, 
-  Edit2, 
-  Trash2, 
+import {
+  Plus,
+  Search,
+  Eye,
+  Edit2,
+  Trash2,
   FileText,
   Calendar,
   DollarSign,
@@ -161,27 +161,27 @@ const changeOrdersData: ChangeOrder[] = [
 ]
 
 const statusConfig = {
-  pending: { 
-    label: 'Pending', 
-    bg: 'bg-yellow-100', 
+  pending: {
+    label: 'Pending',
+    bg: 'bg-yellow-100',
     text: 'text-yellow-700',
     icon: AlertCircle
   },
-  approved: { 
-    label: 'Approved', 
-    bg: 'bg-green-100', 
+  approved: {
+    label: 'Approved',
+    bg: 'bg-green-100',
     text: 'text-green-700',
     icon: CheckCircle
   },
-  rejected: { 
-    label: 'Rejected', 
-    bg: 'bg-red-100', 
+  rejected: {
+    label: 'Rejected',
+    bg: 'bg-red-100',
     text: 'text-red-700',
     icon: XCircle
   },
-  draft: { 
-    label: 'Draft', 
-    bg: 'bg-gray-100', 
+  draft: {
+    label: 'Draft',
+    bg: 'bg-gray-100',
     text: 'text-gray-700',
     icon: FileText
   },
@@ -194,21 +194,21 @@ export default function ChangeOrderList() {
 
   // Filter orders
   const filteredOrders = changeOrdersData.filter(order => {
-    const matchesSearch = 
+    const matchesSearch =
       order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.projectType.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.owner.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.jobNumber.toLowerCase().includes(searchTerm.toLowerCase())
-    
+
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter
-    
+
     return matchesSearch && matchesStatus
   })
 
   // Calculate stats
   const totalPending = changeOrdersData.filter(o => o.status === 'pending').length
   const totalApproved = changeOrdersData.filter(o => o.status === 'approved').length
-  
+
   // Calculate total change value from all orders
   const totalChangeValue = changeOrdersData.reduce((sum, order) => {
     const orderChange = order.items.reduce((itemSum, item) => itemSum + item.costImpact, 0)
@@ -328,7 +328,7 @@ export default function ChangeOrderList() {
         </div>
       </div>
 
-      {/* Table */}
+      
       <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -351,106 +351,105 @@ export default function ChangeOrderList() {
               {filteredOrders.map((order) => {
                 const StatusIcon = statusConfig[order.status].icon
                 const { changeAmount, daysImpact, newTotal } = getOrderTotals(order)
-                
+
                 return (
-                  <tr 
-                    key={order.id} 
+                  <tr
+                    key={order.id}
                     className="hover:bg-gray-50 cursor-pointer transition"
                     onClick={() => navigate(`/change-orders/${order.id}`)}
                   >
-                    
+
                     <td className="px-4 py-3 text-nowrap">
                       <span className="font-semibold text-green-600">{order.orderNumber}</span>
                     </td>
-                    
-                   
+
+
                     <td className="px-4 py-3">
                       <div>
                         <p className="font-medium text-gray-900">{order.projectType}</p>
                         <p className="text-xs text-gray-500">Job #{order.jobNumber}</p>
                       </div>
                     </td>
-                    
-                   
+
+
                     <td className="px-4 py-3">
                       <div>
                         <p className="text-gray-900">{order.owner}</p>
                         <p className="text-xs text-gray-500 truncate max-w-[150px]">{order.ownerAddress}</p>
                       </div>
                     </td>
-                    
-                    
+
+
                     <td className="px-4 py-3 text-gray-700">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3 text-gray-400" />
                         {new Date(order.date).toLocaleDateString()}
                       </div>
                     </td>
-                    
-                   
+
+
                     <td className="px-4 py-3 text-center">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${statusConfig[order.status].bg} ${statusConfig[order.status].text}`}>
                         <StatusIcon className="w-3 h-3" />
                         {statusConfig[order.status].label}
                       </span>
                     </td>
-                    
+
                     {/* Original Value */}
                     <td className="px-4 py-3 text-right text-gray-700">
                       ${order.originalContractValue.toLocaleString()}
                     </td>
-                    
+
                     {/* Change Amount */}
                     <td className="px-4 py-3 text-right">
                       <span className={`font-semibold ${changeAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {changeAmount >= 0 ? '+' : ''}${changeAmount.toLocaleString()}
                       </span>
                     </td>
+
                     
-                    {/* New Total */}
                     <td className="px-4 py-3 text-right font-semibold text-blue-600">
                       ${newTotal.toLocaleString()}
                     </td>
-                    
-                    {/* Days Impact */}
+
+                   
                     <td className="px-4 py-3 text-center">
-                      <span className={`inline-flex items-center gap-1 text-sm font-medium ${
-                        daysImpact > 0 ? 'text-orange-600' : 
-                        daysImpact < 0 ? 'text-green-600' : 'text-gray-500'
-                      }`}>
+                      <span className={`inline-flex items-center gap-1 text-sm font-medium ${daysImpact > 0 ? 'text-orange-600' :
+                          daysImpact < 0 ? 'text-green-600' : 'text-gray-500'
+                        }`}>
                         <Clock className="w-3 h-3" />
                         {daysImpact > 0 ? '+' : ''}{daysImpact}
                       </span>
                     </td>
-                    
-                    {/* Items Count */}
+
+                   
                     <td className="px-4 py-3 text-center">
                       <span className="inline-flex items-center justify-center w-6 h-6 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold">
                         {order.items.length}
                       </span>
                     </td>
-                    
-                    {/* Actions */}
+
+                   
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-                        <button 
+                        <button
                           onClick={() => navigate(`/change-orders/${order.id}`)}
                           className="p-1.5 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition"
                           title="View"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => navigate(`/change-orders/${order.id}/edit`)}
                           className="p-1.5 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition"
                           title="Edit"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => {
                             if (confirm('Are you sure you want to delete this change order?')) {
-                              // Handle delete
+                              // Handle delete 
                               console.log('Delete:', order.id)
                             }
                           }}
@@ -468,13 +467,13 @@ export default function ChangeOrderList() {
           </table>
         </div>
 
-        {/* Empty State */}
+        
         {filteredOrders.length === 0 && (
           <div className="p-12 text-center text-gray-500">
             <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
             <p className="text-lg font-medium">No change orders found</p>
             <p className="text-sm mt-1">Try adjusting your search or filter</p>
-            <button 
+            <button
               onClick={() => navigate('/change-orders/new')}
               className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold inline-flex items-center gap-2 hover:bg-green-700 transition"
             >
@@ -485,7 +484,7 @@ export default function ChangeOrderList() {
         )}
       </div>
 
-      {/* Pagination (Optional - can add later) */}
+      
       {filteredOrders.length > 0 && (
         <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
           <p>Showing {filteredOrders.length} of {changeOrdersData.length} change orders</p>

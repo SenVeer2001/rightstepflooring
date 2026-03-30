@@ -50,7 +50,7 @@ import { Payments } from "../app/payments/PaymentDashboard"
 import { InvoicePaymentDetailsPage } from "../app/payments/InvoicePage"
 import ChangeOrderList from "../app/changeOrder/ChangeOrderList"
 import ChangeOrderView from "../app/changeOrder/ChangeOrderView"
-import PayoutList from "../app/payout/PayoutList"
+
 import PayoutDetails from "../app/payout/PayoutDetails"
 
 
@@ -129,8 +129,7 @@ export function AppRoutes() {
 
 
 
-                  {/* tranning route  */}
-
+              
                   <Route path="/training/courses" element={<CourseDashboard />} />
                   <Route path="/training/courses/new" element={<CourseDetail />} />
 
@@ -156,11 +155,6 @@ export function AppRoutes() {
 
                   {/* <Route path="/payouts" element={<PayoutList />} /> */}
                   <Route path="/payouts" element={<PayoutDetails />} />
-
-
-
-
-
                   <Route path="/notifications" element={<NotificationsPage />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/faq" element={<FAQ />} />

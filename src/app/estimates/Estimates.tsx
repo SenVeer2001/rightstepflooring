@@ -257,8 +257,6 @@ export default function EstimatesPage() {
     )
   }
 
-
-
   /* ================= UI ================= */
 
   return (

@@ -215,7 +215,6 @@ const priceBookData: PriceBookCategory[] = [
 
 
 
-
 export function EstimatesView() {
 
   const [Tab, setActiveTab] = useState<'view' | 'add'>('view')
@@ -915,10 +914,10 @@ export function EstimatesView() {
                 </div>
               </div>
 
-              {/* Address + Status */}
+              
               <div className="lg:col-span-3 space-y-4">
 
-                {/* Service Address */}
+               
                 <div>
                   <p className="text-sm font-semibold text-gray-700 mb-1">
                     Service address
@@ -1003,7 +1002,7 @@ export function EstimatesView() {
               `}
               style={{ position: 'relative' }}
             >
-              {/* DESCRIPTION */}
+            
               <td className={`px-2.5 py-3 min-w-[230px] ${item.isDeleted ? 'opacity-30' : ''}`}>
                 <div className='flex items-center gap-2'>
                   <img 

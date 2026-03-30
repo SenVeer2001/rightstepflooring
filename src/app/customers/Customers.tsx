@@ -1,12 +1,16 @@
 import { useState, useRef, useEffect } from "react"
 import { 
   Search, Filter, Plus, RefreshCcw, Tag, X, Check, 
-  Eye, Trash2, Download, UserCog, Mail, Phone
+  Eye, Trash2, Download, UserCog, Mail, Phone, ShoppingCart, FileText,
+  ShoppingBag
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { CreateClientModal } from "../../components/customerPages/CreateClientModal"
+ // 👈 NEW IMPORT
 import { Tooltip } from "react-tooltip"
 import "react-tooltip/dist/react-tooltip.css"
+import { ShoppingListModal } from "./ShoppingListModal"
+import { PriceBookModal } from "../../components/PriceBookModal"
 
 /* ===================== TYPES ===================== */
 
@@ -28,6 +32,30 @@ interface Customer {
   status: CustomerStatus
   tags: string[]
   joinDate: string
+}
+
+interface PriceBookItem {
+  id: string
+  name: string
+  price: number
+  image: string
+}
+
+interface PriceBookCategory {
+  id: string
+  name: string
+  image: string
+  items: PriceBookItem[]
+}
+
+interface ShoppingListItem {
+  id: string
+  itemId: string
+  name: string
+  price: number
+  quantity: number
+  image: string
+  total: number
 }
 
 /* ===================== STATUS CONFIG ===================== */
@@ -77,6 +105,61 @@ const tagColorMap: Record<string, string> = {
 const getTagColor = (tagLabel: string): string => {
   return tagColorMap[tagLabel] || "bg-gray-100 text-gray-700 border border-gray-200"
 }
+
+/* ===================== PRICE BOOK DATA ===================== */
+
+const priceBookData: PriceBookCategory[] = [
+  {
+    id: "flooring",
+    name: "Flooring Install",
+    image: "https://images.pexels.com/photos/48889/cleaning-washing-cleanup-the-ilo-48889.jpeg",
+    items: [
+      { id: "lvp", name: "LVP Installation", price: 2.5, image: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea" },
+      { id: "hardwood", name: "Hardwood Installation", price: 4.25, image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c" },
+      { id: "tile-floor", name: "Tile Flooring", price: 5.75, image: "https://images.unsplash.com/photo-1615874959474-d609969a20ed" },
+    ],
+  },
+  {
+    id: "carpet",
+    name: "Carpet Services",
+    image: "https://images.unsplash.com/photo-1586105251261-72a756497a11",
+    items: [
+      { id: "carpet-install", name: "Carpet Installation", price: 1.67, image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c" },
+      { id: "carpet-removal", name: "Carpet Removal", price: 0.85, image: "https://images.pexels.com/photos/4107284/pexels-photo-4107284.jpeg" },
+      { id: "carpet-clean", name: "Carpet Deep Cleaning", price: 0.95, image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6" },
+    ],
+  },
+  {
+    id: "painting",
+    name: "Painting",
+    image: "https://images.unsplash.com/photo-1599619351208-3e6c839d6828",
+    items: [
+      { id: "interior-paint", name: "Interior Wall Painting", price: 1.5, image: "https://images.pexels.com/photos/6764289/pexels-photo-6764289.jpeg" },
+      { id: "exterior-paint", name: "Exterior Painting", price: 2.75, image: "https://images.pexels.com/photos/221027/pexels-photo-221027.jpeg" },
+      { id: "ceiling-paint", name: "Ceiling Painting", price: 1.9, image: "https://images.pexels.com/photos/69903/pexels-photo-69903.jpeg" },
+    ],
+  },
+  {
+    id: "plumbing",
+    name: "Plumbing",
+    image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952",
+    items: [
+      { id: "faucet-install", name: "Faucet Installation", price: 120, image: "https://images.unsplash.com/photo-1600566752355-35792bedcfea" },
+      { id: "toilet-install", name: "Toilet Installation", price: 180, image: "https://images.pexels.com/photos/10421641/pexels-photo-10421641.jpeg" },
+      { id: "leak-fix", name: "Leak Repair", price: 95, image: "https://images.pexels.com/photos/11658940/pexels-photo-11658940.jpeg" },
+    ],
+  },
+  {
+    id: "electrical",
+    name: "Electrical",
+    image: "https://images.pexels.com/photos/9989522/pexels-photo-9989522.jpeg",
+    items: [
+      { id: "light-install", name: "Light Fixture Installation", price: 85, image: "https://images.unsplash.com/photo-1604014237800-1c9102c219da" },
+      { id: "ceiling-fan", name: "Ceiling Fan Installation", price: 120, image: "https://images.unsplash.com/photo-1621905251918-48416bd8575a" },
+      { id: "switch-repair", name: "Switch / Socket Repair", price: 65, image: "https://images.pexels.com/photos/7596370/pexels-photo-7596370.jpeg" },
+    ],
+  },
+]
 
 /* ===================== MOCK DATA ===================== */
 
@@ -189,6 +272,16 @@ export function Customers() {
   const statusDropdownRef = useRef<HTMLDivElement>(null)
   const tagsDropdownRef = useRef<HTMLDivElement>(null)
 
+  // Price Book Modal State
+  const [isPriceBookOpen, setIsPriceBookOpen] = useState(false)
+
+  // Shopping List State
+  const [shoppingListItems, setShoppingListItems] = useState<ShoppingListItem[]>([])
+
+  // 👇 NEW: Shopping List View Modal State
+  const [isShoppingListViewOpen, setIsShoppingListViewOpen] = useState(false)
+  const [selectedClientForView, setSelectedClientForView] = useState<Customer | null>(null)
+
   const [visibleColumns, setVisibleColumns] = useState({
     id: true,
     name: true,
@@ -201,10 +294,8 @@ export function Customers() {
     action: true,
   })
 
-  // Check if any customers are selected
   const hasSelection = selectedIds.size > 0
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -220,6 +311,40 @@ export function Customers() {
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
+
+  /* ===================== PRICE BOOK HANDLER ===================== */
+
+  const handleAddToShoppingList = (item: PriceBookItem, quantity: number) => {
+    const newShoppingItem: ShoppingListItem = {
+      id: Date.now().toString(),
+      itemId: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: quantity,
+      image: item.image,
+      total: item.price * quantity,
+    }
+
+    setShoppingListItems(prev => [...prev, newShoppingItem])
+  }
+
+  const handleRemoveFromShoppingList = (itemId: string) => {
+    setShoppingListItems(prev => prev.filter(item => item.id !== itemId))
+  }
+
+  const handleClearShoppingList = () => {
+    setShoppingListItems([])
+  }
+
+  const shoppingListTotal = shoppingListItems.reduce((sum, item) => sum + item.total, 0)
+
+  /* ===================== VIEW SHOPPING LIST HANDLER ===================== */
+
+  // 👇 NEW: Open Shopping List View for a specific client
+  const handleViewShoppingList = (customer: Customer) => {
+    setSelectedClientForView(customer)
+    setIsShoppingListViewOpen(true)
+  }
 
   /* ===================== STATUS TABS ===================== */
 
@@ -380,14 +505,91 @@ export function Customers() {
           </p>
         </div>
 
-        <button 
-          onClick={() => setOpenCreateClient(true)}
-          className="flex text-sm items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
-        >
-          <Plus size={18} />
-          Add Client
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setIsPriceBookOpen(true)}
+            className="flex text-sm items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+          >
+            <ShoppingCart size={18} />
+            Client Shopping List
+          </button>
+
+          <button 
+            onClick={() => setOpenCreateClient(true)}
+            className="flex text-sm items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+          >
+            <Plus size={18} />
+            Add Client
+          </button>
+        </div>
       </div>
+
+      {/* SHOPPING LIST PREVIEW */}
+      {shoppingListItems.length > 0 && (
+        <div className="bg-white border border-primary/20 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <ShoppingCart size={20} className="text-primary" />
+              Shopping List ({shoppingListItems.length} items)
+            </h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsPriceBookOpen(true)}
+                className="px-3 py-1.5 text-sm border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
+              >
+                + Add More
+              </button>
+              <button
+                onClick={handleClearShoppingList}
+                className="px-3 py-1.5 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+              >
+                Clear All
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {shoppingListItems.map((item) => (
+              <div 
+                key={item.id} 
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={item.image} 
+                    alt={item.name}
+                    className="w-12 h-12 object-cover rounded-lg"
+                  />
+                  <div>
+                    <p className="font-medium text-gray-900">{item.name}</p>
+                    <p className="text-sm text-gray-500">
+                      {item.quantity} x ${item.price.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold text-primary">
+                    ${item.total.toFixed(2)}
+                  </span>
+                  <button
+                    onClick={() => handleRemoveFromShoppingList(item.id)}
+                    className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 pt-3 border-t flex items-center justify-between">
+            <span className="text-gray-600 font-medium">Total:</span>
+            <span className="text-xl font-bold text-primary">
+              ${shoppingListTotal.toFixed(2)}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -443,9 +645,7 @@ export function Customers() {
 
       {/* SEARCH & BULK ACTIONS */}
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-        {/* Search */}
         <div className="relative flex-1 min-w-[300px]">
-          {/* <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" /> */}
           <input
             type="text"
             placeholder="Search by name, email, phone, or company..."
@@ -455,7 +655,6 @@ export function Customers() {
           />
         </div>
 
-        {/* Quick Actions */}
         <div className="flex items-center gap-2 flex-wrap">
           {hasSelection && (
             <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-lg mr-2">
@@ -498,7 +697,6 @@ export function Customers() {
                 </button>
               )}
 
-              {/* Status Dropdown */}
               {activeDropdown === "status" && hasSelection && (
                 <div className="absolute top-full left-0 mt-2 w-48 bg-white border rounded-xl shadow-lg z-50 py-2">
                   <div className="px-3 py-2 border-b">
@@ -545,7 +743,6 @@ export function Customers() {
                 </button>
               )}
 
-              {/* Tags Dropdown */}
               {activeDropdown === "tags" && hasSelection && (
                 <div className="absolute top-full left-0 mt-2 w-64 bg-white border rounded-xl shadow-lg z-50 py-2 max-h-80 overflow-y-auto">
                   <div className="px-3 py-2 border-b">
@@ -572,7 +769,6 @@ export function Customers() {
                     )
                   })}
 
-                  {/* Current tags on selected customers */}
                   {getSelectedCustomersTags().length > 0 && (
                     <>
                       <div className="px-3 py-2 border-t border-b mt-2">
@@ -645,12 +841,10 @@ export function Customers() {
             )}
           </div>
 
-          {/* Export Button */}
           <button className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-primary bg-gray-200 font-semibold hover:bg-primary hover:text-white transition">
             <Download size={16} /> Export
           </button>
 
-          {/* FIELDS */}
           <div className="relative">
             <button
               onClick={() => setShowFields(!showFields)}
@@ -705,7 +899,7 @@ export function Customers() {
                   className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-primary"
                 />
               </th>
-
+              
               {visibleColumns.id && <th className="px-4 py-3 text-left font-semibold">Client ID</th>}
               {visibleColumns.name && <th className="px-4 py-3 text-left font-semibold">Name</th>}
               {visibleColumns.status && <th className="px-4 py-3 text-left font-semibold">Status</th>}
@@ -768,7 +962,6 @@ export function Customers() {
                       </td>
                     )}
 
-                    {/* Status with Dropdown */}
                     {visibleColumns.status && (
                       <td className="px-4 py-3 min-w-[150px]">
                         <select
@@ -784,8 +977,6 @@ export function Customers() {
                         </select>
                       </td>
                     )}
-
-                    {/* Tags Column */}
                     {visibleColumns.tags && (
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1 max-w-[200px]">
@@ -832,9 +1023,20 @@ export function Customers() {
                       </td>
                     )}
 
+                    {/* 👇 UPDATED ACTION COLUMN WITH VIEW BUTTON */}
                     {visibleColumns.action && (
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
+                          {/* View Client Details */}
+
+                           <button
+                            onClick={() => handleViewShoppingList(customer)}
+                            data-tooltip-id="action-tooltip"
+                            data-tooltip-content="View Shopping List"
+                            className="p-1.5 rounded hover:bg-emerald-100 text-emerald-600 transition-colors"
+                          >
+                            <ShoppingBag size={16} />
+                          </button>
                           <button
                             onClick={() => navigate(`/client/${customer.id}`)}
                             data-tooltip-id="action-tooltip"
@@ -843,6 +1045,11 @@ export function Customers() {
                           >
                             <Eye size={16} />
                           </button>
+
+                          {/* 👇 NEW: View Shopping List Button */}
+                         
+
+                          {/* Delete */}
                           <button
                             onClick={() => handleDelete(customer.id)}
                             data-tooltip-id="action-tooltip"
@@ -906,7 +1113,6 @@ export function Customers() {
                     </select>
                   </div>
 
-                  {/* Tags */}
                   <div className="flex flex-wrap gap-1 mt-2">
                     {(customer.tags ?? []).map(tag => (
                       <span
@@ -932,12 +1138,20 @@ export function Customers() {
                       {customer.phone}
                     </a>
                     <div className="flex gap-2">
+                       <button
+                        onClick={() => handleViewShoppingList(customer)}
+                        className="p-2 hover:bg-gray-100 rounded-lg text-emerald-600"
+                      >
+                        <ShoppingCart size={16} />
+                      </button>
                       <button
                         onClick={() => navigate(`/client/${customer.id}`)}
                         className="p-2 hover:bg-gray-100 rounded-lg text-primary"
                       >
                         <Eye size={16} />
                       </button>
+                     
+                     
                       <button
                         onClick={() => handleDelete(customer.id)}
                         className="p-2 hover:bg-gray-100 rounded-lg text-red-600"
@@ -961,6 +1175,31 @@ export function Customers() {
           console.log("CLIENT DATA", data)
           setOpenCreateClient(false)
         }}
+      />
+
+      {/* PRICE BOOK MODAL */}
+      <PriceBookModal
+        isOpen={isPriceBookOpen}
+        onClose={() => setIsPriceBookOpen(false)}
+        data={priceBookData}
+        onAddToEstimate={handleAddToShoppingList}
+      />
+
+      {/* 👇 NEW: SHOPPING LIST VIEW MODAL */}
+      <ShoppingListModal
+        isOpen={isShoppingListViewOpen}
+        onClose={() => {
+          setIsShoppingListViewOpen(false)
+          setSelectedClientForView(null)
+        }}
+        client={selectedClientForView ? {
+          name: selectedClientForView.name,
+          email: selectedClientForView.email,
+          phone: selectedClientForView.phone,
+          company: selectedClientForView.company,
+          address: `${selectedClientForView.address}, ${selectedClientForView.city}, ${selectedClientForView.state} ${selectedClientForView.zip}`
+        } : null}
+        items={shoppingListItems}
       />
 
       {/* TOOLTIPS */}

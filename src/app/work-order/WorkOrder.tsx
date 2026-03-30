@@ -4,8 +4,6 @@ import { staticWorkOrders } from '../../services/orderdata'
 import { Plus } from 'lucide-react'
 import { WorkOrderFormModal } from '../../components/customerPages/clientPages/WorkOrderFormModel'
 
-
-// Mock job items - replace with your actual data
 const mockJobItems = [
   {
     id: 1,
@@ -87,8 +85,6 @@ function WorkOrder() {
         workOrders={staticWorkOrders} 
         onDelete={handleDelete}
       />
-
-      
       <WorkOrderFormModal
         isOpen={isModalOpen}
         mode="create"
