@@ -92,16 +92,16 @@ export function ShoppingListModal({
           {/* ===== HEADER SECTION WITH ABSOLUTE BG ===== */}
           <div className="relative">
             
-            {/* Green Background - ABSOLUTE, starts from logo's middle */}
+         
             <div 
               className="absolute left-0 right-0 bg-[#e2eccd]"
               style={{
-                top: '70px',      // Half of logo height (144px / 2)
-                height: '200px',  // Covers logo bottom half + title
+                top: '70px',  
+                height: '200px', 
               }}
             />
             
-            {/* Logo - Centered, on top of everything */}
+           
             <div className="relative z-10 flex justify-center pt-6 ">
               <div className="w-32 h-32 rounded-full  overflow-hidden flex items-center justify-center">
                 <img 
@@ -119,7 +119,7 @@ export function ShoppingListModal({
               </div>
             </div>
             
-            {/* Title - On top of green background */}
+           
             <div className="relative z-10 text-center pt-4 pb-10">
               <h1 className="text-2xl md:text-3xl font-sans tracking-[12px] text-[#2d3a1a] font-light">
                 Client <br /><span className="font-extralight font-serif  ">Shopping List</span>
@@ -143,7 +143,7 @@ export function ShoppingListModal({
                 field.value && (
                   <div key={idx} className="flex items-center gap-4">
                     <label className="text-gray-600 font-medium min-w-[140px] text-xs uppercase tracking-wide">
-                      {field.label}:
+                      {field.label}
                     </label>
                     <div className="flex-1 border-b border-gray-300 pb-1 text-gray-800 font-medium">
                       {field.value}
@@ -152,7 +152,8 @@ export function ShoppingListModal({
                 )
               ))}
             </div>
-
+            
+                  
             {/* Description Text */}
             <div className="text-center max-w-2xl mx-auto">
               <p className="text-gray-500 italic leading-relaxed text-sm">
@@ -185,7 +186,8 @@ export function ShoppingListModal({
                         key={item.id} 
                         className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                       >
-                        {/* Photo */}
+
+                        
                         <td className="px-4 py-3">
                           <img 
                             src={item.image || "/images/placeholder.png"} 
@@ -220,8 +222,7 @@ export function ShoppingListModal({
                   </tbody>
                 </table>
               </div>
-
-              {/* Grand Total */}
+ 
               <div className="flex items-center justify-end gap-4 pt-4 border-t-2 border-[#e2eccd] mt-4">
                 <span className="text-md font-bold text-gray-800">Grand Total:</span>
                 <div className="w-30 h-10 bg-[#3d8c7a] rounded-lg px-4 flex items-center justify-center">
@@ -232,16 +233,17 @@ export function ShoppingListModal({
               </div>
             </div>
             
-            {/* Footer */}
+            
             <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-gray-200">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg overflow-hidden border-2 border-white">
                   <img 
-                    src="/images/logo.jpeg" 
+                    src="/images/logo.jpeg"
                     alt="Company Logo"
                     className="w-full h-full object-contain p-1"
                   />
                 </div>
+                
                 <span className="text-sm text-gray-500 lowercase font-medium">
                   rightstepflooringnc.com
                 </span>
@@ -259,7 +261,6 @@ export function ShoppingListModal({
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="border-t bg-gray-50 px-6 py-4 flex justify-end gap-3">
           <button
             onClick={onClose}

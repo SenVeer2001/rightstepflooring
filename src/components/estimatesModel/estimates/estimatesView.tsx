@@ -685,14 +685,8 @@ export function EstimatesView() {
     }
   }
 
-
-
-
-
   const currentData = activeTab === 'view' && selectedEstimate ? selectedEstimate : newEstimate
 
-
-  // 👇 UPDATED: Calculate excluding deleted items
   const itemCost = (currentData.items || [])
     .filter(item => !item.isDeleted)
     .reduce((sum, item) => sum + item.amount, 0)
@@ -702,9 +696,6 @@ export function EstimatesView() {
   const subtotal = taxableAmount + tax
   const total = subtotal + laborCost
 
-
-
-
   return (
     <div className="flex flex-col h-screen ">
       {/* Breadcrumb */}
@@ -712,7 +703,6 @@ export function EstimatesView() {
         CALLS # TEXT MESSAGES # LEAD (1182) # LEADS # LEAD ({selectedEstimate?.leadId || '1134'}) # ESTIMATE ({activeTab === 'view' ? selectedEstimate?.id : 'NEW'})
       </div>
 
-      {/* Header with Back and Tabs */}
       <div className="px-6 py-4  ">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-4">
@@ -725,7 +715,7 @@ export function EstimatesView() {
               {activeTab === 'view' && selectedEstimate ? `Lead ID: ${selectedEstimate.leadId}` : 'Create New Estimate'}
             </h2>
             
-            {/* 👇 ADDED: Change Order Badge */}
+           
             {selectedEstimate?.hasChangeOrder && (
               <span className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full">
                 Has Change Orders
@@ -832,10 +822,7 @@ export function EstimatesView() {
                       </>
                     ) : (
                       <>
-                        {/* UPLOAD ICON */}
                         <Upload size={28} className="text-primary" />
-   
-
                         <input
                           type="file"
                           accept="image/*"
@@ -845,8 +832,7 @@ export function EstimatesView() {
                       </>
                     )}
                   </div>
-
-                  {/* LABEL */}
+                
                   <p className="text-xs text-gray-600 font-medium">
                     Upload image
                   </p>
@@ -942,11 +928,7 @@ export function EstimatesView() {
                      focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
-
-
-
               </div>
-
             </div>
           </div>
 

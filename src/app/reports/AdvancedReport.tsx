@@ -94,10 +94,8 @@ export function AdvancedReport() {
           ))}
         </section>
 
-        {/* TWO COLUMN GRID */}
+        
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-          {/* LEFT COLUMN */}
           <div className="rounded-2xl p-4 bg-white/80 backdrop-blur-xl border border-white/30">
 
            <div >
@@ -194,11 +192,9 @@ export function AdvancedReport() {
             
           </div>
 
-          {/* RIGHT COLUMN */}
+        
           <div className="rounded-2xl p-4 bg-white/80 backdrop-blur-xl border border-white/30">
-
-            {/* Demographics */}
-            <div >
+             <div >
               <SectionTitle
                 title="Demographics"
                 description="Click data point(s) to filter dashboard."
@@ -287,11 +283,8 @@ export function AdvancedReport() {
                 </table>
               </div>
             </div>
-
           </div>
         </section>
-
-        {/* FOOTER */}
         <footer className="text-xs text-gray-600 text-center pt-4 border-t">
           © HR Analytics Dashboard
         </footer>

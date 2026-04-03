@@ -14,7 +14,7 @@ import CreateEstimateModal from "../../components/estimatesModel/CreateEstimateM
 /* ================= TYPES ================= */
 
 type EstimateStatus =
-  |"all"
+  | "all"
   | "unsent"
   | "pending"
   | "approved"
@@ -35,7 +35,6 @@ interface Estimate {
   depositDue: number
 }
 
-/* ================= MOCK DATA ================= */
 
 const ESTIMATES: Estimate[] = [
   {
@@ -174,7 +173,7 @@ const STATUS_OPTIONS: EstimateStatus[] = [
 ]
 
 const STATUS_STYLES: Record<EstimateStatus, string> = {
-  all:"text-gray-900",
+  all: "text-gray-900",
   unsent: " text-gray-700",
   pending: " text-yellow-800",
   approved: " text-green-700",
@@ -197,7 +196,7 @@ export default function EstimatesPage() {
 
   const statusCounts = useMemo(() => {
     const base = {
-      all:ESTIMATES.length,
+      all: ESTIMATES.length,
       unsent: 0,
       pending: 0,
       approved: 0,
@@ -213,7 +212,7 @@ export default function EstimatesPage() {
     return base
   }, [])
 
-  /* ================= FILTER ================= */
+  
 
   const [estimates, setEstimates] = useState<Estimate[]>(ESTIMATES)
 
@@ -230,7 +229,6 @@ export default function EstimatesPage() {
       return matchesSearch && matchesStatus
     })
   }, [search, statusFilter, estimates])
-
 
   const handleStatusChange = (id: string, newStatus: EstimateStatus) => {
     setEstimates(prev =>
@@ -267,7 +265,7 @@ export default function EstimatesPage() {
         <div>
           <h1 className="text-3xl font-bold text-black">Estimates</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Create and manage estimate Here  
+            Create and manage estimate Here
           </p>
         </div>
 
@@ -283,7 +281,7 @@ export default function EstimatesPage() {
       {/* STATUS TABS */}
       <div className="flex flex-wrap gap-3 ">
         {[
-          ["All","all"],
+          ["All", "all"],
           ["Unsent", "unsent"],
           ["Pending", "pending"],
           ["Approved", "approved"],
@@ -300,9 +298,9 @@ export default function EstimatesPage() {
               className={` flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold
           whitespace-nowrap transition
           ${active
-                      ? "bg-primary text-white"
-                      : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
-                    }`}
+                  ? "bg-primary text-white"
+                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+                }`}
             >
               {label}
               <span
@@ -388,8 +386,6 @@ export default function EstimatesPage() {
 
       </div>
 
-
-
       <div className="bg-white border rounded-lg overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b">
@@ -431,27 +427,23 @@ export default function EstimatesPage() {
                   />
 
                 </td>
-
                 <td
                   className="px-4 py-3 font-medium text-primary cursor-pointer"
                   onClick={() => navigate(`/estimates/${e.estimateNo}`)}
                 >
                   {e.estimateNo}
                 </td>
-
                 <td className="px-4 py-3">{e.name}</td>
 
                 <td className="px-4 py-3">
                   <div className="font-medium">{e.client}</div>
                   <div className="text-xs text-gray-500">{e.email}</div>
                 </td>
-
                 <td className="px-4 py-3">{e.createdAt}</td>
 
                 <td className="px-4 py-3">
                   ${e.amount.toLocaleString()}
                 </td>
-
                 <td className="px-4 py-3">
                   <select
                     value={e.status}

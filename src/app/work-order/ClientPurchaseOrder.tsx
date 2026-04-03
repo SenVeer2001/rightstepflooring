@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import type { PurchaseOrderTableItem } from "../../types/vendor"
 import { PurchaseOrderFormModal, type Item } from "../../components/customerPages/clientPages/PurchaseOrderFormModal"
 
-// ===================== STATUS TYPES =====================
+
 type POStatus = "po_created" | "po_approved" | "item_dispatched" | "item_received"
 
 
@@ -16,7 +16,7 @@ const PO_STATUS_LABELS: Record<POStatus, string> = {
   item_received: "Item Received",
 }
 
-// ===================== STATUS STYLES (Inline) =====================
+
 const statusStyles: Record<POStatus, { bg: string; text: string; border: string }> = {
   po_created: { bg: "#DBEAFE", text: "#1E40AF", border: "#93C5FD" },
   po_approved: { bg: "#DCFCE7", text: "#166534", border: "#86EFAC" },
@@ -40,16 +40,16 @@ export function ClientPurchaseOrder({
   onUpdate,
 }: PurchaseOrderTableProps) {
 
-  // ===================== LOCAL STATE =====================
+ 
   const [purchaseOrders, setPurchaseOrders] = useState(initialOrders || [])
   const [showAll, setShowAll] = useState(false)
   const [selectedStatus, setSelectedStatus] = useState<"all" | POStatus>("all")
 
-  // ===================== MODAL STATE =====================
+ 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedPO, setSelectedPO] = useState<any>(null)
 
-  // Update local state when props change
+ 
   useEffect(() => {
     setPurchaseOrders(initialOrders || [])
   }, [initialOrders])
@@ -57,7 +57,7 @@ export function ClientPurchaseOrder({
   const safePurchaseOrders = purchaseOrders || []
   const safeJobItems = jobItems || []
 
-  // ===================== STATUS TABS =====================
+  
   const statusTabs = [
     { id: "all", label: "All" },
     ...Object.entries(PO_STATUS_LABELS).map(([statusKey, statusLabel]) => ({
@@ -66,7 +66,7 @@ export function ClientPurchaseOrder({
     })),
   ]
 
-  // ===================== COUNT STATUS =====================
+  
   const statusCounts: Record<string, number> = {
     all: safePurchaseOrders.reduce((acc, order) => acc + (order.items?.length || 0), 0),
   }
@@ -246,7 +246,7 @@ export function ClientPurchaseOrder({
                   const itemStatus = ((item as any).status || "po_created") as POStatus
                   const currentStyle = statusStyles[itemStatus] || statusStyles.po_created
                   
-                  // Get cost and quantity
+                 
                   const itemCost = (item as any).cost || 0
                   const itemQuantity = (item as any).quantity || 1
                   const itemTotal = itemCost * itemQuantity

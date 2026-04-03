@@ -53,7 +53,7 @@ export function CreateItemModal({
           </div>
         </div>
 
-        {/* Footer */}
+     
         <div className="flex justify-end gap-3 p-4 border-t">
           <button
             onClick={onCancel}

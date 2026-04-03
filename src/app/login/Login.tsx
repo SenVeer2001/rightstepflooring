@@ -6,8 +6,6 @@ import { useAuth } from "../../context/AuthContext"
 /* ===================== SMALL HELPERS ===================== */
 
 
-
-
 export function Login() {
 
   const [showPassword, setShowPassword] = useState(false)
@@ -35,7 +33,6 @@ export function Login() {
         setError("Password must be at least 6 characters")
         return
       }
-
       await login(email, password)
       navigate("/")
     } catch (loginError) {
@@ -56,10 +53,10 @@ export function Login() {
       <div className="glass-layout" />
       <div className="glass-surface" />
 
-      {/* Card */}
+  
       <div className="relative w-full max-w-md z-10">
         <div className="glass-surface rounded-2xl p-8 md:p-10  backdrop-blur-md">
-          {/* Header */}
+         
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-[#387d22] to-[#2c621b] rounded-xl flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-lg">
               <img
@@ -74,7 +71,7 @@ export function Login() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
+          
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Email Address

@@ -144,6 +144,7 @@ export function Dashboard() {
                         className="w-3 h-3 rounded-full"
                         style={{ backgroundColor: item.color }}
                       />
+
                       <span className="text-xs text-gray-600">{item.name}</span>
                     </div>
                   ))}
@@ -153,9 +154,6 @@ export function Dashboard() {
 
             </div>
             <div className="grid grid-cols-2 gap-2">
-
-
-
               <div className={`${glassCard} p-6`}>
                 <SectionHeader title="DEPARTMENT" />
                 <div className="space-y-6 mt-6">
@@ -171,7 +169,6 @@ export function Dashboard() {
                 </div>
               </div>
             
-
               <div className={`${glassCard} p-6`}>
                 <SectionHeader title="JOB ROLE" subtitle="Top 5" />
                 <div className="space-y-3 mt-4">

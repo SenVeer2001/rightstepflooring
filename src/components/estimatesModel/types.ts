@@ -5,3 +5,4 @@ export interface PriceBookItem {
   cost?: number
   type?: "service" | "product"
 }
+
