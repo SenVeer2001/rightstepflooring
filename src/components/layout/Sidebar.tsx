@@ -5,19 +5,16 @@ import {
   Phone,
   Users,
   FileText,
- 
   LogOut,
   Menu,
   LayoutDashboard,
   CalendarCheck,
   MapPinned,
-
   UserPen,
   BarChart3,
   BookOpen,
   Notebook,
   HandCoins,
- 
   BookOpenText,
   ChevronDown,
   ChevronRight,
@@ -25,12 +22,10 @@ import {
   UserCheck,
   UserX,
   ListChecks,
-  ClockArrowUp,
-  
+  ClockArrowUp, 
   Images,
   Ticket,
   TicketPlus,
-  
   Contact,
   BookUser,
   FileSearch,
@@ -38,6 +33,9 @@ import {
   School,
   CreditCard,
   ListOrdered,
+  Wallet,
+  BookOpenCheck,
+  MessagesSquare,
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 
@@ -74,6 +72,8 @@ const navItems: NavItem[] = [
   { name: "Invoices", path: "/invoices", icon: FileText, section: "CRM" },
   { name: "Payments", path: "/payments", icon: CreditCard, section: "CRM" },
   { name: "Client", path: "/client", icon: Users, section: "CRM" },
+  { name: "Client Feedback", path: "/client-feedback", icon: MessagesSquare, section: "CRM" },
+
   { name: "CRM Calls", path: "/phone", icon: Phone, section: "CRM" },
 
   // Delivery
@@ -98,8 +98,11 @@ const navItems: NavItem[] = [
   { name: "Map View", path: "/map", icon: MapPinned, section: "Delivery" },
   { name: "Price Book", path: "/products", icon: Notebook, section: "Delivery" },
   { name: "Payout", path: "/payouts", icon: HandCoins, section: "Delivery" },
+  { name: "Payout Ledger", path: "/payouts-ledger", icon: Wallet, section: "Delivery" },
   { name: "Subcontractors", path: "/subcontractors", icon: Contact, section: "Delivery" },
   { name: "Staff", path: "/staff", icon:BookUser, section: "Delivery" },
+  { name: "Staff Assessment", path: "/staff-assessment", icon:BookOpenCheck, section: "Delivery" },
+
 
   
 

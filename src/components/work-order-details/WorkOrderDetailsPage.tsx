@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ArrowLeft, Download, FileText, Loader2 } from "lucide-react"
+import { ArrowLeft, FileText, Loader2 } from "lucide-react"
 import WorkOrderLeftPanel from "./WorkOrderLeftPanel"
 import WorkOrderRightPanel from "./WorkOrderRightPanel"
 import PhotoViewerModal from "./PhotoViewerModal"
@@ -14,7 +14,7 @@ export default function WorkOrderDetailsPage() {
     startIndex: number
   } | null>(null)
 
-  // Sample work order data - Replace with actual data from your state/API
+  
   const workOrderData = {
     workOrderId: "WO-2024-001",
     jobId: "JOB-480",
@@ -89,10 +89,10 @@ export default function WorkOrderDetailsPage() {
     setIsGeneratingPDF(true)
     
     try {
-      // Simulate delay for PDF generation
+     
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      // Generate PDF
+   
       generateWorkOrderPDF(workOrderData)
       
     } catch (error) {
@@ -125,9 +125,7 @@ export default function WorkOrderDetailsPage() {
         </div>
 
         <div className="flex items-center gap-3">
-         
-
-          {/* Download PDF Button */}
+          
           <button
             onClick={handleDownloadPDF}
             disabled={isGeneratingPDF}
@@ -150,7 +148,7 @@ export default function WorkOrderDetailsPage() {
 
       {/* MAIN CONTENT */}
       <div className="flex flex-1 overflow-hidden">
-        {/* LEFT SCROLLABLE */}
+       
         <div className="flex-1 overflow-y-auto p-3 thin-scrollbar">
           <WorkOrderLeftPanel />
         </div>
@@ -163,7 +161,7 @@ export default function WorkOrderDetailsPage() {
         </div>
       </div>
 
-      {/* PHOTO MODAL */}
+     
       <PhotoViewerModal
       // @ts-ignore
         images={selectedPhoto?.images || null}

@@ -1,6 +1,10 @@
 // Leads.tsx
-import { useState, useRef, useEffect } from "react"
-import { Search, Plus, Download, LayoutGrid, List, Eye, Trash2, RefreshCcw, Tag, UserCog, CalendarClock, X, Check } from "lucide-react"
+import { useState, useRef, useEffect, useMemo } from "react"
+import { 
+  Search, Plus, Download, LayoutGrid, List, Eye, Trash2, RefreshCcw, 
+  Tag, UserCog, CalendarClock, X, Check, Clock, Phone, MessageSquare,
+  TrendingUp, CalendarCheck, FileText
+} from "lucide-react"
 import { LeadModal, LEAD_STATUS_LABELS } from "../../components/LeadModal"
 import type { LeadStatus } from "../../components/LeadModal"
 import { useNavigate } from "react-router-dom"
@@ -12,14 +16,33 @@ import "react-tooltip/dist/react-tooltip.css"
 
 /* ===================== TYPES ===================== */
 
+// Extended Lead type with additional tracking fields
+interface ExtendedLead extends Lead {
+  responseTime?: number // in minutes
+  touchPoints?: {
+    calls: number
+    texts: number
+  }
+  hasAppointment?: boolean
+  hasEstimate?: boolean
+}
+
 // @ts-ignore
-const leadsData: Lead[] = Array.isArray(mockLeadsData)
-  ? mockLeadsData.map(lead => ({
+const leadsData: ExtendedLead[] = Array.isArray(mockLeadsData)
+  ? mockLeadsData.map((lead, index) => ({
     ...lead,
     address: lead.address || '',
     city: lead.city || '',
     state: lead.state || '',
     createdDate: lead.createdAt,
+    // Mock data for stats
+    responseTime: Math.floor(Math.random() * 120) + 5, // 5-125 minutes
+    touchPoints: {
+      calls: Math.floor(Math.random() * 5) + 1,
+      texts: Math.floor(Math.random() * 8) + 1,
+    },
+    hasAppointment: Math.random() > 0.3, // 70% have appointments
+    hasEstimate: Math.random() > 0.5, // 50% have estimates
   }))
   : []
 
@@ -83,7 +106,7 @@ type ActiveDropdown = "status" | "tags" | null
 /* ===================== COMPONENT ===================== */
 
 export function Leads() {
-  const [leads, setLeads] = useState<Lead[]>(leadsData ?? [])
+  const [leads, setLeads] = useState<ExtendedLead[]>(leadsData ?? [])
   const [searchText, setSearchText] = useState("")
   const [selectedStatus, setSelectedStatus] = useState<"all" | LeadStatus>("all")
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -101,6 +124,59 @@ export function Leads() {
 
   // Check if any leads are selected
   const hasSelection = selectedLeads.size > 0
+
+  /* ===================== STATS CALCULATION ===================== */
+
+  const stats = useMemo(() => {
+    const totalLeads = leads.length
+    
+    // Average Response Time (in minutes)
+    const leadsWithResponseTime = leads.filter(l => l.responseTime !== undefined)
+    const totalResponseTime = leadsWithResponseTime.reduce((sum, l) => sum + (l.responseTime || 0), 0)
+    const avgResponseTime = leadsWithResponseTime.length > 0 
+      ? Math.round(totalResponseTime / leadsWithResponseTime.length) 
+      : 0
+
+    // Average Touch Points (calls & texts)
+    const leadsWithTouchPoints = leads.filter(l => l.touchPoints !== undefined)
+    const totalCalls = leadsWithTouchPoints.reduce((sum, l) => sum + (l.touchPoints?.calls || 0), 0)
+    const totalTexts = leadsWithTouchPoints.reduce((sum, l) => sum + (l.touchPoints?.texts || 0), 0)
+    const avgCalls = leadsWithTouchPoints.length > 0 
+      ? (totalCalls / leadsWithTouchPoints.length).toFixed(1) 
+      : "0"
+    const avgTexts = leadsWithTouchPoints.length > 0 
+      ? (totalTexts / leadsWithTouchPoints.length).toFixed(1) 
+      : "0"
+    const avgTotalTouchPoints = leadsWithTouchPoints.length > 0 
+      ? ((totalCalls + totalTexts) / leadsWithTouchPoints.length).toFixed(1) 
+      : "0"
+
+    // Lead-to-Appointment Rate
+    const leadsWithAppointment = leads.filter(l => l.hasAppointment === true).length
+    const leadToAppointmentRate = totalLeads > 0 
+      ? ((leadsWithAppointment / totalLeads) * 100).toFixed(1) 
+      : "0"
+
+    // Appointment-to-Estimate Rate
+    const leadsWithEstimate = leads.filter(l => l.hasEstimate === true).length
+    const appointmentToEstimateRate = leadsWithAppointment > 0 
+      ? ((leadsWithEstimate / leadsWithAppointment) * 100).toFixed(1) 
+      : "0"
+
+    return {
+      avgResponseTime,
+      avgCalls,
+      avgTexts,
+      avgTotalTouchPoints,
+      totalCalls,
+      totalTexts,
+      leadToAppointmentRate,
+      appointmentToEstimateRate,
+      leadsWithAppointment,
+      leadsWithEstimate,
+      totalLeads,
+    }
+  }, [leads])
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -148,7 +224,7 @@ export function Leads() {
   /* ===================== HANDLERS ===================== */
 
   const handleCreateLead = (formData: any) => {
-    const newLead: Lead = {
+    const newLead: ExtendedLead = {
       id: String(leads.length + 1),
       name: formData.clientName,
       email: formData.email,
@@ -161,6 +237,10 @@ export function Leads() {
       type: formData.jobType || "Other",
       tags: formData.tags || [],
       createdDate: new Date().toISOString().split("T")[0],
+      responseTime: 0,
+      touchPoints: { calls: 0, texts: 0 },
+      hasAppointment: false,
+      hasEstimate: false,
     }
 
     setLeads(previousLeads => [newLead, ...previousLeads])
@@ -270,6 +350,17 @@ export function Leads() {
     return [...new Set(allTags)]
   }
 
+  // Format response time
+  const formatResponseTime = (minutes: number) => {
+    if (minutes < 60) {
+      return `${minutes} min`
+    } else {
+      const hours = Math.floor(minutes / 60)
+      const mins = minutes % 60
+      return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+    }
+  }
+
   return (
     <div className="p-4 space-y-6 min-h-screen">
 
@@ -327,6 +418,116 @@ export function Leads() {
           </button>
         </div>
       </div>
+
+      {/* STATS BOXES */}
+      {viewMode === 'table' && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+
+           <div className="bg-white rounded-lg border p-4 hover:shadow-md transition">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 bg-gray-100 rounded-lg">
+                <TrendingUp className="w-4 h-4 text-gray-600" />
+              </div>
+              <p className="text-xs font-medium text-gray-500">Total Leads</p>
+            </div>
+            <p className="text-xl font-bold text-gray-700">
+              {stats.totalLeads}
+            </p>
+          </div>
+          {/* # Average Response Time */}
+          <div className="bg-white rounded-lg border p-4 hover:shadow-md transition">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 bg-blue-100 rounded-lg">
+                <Clock className="w-4 h-4 text-blue-600" />
+              </div>
+              <p className="text-xs font-medium text-gray-500">Avg Response Time</p>
+            </div>
+            <p className="text-xl font-bold text-blue-600">
+              {formatResponseTime(stats.avgResponseTime)}
+            </p>
+          </div>
+
+          {/* # Average Touch Points - Total */}
+          <div className="bg-white rounded-lg border p-4 hover:shadow-md transition">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 bg-purple-100 rounded-lg">
+                <MessageSquare className="w-4 h-4 text-purple-600" />
+              </div>
+              <p className="text-xs font-medium text-gray-500">Avg Touch Points</p>
+            </div>
+            <p className="text-xl font-bold text-purple-600">
+              {stats.avgTotalTouchPoints}
+            </p>
+          </div>
+
+          {/* # Avg Calls */}
+          <div className="bg-white rounded-lg border p-4 hover:shadow-md transition">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 bg-green-100 rounded-lg">
+                <Phone className="w-4 h-4 text-green-600" />
+              </div>
+              <p className="text-xs font-medium text-gray-500">Avg Calls</p>
+            </div>
+            <p className="text-xl font-bold text-green-600">
+              {stats.avgCalls}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              Total: {stats.totalCalls}
+            </p>
+          </div>
+
+          {/* # Avg Texts */}
+          <div className="bg-white rounded-lg border p-4 hover:shadow-md transition">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 bg-indigo-100 rounded-lg">
+                <MessageSquare className="w-4 h-4 text-indigo-600" />
+              </div>
+              <p className="text-xs font-medium text-gray-500">Avg Texts</p>
+            </div>
+            <p className="text-xl font-bold text-indigo-600">
+              {stats.avgTexts}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              Total: {stats.totalTexts}
+            </p>
+          </div>
+
+          {/* % Lead-to-Appointment Rate */}
+          <div className="bg-white rounded-lg border p-4 hover:shadow-md transition">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 bg-emerald-100 rounded-lg">
+                <CalendarCheck className="w-4 h-4 text-emerald-600" />
+              </div>
+              <p className="text-xs font-medium text-gray-500">Lead → Appt</p>
+            </div>
+            <p className="text-xl font-bold text-emerald-600">
+              {stats.leadToAppointmentRate}%
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              {stats.leadsWithAppointment}/{stats.totalLeads}
+            </p>
+          </div>
+
+          {/* % Appointment-to-Estimate Rate */}
+          <div className="bg-white rounded-lg border p-4 hover:shadow-md transition">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 bg-orange-100 rounded-lg">
+                <FileText className="w-4 h-4 text-orange-600" />
+              </div>
+              <p className="text-xs font-medium text-gray-500">Appt → Estimate</p>
+            </div>
+            <p className="text-xl font-bold text-orange-600">
+              {stats.appointmentToEstimateRate}%
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              {stats.leadsWithEstimate}/{stats.leadsWithAppointment}
+            </p>
+          </div>
+
+          {/* Total Leads */}
+         
+        </div>
+      )}
 
       {viewMode === 'table' && (
         <>
@@ -394,7 +595,7 @@ export function Leads() {
               )}
 
               <div className="flex items-center gap-1 bg-white border border-gray-300 rounded-lg px-2 py-1">
-                {/* Change Status Button - FIXED: Added tooltip when hasSelection */}
+                {/* Change Status Button */}
                 <div className="relative" ref={statusDropdownRef}>
                   {hasSelection ? (
                     <button
@@ -441,7 +642,7 @@ export function Leads() {
                   )}
                 </div>
 
-                {/* Modify Tags Button - FIXED: Added tooltip when hasSelection */}
+                {/* Modify Tags Button */}
                 <div className="relative" ref={tagsDropdownRef}>
                   {hasSelection ? (
                     <button

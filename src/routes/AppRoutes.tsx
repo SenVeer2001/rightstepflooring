@@ -52,6 +52,12 @@ import ChangeOrderList from "../app/changeOrder/ChangeOrderList"
 import ChangeOrderView from "../app/changeOrder/ChangeOrderView"
 
 import PayoutDetails from "../app/payout/PayoutDetails"
+import PayoutLedger from "../app/payout-ladger/PayoutLadger"
+import StaffAssessment from "../app/staff/StaffAssessment"
+import StartAssessment from "../app/staff/StartAssessment"
+import ViewAssessmentReport from "../app/staff/ViewAssessmentReport"
+import ClientFeedback from "../components/customerPages/ClientFeedback"
+import ViewClientFeedbackReport from "../components/customerPages/ViewClientFeedbackReport"
 
 
 
@@ -82,6 +88,9 @@ export function AppRoutes() {
                   <Route path="/client" element={<Customers />} />
                   <Route path="/client/jobs/:jobId" element={<CustomerAndJobModel />} />
                   <Route path="/client/:customerId" element={<ClientModel />} />
+                  <Route path="/client-feedback" element={<ClientFeedback />} />
+<Route path="/client-feedback/view/:jobId" element={<ViewClientFeedbackReport />} />
+                 
 
                   <Route path="/orders/work-order" element={<WorkOrder />} />
                   <Route path="/orders/work-order/:id" element={<WorkOrderDetailsPage />} />
@@ -129,7 +138,7 @@ export function AppRoutes() {
 
 
 
-              
+
                   <Route path="/training/courses" element={<CourseDashboard />} />
                   <Route path="/training/courses/new" element={<CourseDetail />} />
 
@@ -144,6 +153,10 @@ export function AppRoutes() {
                   <Route path="/subcontractors/:id" element={<SubcontractorProfile />} />
                   <Route path="/staff" element={<StaffList />} />
                   <Route path="/staff/:id" element={<StaffProfile />} />
+                  <Route path="/staff-assessment" element={<StaffAssessment />} />
+                  <Route path="/staff-assessment/start/:jobId" element={<StartAssessment />} />
+                  <Route path="/staff-assessment/view/:jobId" element={<ViewAssessmentReport />} />
+
                   <Route path="/document-vault" element={<DocumentVault />} />
                   <Route path="/communication-hub" element={<CommunicationHub />} />
 
@@ -155,6 +168,8 @@ export function AppRoutes() {
 
                   {/* <Route path="/payouts" element={<PayoutList />} /> */}
                   <Route path="/payouts" element={<PayoutDetails />} />
+                  <Route path="/payouts-ledger" element={<PayoutLedger />} />
+
                   <Route path="/notifications" element={<NotificationsPage />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/faq" element={<FAQ />} />

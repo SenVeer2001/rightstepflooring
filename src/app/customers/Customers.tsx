@@ -258,6 +258,7 @@ type ActiveDropdown = "status" | "tags" | null
 /* ===================== COMPONENT ===================== */
 
 export function Customers() {
+
   const navigate = useNavigate()
 
   const [customers, setCustomers] = useState<Customer[]>(customersData)
@@ -278,7 +279,7 @@ export function Customers() {
   // Shopping List State
   const [shoppingListItems, setShoppingListItems] = useState<ShoppingListItem[]>([])
 
-  // 👇 NEW: Shopping List View Modal State
+
   const [isShoppingListViewOpen, setIsShoppingListViewOpen] = useState(false)
   const [selectedClientForView, setSelectedClientForView] = useState<Customer | null>(null)
 
@@ -1023,7 +1024,7 @@ export function Customers() {
                       </td>
                     )}
 
-                    {/* 👇 UPDATED ACTION COLUMN WITH VIEW BUTTON */}
+                   
                     {visibleColumns.action && (
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
@@ -1037,6 +1038,7 @@ export function Customers() {
                           >
                             <ShoppingBag size={16} />
                           </button>
+
                           <button
                             onClick={() => navigate(`/client/${customer.id}`)}
                             data-tooltip-id="action-tooltip"
@@ -1045,11 +1047,7 @@ export function Customers() {
                           >
                             <Eye size={16} />
                           </button>
-
-                          {/* 👇 NEW: View Shopping List Button */}
                          
-
-                          {/* Delete */}
                           <button
                             onClick={() => handleDelete(customer.id)}
                             data-tooltip-id="action-tooltip"

@@ -15,7 +15,7 @@ function WorkOrderLeftPanel() {
     startIndex: 0
   })
 
-  // Handle photo click from PhotosTab
+
   const handlePhotoClick = (data: { photos: PhotoData[]; startIndex: number }) => {
     setPhotoViewerData({
       photos: data.photos,

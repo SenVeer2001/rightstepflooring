@@ -17,7 +17,6 @@ interface OrderDetailsTabsProps {
   pagesCount?: number
   filesCount?: number
   paymentsCount?: number
-
   PhotosComponent: React.ReactNode
   ItemsComponent: React.ReactNode
   PagesComponent: React.ReactNode
