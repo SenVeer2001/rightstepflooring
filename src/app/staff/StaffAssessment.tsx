@@ -52,7 +52,7 @@ const staffAssessments: Record<string, AssessmentRecord> = {
     lastAssessmentDate: "2024-01-16",
     lastAssessmentScore: 92,
     lastAssessmentStatus: "excellent",
-    nextAssessmentDue: "2026-04-09",
+    nextAssessmentDue: "2026-04-10",
     completedDate: "2024-01-16"
   },
   "STF-002": {

@@ -94,7 +94,7 @@ export function AddJobModal({
     return Object.keys(errors).length === 0
   }
 
-  /* ===================== TEAM MEMBER HANDLERS ===================== */
+
 
   const handleAddTeamMember = () => {
     if (

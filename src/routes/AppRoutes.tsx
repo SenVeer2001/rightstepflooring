@@ -57,7 +57,9 @@ import StaffAssessment from "../app/staff/StaffAssessment"
 import StartAssessment from "../app/staff/StartAssessment"
 import ViewAssessmentReport from "../app/staff/ViewAssessmentReport"
 import ClientFeedback from "../components/customerPages/ClientFeedback"
-import ViewClientFeedbackReport from "../components/customerPages/ViewClientFeedbackReport"
+
+import StaffPPF from "../app/staff/StaffPPF"
+import FeedbackReport from "../components/customerPages/FeedbackReport"
 
 
 
@@ -89,7 +91,7 @@ export function AppRoutes() {
                   <Route path="/client/jobs/:jobId" element={<CustomerAndJobModel />} />
                   <Route path="/client/:customerId" element={<ClientModel />} />
                   <Route path="/client-feedback" element={<ClientFeedback />} />
-<Route path="/client-feedback/view/:jobId" element={<ViewClientFeedbackReport />} />
+                  <Route path="/client-feedback/view/:jobId" element={<FeedbackReport />} />
                  
 
                   <Route path="/orders/work-order" element={<WorkOrder />} />
@@ -156,6 +158,8 @@ export function AppRoutes() {
                   <Route path="/staff-assessment" element={<StaffAssessment />} />
                   <Route path="/staff-assessment/start/:jobId" element={<StartAssessment />} />
                   <Route path="/staff-assessment/view/:jobId" element={<ViewAssessmentReport />} />
+                  <Route path="/staff-ppf" element={<StaffPPF />} />
+
 
                   <Route path="/document-vault" element={<DocumentVault />} />
                   <Route path="/communication-hub" element={<CommunicationHub />} />

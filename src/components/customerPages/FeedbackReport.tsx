@@ -31,7 +31,7 @@ const feedbackReportData = {
     },
     client: {
       id: "CLT-001",
-      name: "Robin Stevens",
+      name: "John Smith",
       companyName: "Stevens Flooring",
       email: "robin@stevensflooring.com",
       phone: "(413) 275-4790",
@@ -104,7 +104,7 @@ const feedbackReportData = {
 
 /* ===================== COMPONENT ===================== */
 
-export default function ViewClientFeedbackReport() {
+export default function FeedbackReport() {
   const navigate = useNavigate()
   const { jobId } = useParams()
 
@@ -145,7 +145,7 @@ export default function ViewClientFeedbackReport() {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-                Client PPF Report
+               Staff PPF 
               </h1>
               <p className="text-sm text-gray-500 mt-1">
                 Purpose. Priority. Finish Line.

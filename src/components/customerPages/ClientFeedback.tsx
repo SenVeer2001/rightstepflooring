@@ -8,20 +8,13 @@ import {
   Send,
   CheckCircle,
   Clock,
-  AlertCircle,
   User,
-  Briefcase,
-  Building2,
-  Phone,
-  Mail,
-  MapPin,
   X,
-  ChevronRight,
   FileText,
-  Target,
-  DollarSign,
-  Sparkles,
-  Flag
+  Star,
+  MessageSquare,
+  ThumbsUp,
+  AlertCircle
 } from "lucide-react"
 
 /* ===================== TYPES ===================== */
@@ -48,35 +41,26 @@ interface CompletedJob {
   client: Client
 }
 
+interface FeedbackFormData {
+  q1_communicationRating: number
+  q2_informedConfident: string
+  q2_stageNeedsImprovement?: string
+  q3_timeframeCompleted: string
+  q3_shortfallReason?: string
+  q4_professionalismRating: number
+  q5_happyWithFloors: string
+  q5_expectationDifference?: string
+  q6_praise: string
+  q6_improvement: string
+}
+
 interface FeedbackRecord {
   id: string
   jobId: string
   requestedDate?: string
   submittedDate?: string
   status: 'not_requested' | 'requested' | 'submitted' | 'viewed'
-  personalGoal?: {
-    goal: string
-    deadline: string
-    actionPlan: string
-  }
-  professionalGoal?: {
-    goal: string
-    deadline: string
-    actionPlan: string
-  }
-  financialGoal?: {
-    goal: string
-    deadline: string
-    actionPlan: string
-  }
-  finishLine?: string
-}
-
-interface FormData {
-  personalGoal: { goal: string; deadline: string; actionPlan: string }
-  professionalGoal: { goal: string; deadline: string; actionPlan: string }
-  financialGoal: { goal: string; deadline: string; actionPlan: string }
-  finishLine: string
+  feedback?: FeedbackFormData
 }
 
 /* ===================== MOCK DATA ===================== */
@@ -203,22 +187,16 @@ const feedbackRecords: Record<string, FeedbackRecord> = {
     requestedDate: "2024-01-16",
     submittedDate: "2024-01-17",
     status: "submitted",
-    personalGoal: {
-      goal: "Achieve better work-life balance by spending more quality time with family",
-      deadline: "2024-06-30",
-      actionPlan: "Set strict working hours, delegate more tasks, plan weekly family activities"
-    },
-    professionalGoal: {
-      goal: "Expand flooring business to 3 new locations",
-      deadline: "2024-12-31",
-      actionPlan: "Research potential locations, secure financing, hire regional managers"
-    },
-    financialGoal: {
-      goal: "Increase annual revenue by 40% to $2M",
-      deadline: "2024-12-31",
-      actionPlan: "Expand service offerings, improve marketing, build strategic partnerships"
-    },
-    finishLine: "I envision having a thriving multi-location business that runs smoothly even without my daily involvement, allowing me to spend quality time with my family while maintaining financial security."
+    feedback: {
+      q1_communicationRating: 5,
+      q2_informedConfident: "fully",
+      q3_timeframeCompleted: "mostly",
+      q3_shortfallReason: "Installation took 1 extra day due to unexpected subfloor repairs",
+      q4_professionalismRating: 5,
+      q5_happyWithFloors: "completely",
+      q6_praise: "Mike Johnson was exceptional - very professional, clean, and explained everything clearly. The final walkthrough was thorough.",
+      q6_improvement: "Would be great to get a reminder call the day before installation starts."
+    }
   },
   "JOB-002": {
     id: "FB-002",
@@ -232,22 +210,16 @@ const feedbackRecords: Record<string, FeedbackRecord> = {
     requestedDate: "2024-01-11",
     submittedDate: "2024-01-12",
     status: "viewed",
-    personalGoal: {
-      goal: "Complete a professional interior design certification",
-      deadline: "2024-09-30",
-      actionPlan: "Enroll in accredited program, dedicate 10 hours/week to studies"
-    },
-    professionalGoal: {
-      goal: "Launch a luxury interior design division",
-      deadline: "2024-08-31",
-      actionPlan: "Build portfolio, network with high-end clients, hire specialized designers"
-    },
-    financialGoal: {
-      goal: "Save $50,000 for business expansion",
-      deadline: "2024-12-31",
-      actionPlan: "Set aside 20% of profits monthly, reduce overhead costs"
-    },
-    finishLine: "I see myself as a recognized interior design expert with a successful luxury division, financially secure and creatively fulfilled."
+    feedback: {
+      q1_communicationRating: 4,
+      q2_informedConfident: "mostly",
+      q2_stageNeedsImprovement: "Scheduling could have been clearer - we weren't sure of the exact start time",
+      q3_timeframeCompleted: "fully",
+      q4_professionalismRating: 5,
+      q5_happyWithFloors: "completely",
+      q6_praise: "The installation crew was amazing - super clean, respectful, and the floors look perfect!",
+      q6_improvement: "More specific timing for installation start would be helpful"
+    }
   }
 }
 
@@ -286,13 +258,51 @@ const getFeedbackStatusConfig = (status: string) => {
   }
 }
 
-/* ===================== REQUEST MODAL COMPONENT ===================== */
+/* ===================== STAR RATING COMPONENT ===================== */
+
+const StarRating = ({ 
+  value, 
+  onChange, 
+  readonly = false 
+}: { 
+  value: number
+  onChange?: (rating: number) => void
+  readonly?: boolean
+}) => {
+  return (
+    <div className="flex items-center gap-1">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          onClick={() => !readonly && onChange?.(star)}
+          disabled={readonly}
+          className={`transition ${readonly ? 'cursor-default' : 'cursor-pointer hover:scale-110'}`}
+        >
+          <Star
+            size={24}
+            className={`${
+              star <= value
+                ? 'fill-yellow-400 text-yellow-400'
+                : 'fill-gray-200 text-gray-300'
+            }`}
+          />
+        </button>
+      ))}
+      <span className="ml-2 text-sm font-medium text-gray-700">
+        {value > 0 ? `${value}/5` : 'Not rated'}
+      </span>
+    </div>
+  )
+}
+
+/* ===================== REQUEST FEEDBACK MODAL ===================== */
 
 interface RequestFeedbackModalProps {
   showRequestModal: boolean
   selectedJob: CompletedJob | null
-  formData: FormData
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>
+  formData: FeedbackFormData
+  setFormData: React.Dispatch<React.SetStateAction<FeedbackFormData>>
   setShowRequestModal: (show: boolean) => void
   handleSubmitFeedback: () => void
   isFormValid: () => boolean
@@ -315,15 +325,15 @@ const RequestFeedbackModal = ({
       onClick={() => setShowRequestModal(false)}
     >
       <div
-        className="bg-white rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[95vh] flex flex-col"
+        className="bg-white rounded-xl w-full max-w-3xl shadow-2xl overflow-hidden max-h-[95vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="bg-primary px-5 py-4 text-white flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold">Team Member PPF</h2>
-              <p className="text-sm text-white/80">Purpose. Priority. Finish Line.</p>
+              <h2 className="text-lg font-bold">Customer Experience Survey</h2>
+              <p className="text-sm text-white/80">Right Step Flooring</p>
             </div>
             <button
               onClick={() => setShowRequestModal(false)}
@@ -351,7 +361,7 @@ const RequestFeedbackModal = ({
             <div>
               <p className="text-sm font-semibold text-gray-900">{selectedJob.client.name}</p>
               <p className="text-xs text-gray-500">
-                {selectedJob.client.companyName} • {selectedJob.jobNumber}
+                {selectedJob.jobNumber} • {selectedJob.service}
               </p>
             </div>
           </div>
@@ -360,194 +370,213 @@ const RequestFeedbackModal = ({
           </span>
         </div>
 
-        {/* Instructions */}
-        <div className="px-5 py-2 border-b">
-          <p className="text-xs text-gray-600">
-            Set clear yearly goals in three areas: <span className="font-medium">Personal</span>, <span className="font-medium">Professional</span>, and <span className="font-medium">Financial</span>. Each goal should be specific, measurable, and time-bound.
-          </p>
-        </div>
-
         {/* Form Content */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5">
-          {/* 1. Personal Goal */}
-          <div className="border rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">1</span>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">Personal Goal</h3>
-                <p className="text-xs text-gray-500">What is a personal goal you want to accomplish this year?</p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">Goal</label>
-                <textarea
-                  value={formData.personalGoal.goal}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    personalGoal: { ...prev.personalGoal, goal: e.target.value }
-                  }))}
-                  placeholder="Describe your personal goal..."
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none resize-none"
+        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+          {/* Question 1 */}
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <div className="flex items-start gap-2 mb-3">
+              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  How would you rate the speed and consistency of communication from our team throughout your project?
+                </h3>
+                <StarRating
+                  value={formData.q1_communicationRating}
+                  onChange={(rating) => setFormData(prev => ({ ...prev, q1_communicationRating: rating }))}
                 />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">Deadline</label>
-                  <input
-                    type="date"
-                    value={formData.personalGoal.deadline}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      personalGoal: { ...prev.personalGoal, deadline: e.target.value }
-                    }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">Action Plan</label>
-                  <input
-                    type="text"
-                    value={formData.personalGoal.actionPlan}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      personalGoal: { ...prev.personalGoal, actionPlan: e.target.value }
-                    }))}
-                    placeholder="Key steps to achieve..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none"
-                  />
-                </div>
               </div>
             </div>
           </div>
 
-          {/* 2. Professional Goal */}
-          <div className="border rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">2</span>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">Professional Goal</h3>
-                <p className="text-xs text-gray-500">What is a professional goal you want to accomplish this year?</p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">Goal</label>
-                <textarea
-                  value={formData.professionalGoal.goal}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    professionalGoal: { ...prev.professionalGoal, goal: e.target.value }
-                  }))}
-                  placeholder="Describe your professional goal..."
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none resize-none"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">Deadline</label>
-                  <input
-                    type="date"
-                    value={formData.professionalGoal.deadline}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      professionalGoal: { ...prev.professionalGoal, deadline: e.target.value }
-                    }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none"
-                  />
+          {/* Question 2 */}
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <div className="flex items-start gap-2 mb-3">
+              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  Did you feel informed and confident at each stage of the process — sales, scheduling, installation, and final walkthrough?
+                </h3>
+                <div className="space-y-2 mb-3">
+                  {[
+                    { value: 'fully', label: 'Yes, fully' },
+                    { value: 'mostly', label: 'Mostly' },
+                    { value: 'no', label: 'No' }
+                  ].map((option) => (
+                    <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="q2"
+                        value={option.value}
+                        checked={formData.q2_informedConfident === option.value}
+                        onChange={(e) => setFormData(prev => ({ ...prev, q2_informedConfident: e.target.value }))}
+                        className="w-4 h-4 text-primary focus:ring-primary"
+                      />
+                      <span className="text-sm text-gray-700">{option.label}</span>
+                    </label>
+                  ))}
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">Action Plan</label>
-                  <input
-                    type="text"
-                    value={formData.professionalGoal.actionPlan}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      professionalGoal: { ...prev.professionalGoal, actionPlan: e.target.value }
-                    }))}
-                    placeholder="Key steps to achieve..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none"
-                  />
-                </div>
+                {(formData.q2_informedConfident === 'mostly' || formData.q2_informedConfident === 'no') && (
+                  <div className="mt-3">
+                    <label className="text-xs font-medium text-gray-600 mb-1 block">
+                      If not, which stage needs improvement?
+                    </label>
+                    <textarea
+                      value={formData.q2_stageNeedsImprovement || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, q2_stageNeedsImprovement: e.target.value }))}
+                      placeholder="Please specify..."
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none resize-none"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* 3. Financial Goal */}
-          <div className="border rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">3</span>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">Financial Goal</h3>
-                <p className="text-xs text-gray-500">What is a financial goal you want to accomplish this year?</p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">Goal</label>
-                <textarea
-                  value={formData.financialGoal.goal}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    financialGoal: { ...prev.financialGoal, goal: e.target.value }
-                  }))}
-                  placeholder="Describe your financial goal..."
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none resize-none"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">Deadline</label>
-                  <input
-                    type="date"
-                    value={formData.financialGoal.deadline}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      financialGoal: { ...prev.financialGoal, deadline: e.target.value }
-                    }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none"
-                  />
+          {/* Question 3 */}
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <div className="flex items-start gap-2 mb-3">
+              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  Was your project started and completed within the timeframe you were given?
+                </h3>
+                <div className="space-y-2 mb-3">
+                  {[
+                    { value: 'fully', label: 'Yes, fully' },
+                    { value: 'mostly', label: 'Mostly' },
+                    { value: 'no', label: 'No' }
+                  ].map((option) => (
+                    <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="q3"
+                        value={option.value}
+                        checked={formData.q3_timeframeCompleted === option.value}
+                        onChange={(e) => setFormData(prev => ({ ...prev, q3_timeframeCompleted: e.target.value }))}
+                        className="w-4 h-4 text-primary focus:ring-primary"
+                      />
+                      <span className="text-sm text-gray-700">{option.label}</span>
+                    </label>
+                  ))}
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-gray-600 mb-1 block">Action Plan</label>
-                  <input
-                    type="text"
-                    value={formData.financialGoal.actionPlan}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      financialGoal: { ...prev.financialGoal, actionPlan: e.target.value }
-                    }))}
-                    placeholder="Key steps to achieve..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none"
-                  />
-                </div>
+                {(formData.q3_timeframeCompleted === 'mostly' || formData.q3_timeframeCompleted === 'no') && (
+                  <div className="mt-3">
+                    <label className="text-xs font-medium text-gray-600 mb-1 block">
+                      If no, where did we fall short?
+                    </label>
+                    <textarea
+                      value={formData.q3_shortfallReason || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, q3_shortfallReason: e.target.value }))}
+                      placeholder="Please explain..."
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none resize-none"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* 4. Finish Line */}
-          <div className="border rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">4</span>
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900">Finish Line</h3>
-                <p className="text-xs text-gray-500">How do you envision your life, work, or future looking once you accomplish these goals?</p>
+          {/* Question 4 */}
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <div className="flex items-start gap-2 mb-3">
+              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">4</span>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  How would you rate the professionalism, preparedness, and cleanliness of the crew in your home?
+                </h3>
+                <StarRating
+                  value={formData.q4_professionalismRating}
+                  onChange={(rating) => setFormData(prev => ({ ...prev, q4_professionalismRating: rating }))}
+                />
               </div>
             </div>
+          </div>
 
-            <textarea
-              value={formData.finishLine}
-              onChange={(e) => setFormData(prev => ({ ...prev, finishLine: e.target.value }))}
-              placeholder="Describe your vision for the future..."
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none resize-none"
-            />
+          {/* Question 5 */}
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <div className="flex items-start gap-2 mb-3">
+              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">5</span>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  Are you happy with your new floors, and did the final result match what you hoped for?
+                </h3>
+                <div className="space-y-2 mb-3">
+                  {[
+                    { value: 'completely', label: 'Yes, completely' },
+                    { value: 'mostly', label: 'Mostly' },
+                    { value: 'not_fully', label: 'Not fully' }
+                  ].map((option) => (
+                    <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="q5"
+                        value={option.value}
+                        checked={formData.q5_happyWithFloors === option.value}
+                        onChange={(e) => setFormData(prev => ({ ...prev, q5_happyWithFloors: e.target.value }))}
+                        className="w-4 h-4 text-primary focus:ring-primary"
+                      />
+                      <span className="text-sm text-gray-700">{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+                {(formData.q5_happyWithFloors === 'mostly' || formData.q5_happyWithFloors === 'not_fully') && (
+                  <div className="mt-3">
+                    <label className="text-xs font-medium text-gray-600 mb-1 block">
+                      If not, what felt different from your expectations?
+                    </label>
+                    <textarea
+                      value={formData.q5_expectationDifference || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, q5_expectationDifference: e.target.value }))}
+                      placeholder="Please describe..."
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none resize-none"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Question 6 */}
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <div className="flex items-start gap-2 mb-3">
+              <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">6</span>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  What is one team member, moment, or part of the process you would praise, and what is one thing we should improve for the next customer?
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 mb-1 block flex items-center gap-1">
+                      <ThumbsUp size={12} className="text-green-600" />
+                      What would you praise?
+                    </label>
+                    <textarea
+                      value={formData.q6_praise}
+                      onChange={(e) => setFormData(prev => ({ ...prev, q6_praise: e.target.value }))}
+                      placeholder="Tell us what we did well..."
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 mb-1 block flex items-center gap-1">
+                      <AlertCircle size={12} className="text-orange-600" />
+                      What should we improve?
+                    </label>
+                    <textarea
+                      value={formData.q6_improvement}
+                      onChange={(e) => setFormData(prev => ({ ...prev, q6_improvement: e.target.value }))}
+                      placeholder="How can we do better?"
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -565,7 +594,237 @@ const RequestFeedbackModal = ({
             className="flex items-center gap-2 px-5 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send size={16} />
-            Submit
+            Submit Feedback
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ===================== VIEW FEEDBACK MODAL ===================== */
+
+interface ViewFeedbackModalProps {
+  showViewModal: boolean
+  selectedJob: CompletedJob | null
+  feedback: FeedbackFormData | null
+  setShowViewModal: (show: boolean) => void
+}
+
+const ViewFeedbackModal = ({
+  showViewModal,
+  selectedJob,
+  feedback,
+  setShowViewModal
+}: ViewFeedbackModalProps) => {
+  if (!showViewModal || !selectedJob || !feedback) return null
+
+  const getResponseLabel = (questionKey: string, value: string) => {
+    const labels: Record<string, Record<string, string>> = {
+      q2_informedConfident: {
+        'fully': 'Yes, fully',
+        'mostly': 'Mostly',
+        'no': 'No'
+      },
+      q3_timeframeCompleted: {
+        'fully': 'Yes, fully',
+        'mostly': 'Mostly',
+        'no': 'No'
+      },
+      q5_happyWithFloors: {
+        'completely': 'Yes, completely',
+        'mostly': 'Mostly',
+        'not_fully': 'Not fully'
+      }
+    }
+    return labels[questionKey]?.[value] || value
+  }
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      onClick={() => setShowViewModal(false)}
+    >
+      <div
+        className="bg-white rounded-xl w-full max-w-3xl shadow-2xl overflow-hidden max-h-[95vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="bg-primary px-5 py-4 text-white flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-white">Customer Feedback Report</h2>
+              <p className="text-sm text-white/80">Right Step Flooring</p>
+            </div>
+            <button
+              onClick={() => setShowViewModal(false)}
+              className="p-1.5 hover:bg-white/10 rounded-full transition"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Client Info Bar */}
+        <div className="px-5 py-3 bg-gray-50 border-b flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {selectedJob.client.avatar ? (
+              <img
+                src={selectedJob.client.avatar}
+                alt={selectedJob.client.name}
+                className="w-9 h-9 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                <User size={16} className="text-primary" />
+              </div>
+            )}
+            <div>
+              <p className="text-sm font-semibold text-gray-900">{selectedJob.client.name}</p>
+              <p className="text-xs text-gray-500">
+                {selectedJob.jobNumber} • {selectedJob.service}
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-500">Completed</p>
+            <p className="text-xs font-medium text-gray-700">
+              {new Date(selectedJob.completedDate).toLocaleDateString()}
+            </p>
+          </div>
+        </div>
+
+        {/* Feedback Content */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+          {/* Question 1 - Communication Rating */}
+          <div className="border-l-4 border-primary bg-gray-50 rounded-r-lg p-4">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Question 1</h3>
+            <p className="text-sm font-medium text-gray-900 mb-3">
+              How would you rate the speed and consistency of communication from our team throughout your project?
+            </p>
+            <StarRating value={feedback.q1_communicationRating} readonly />
+          </div>
+
+          {/* Question 2 - Informed & Confident */}
+          <div className="border-l-4 border-primary bg-gray-50 rounded-r-lg p-4">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Question 2</h3>
+            <p className="text-sm font-medium text-gray-900 mb-3">
+              Did you feel informed and confident at each stage of the process?
+            </p>
+            <div className="bg-white rounded-lg p-3 mb-2">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+                {getResponseLabel('q2_informedConfident', feedback.q2_informedConfident)}
+              </span>
+            </div>
+            {feedback.q2_stageNeedsImprovement && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                <p className="text-xs font-medium text-orange-900 mb-1">Stage needs improvement:</p>
+                <p className="text-sm text-orange-800">{feedback.q2_stageNeedsImprovement}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Question 3 - Timeframe */}
+          <div className="border-l-4 border-primary bg-gray-50 rounded-r-lg p-4">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Question 3</h3>
+            <p className="text-sm font-medium text-gray-900 mb-3">
+              Was your project started and completed within the timeframe you were given?
+            </p>
+            <div className="bg-white rounded-lg p-3 mb-2">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+                {getResponseLabel('q3_timeframeCompleted', feedback.q3_timeframeCompleted)}
+              </span>
+            </div>
+            {feedback.q3_shortfallReason && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                <p className="text-xs font-medium text-orange-900 mb-1">Reason for delay:</p>
+                <p className="text-sm text-orange-800">{feedback.q3_shortfallReason}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Question 4 - Professionalism Rating */}
+          <div className="border-l-4 border-primary bg-gray-50 rounded-r-lg p-4">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Question 4</h3>
+            <p className="text-sm font-medium text-gray-900 mb-3">
+              How would you rate the professionalism, preparedness, and cleanliness of the crew?
+            </p>
+            <StarRating value={feedback.q4_professionalismRating} readonly />
+          </div>
+
+          {/* Question 5 - Happy with Floors */}
+          <div className="border-l-4 border-primary bg-gray-50 rounded-r-lg p-4">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Question 5</h3>
+            <p className="text-sm font-medium text-gray-900 mb-3">
+              Are you happy with your new floors, and did the final result match what you hoped for?
+            </p>
+            <div className="bg-white rounded-lg p-3 mb-2">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+                {getResponseLabel('q5_happyWithFloors', feedback.q5_happyWithFloors)}
+              </span>
+            </div>
+            {feedback.q5_expectationDifference && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                <p className="text-xs font-medium text-orange-900 mb-1">Expectation difference:</p>
+                <p className="text-sm text-orange-800">{feedback.q5_expectationDifference}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Question 6 - Praise & Improvement */}
+          <div className="border-l-4 border-primary bg-gray-50 rounded-r-lg p-4">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Question 6</h3>
+            <p className="text-sm font-medium text-gray-900 mb-3">
+              Praise and suggestions for improvement
+            </p>
+            <div className="space-y-3">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <ThumbsUp size={14} className="text-green-600" />
+                  <p className="text-xs font-medium text-green-900">What they praised:</p>
+                </div>
+                <p className="text-sm text-green-800">{feedback.q6_praise}</p>
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle size={14} className="text-blue-600" />
+                  <p className="text-xs font-medium text-blue-900">Suggested improvement:</p>
+                </div>
+                <p className="text-sm text-blue-800">{feedback.q6_improvement}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Summary Stats */}
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4">
+              <p className="text-xs text-yellow-700 font-medium mb-1">Communication Score</p>
+              <div className="flex items-center gap-2">
+                <Star size={20} className="fill-yellow-400 text-yellow-400" />
+                <p className="text-2xl font-bold text-yellow-900">
+                  {feedback.q1_communicationRating}/5
+                </p>
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4">
+              <p className="text-xs text-purple-700 font-medium mb-1">Professionalism Score</p>
+              <div className="flex items-center gap-2">
+                <Star size={20} className="fill-purple-400 text-purple-400" />
+                <p className="text-2xl font-bold text-purple-900">
+                  {feedback.q4_professionalismRating}/5
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 py-3 bg-gray-50 border-t flex justify-end flex-shrink-0">
+          <button
+            onClick={() => setShowViewModal(false)}
+            className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition"
+          >
+            Close
           </button>
         </div>
       </div>
@@ -582,16 +841,23 @@ export default function ClientFeedback() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'not_requested' | 'requested' | 'submitted' | 'viewed'>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [showRequestModal, setShowRequestModal] = useState(false)
+  const [showViewModal, setShowViewModal] = useState(false)
   const [selectedJob, setSelectedJob] = useState<CompletedJob | null>(null)
   const [feedbackData, setFeedbackData] = useState(feedbackRecords)
   const rowsPerPage = 10
 
-  // Form states for PPF
-  const [formData, setFormData] = useState<FormData>({
-    personalGoal: { goal: '', deadline: '', actionPlan: '' },
-    professionalGoal: { goal: '', deadline: '', actionPlan: '' },
-    financialGoal: { goal: '', deadline: '', actionPlan: '' },
-    finishLine: ''
+  // Form states
+  const [formData, setFormData] = useState<FeedbackFormData>({
+    q1_communicationRating: 0,
+    q2_informedConfident: '',
+    q2_stageNeedsImprovement: '',
+    q3_timeframeCompleted: '',
+    q3_shortfallReason: '',
+    q4_professionalismRating: 0,
+    q5_happyWithFloors: '',
+    q5_expectationDifference: '',
+    q6_praise: '',
+    q6_improvement: ''
   })
 
   /* ===================== STATS ===================== */
@@ -653,10 +919,16 @@ export default function ClientFeedback() {
   const handleRequestFeedback = (job: CompletedJob) => {
     setSelectedJob(job)
     setFormData({
-      personalGoal: { goal: '', deadline: '', actionPlan: '' },
-      professionalGoal: { goal: '', deadline: '', actionPlan: '' },
-      financialGoal: { goal: '', deadline: '', actionPlan: '' },
-      finishLine: ''
+      q1_communicationRating: 0,
+      q2_informedConfident: '',
+      q2_stageNeedsImprovement: '',
+      q3_timeframeCompleted: '',
+      q3_shortfallReason: '',
+      q4_professionalismRating: 0,
+      q5_happyWithFloors: '',
+      q5_expectationDifference: '',
+      q6_praise: '',
+      q6_improvement: ''
     })
     setShowRequestModal(true)
   }
@@ -670,10 +942,7 @@ export default function ClientFeedback() {
       requestedDate: new Date().toISOString().split('T')[0],
       submittedDate: new Date().toISOString().split('T')[0],
       status: 'submitted',
-      personalGoal: formData.personalGoal,
-      professionalGoal: formData.professionalGoal,
-      financialGoal: formData.financialGoal,
-      finishLine: formData.finishLine
+      feedback: formData
     }
 
     setFeedbackData(prev => ({
@@ -685,22 +954,20 @@ export default function ClientFeedback() {
     setSelectedJob(null)
   }
 
-  const handleViewFeedback = (jobId: string) => {
-    navigate(`/client-feedback/view/${jobId}`)
+  const handleViewFeedback = (job: CompletedJob) => {
+    setSelectedJob(job)
+    setShowViewModal(true)
   }
 
   const isFormValid = () => {
     return (
-      formData.personalGoal.goal.trim() !== '' &&
-      formData.personalGoal.deadline !== '' &&
-      formData.personalGoal.actionPlan.trim() !== '' &&
-      formData.professionalGoal.goal.trim() !== '' &&
-      formData.professionalGoal.deadline !== '' &&
-      formData.professionalGoal.actionPlan.trim() !== '' &&
-      formData.financialGoal.goal.trim() !== '' &&
-      formData.financialGoal.deadline !== '' &&
-      formData.financialGoal.actionPlan.trim() !== '' &&
-      formData.finishLine.trim() !== ''
+      formData.q1_communicationRating > 0 &&
+      formData.q2_informedConfident !== '' &&
+      formData.q3_timeframeCompleted !== '' &&
+      formData.q4_professionalismRating > 0 &&
+      formData.q5_happyWithFloors !== '' &&
+      formData.q6_praise.trim() !== '' &&
+      formData.q6_improvement.trim() !== ''
     )
   }
 
@@ -711,7 +978,7 @@ export default function ClientFeedback() {
         <div>
           <h1 className="text-3xl font-bold text-black">Client Feedback</h1>
           <p className="text-sm text-gray-600 mt-1">
-            PPF - Purpose, Priority, Finish Line
+            Customer Experience Survey - Right Step Flooring
           </p>
         </div>
       </div>
@@ -833,7 +1100,7 @@ export default function ClientFeedback() {
                   "Technician",
                   "Status",
                   "Req Feedback",
-                  "Check Feedback"
+                  "View Feedback"
                 ].map((heading) => (
                   <th
                     key={heading}
@@ -860,17 +1127,16 @@ export default function ClientFeedback() {
                   const hasSubmitted = status === 'submitted' || status === 'viewed'
 
                   return (
-                    <tr key={job.id} className="border-t hover:bg-primary/10">
+                    <tr key={job.id} className="border-t hover:bg-primary/5">
                       {/* Job Number */}
-                      <td className="px-4 py-3 font-semibold text-primary text-nowrap ">
-                       <button
-                            onClick={() => navigate(`/client/jobs/1`)}
-                            className="  underline"
-                          >
-                            {job.jobNumber }
-                          </button>
+                      <td className="px-4 py-3 font-semibold text-primary">
+                        <button
+                          onClick={() => navigate(`/client/jobs/1`)}
+                          className="underline text-nowrap hover:text-primary/80"
+                        >
+                          {job.jobNumber}
+                        </button>
                       </td>
-                      {/* /client/jobs/1 */}
 
                       {/* Client */}
                       <td className="px-4 py-3">
@@ -926,7 +1192,7 @@ export default function ClientFeedback() {
                         </span>
                       </td>
 
-                      {/* Req Feedback */}
+                      {/* Request */}
                       <td className="px-4 py-3">
                         {!hasSubmitted ? (
                           <button
@@ -941,12 +1207,12 @@ export default function ClientFeedback() {
                         )}
                       </td>
 
-                     
+                      {/* View */}
                       <td className="px-4 py-3">
                         {hasSubmitted ? (
                           <button
-                            onClick={() => handleViewFeedback(job.id)}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-xs font-medium rounded-lg hover:bg-green-800 transition"
+                            onClick={() => handleViewFeedback(job)}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-xs font-medium rounded-lg hover:bg-primary/90 transition"
                           >
                             <Eye size={14} />
                             View
@@ -1023,6 +1289,14 @@ export default function ClientFeedback() {
         setShowRequestModal={setShowRequestModal}
         handleSubmitFeedback={handleSubmitFeedback}
         isFormValid={isFormValid}
+      />
+
+      {/* View Feedback Modal */}
+      <ViewFeedbackModal
+        showViewModal={showViewModal}
+        selectedJob={selectedJob}
+        feedback={selectedJob ? feedbackData[selectedJob.id]?.feedback || null : null}
+        setShowViewModal={setShowViewModal}
       />
     </div>
   )

@@ -36,6 +36,7 @@ import {
   Wallet,
   BookOpenCheck,
   MessagesSquare,
+  Goal,
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 
@@ -102,6 +103,8 @@ const navItems: NavItem[] = [
   { name: "Subcontractors", path: "/subcontractors", icon: Contact, section: "Delivery" },
   { name: "Staff", path: "/staff", icon:BookUser, section: "Delivery" },
   { name: "Staff Assessment", path: "/staff-assessment", icon:BookOpenCheck, section: "Delivery" },
+  { name: "Staff PPF", path: "/staff-ppf", icon:Goal, section: "Delivery" },
+
 
 
   
@@ -135,7 +138,7 @@ export function Sidebar() {
   const { logout } = useAuth()
   const navigate = useNavigate()
   const [isExpanded, setIsExpanded] = useState(false)
-  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({}) // ✅ Add type
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({}) 
 
   const handleLogout = () => {
     logout()
@@ -173,7 +176,7 @@ export function Sidebar() {
           </div>
         )}
 
-        {/* Main Menu Item */}
+        
         {hasSubmenu ? (
           <>
             <button
