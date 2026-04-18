@@ -19,7 +19,7 @@ import {
   Briefcase
 } from "lucide-react"
 
-/* ===================== PIE CHART COMPONENT ===================== */
+
 
 interface PieChartProps {
   score: number
@@ -74,8 +74,6 @@ const PieChart = ({ score, size = 200, strokeWidth = 20 }: PieChartProps) => {
     </div>
   )
 }
-
-/* ===================== MOCK ASSESSMENT DATA ===================== */
 
 const assessmentData = {
   jobId: "480",

@@ -304,6 +304,10 @@ export default function ChangeOrderView() {
                         {isDeleted && <RedLine />}
                         <span className="text-sm text-gray-700">{item.scopeOfWork}</span>
                       </td>
+                      <td>
+                        {isDeleted && <RedLine />}
+                        <span className='text-prhetty bg-primary border-primary/50  '></span>
+                      </td>
 
                       {/* Cost Impact */}
                       <td

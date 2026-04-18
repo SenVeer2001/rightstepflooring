@@ -247,7 +247,7 @@ export function PriceBookItemsModal({
           ))}
         </div>
 
-        {/* Footer */}
+      
         <div className="px-6 py-4 border-t flex justify-between items-center">
           <button
             onClick={onClose}

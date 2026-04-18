@@ -60,7 +60,7 @@ import ClientFeedback from "../components/customerPages/ClientFeedback"
 
 import StaffPPF from "../app/staff/StaffPPF"
 import FeedbackReport from "../components/customerPages/FeedbackReport"
-
+import VendorBrandPayout from "../app/vendor-payout/VendorBrandPayout"
 
 
 export function AppRoutes() {
@@ -103,20 +103,13 @@ export function AppRoutes() {
                       console.log("Delete PO:", id)
                     }}
                   />} />
-
-
                   <Route path="/projects" element={<WorkOrderGallery />} />
                   <Route path="/support/manage-ticket" element={<Tickets />} />
                   <Route path="/support/manage-ticket/:id" element={<TicketView />} />
-
-
-
                   <Route path="/team" element={<Team />} />
                   <Route path="/technicians" element={<Technicians />} />
                   <Route path="/invoices" element={<Invoices />} />
                   <Route path="/invoices/:invoiceId" element={<InvoiceDetailsPage />} />
-
-
                   <Route path="/payments" element={<Payments />} />
                   <Route path="/invoice/:invoiceId" element={<InvoicePaymentDetailsPage />} />
                   {/* <Route path="/estimates" element={<Estimates />} /> */}
@@ -159,21 +152,16 @@ export function AppRoutes() {
                   <Route path="/staff-assessment/start/:jobId" element={<StartAssessment />} />
                   <Route path="/staff-assessment/view/:jobId" element={<ViewAssessmentReport />} />
                   <Route path="/staff-ppf" element={<StaffPPF />} />
-
-
                   <Route path="/document-vault" element={<DocumentVault />} />
                   <Route path="/communication-hub" element={<CommunicationHub />} />
-
-
                   <Route path="/change-orders" element={<ChangeOrderList />} />
                   <Route path="/change-orders/:id" element={<ChangeOrderView />} />
                   <Route path="/change-orders/new" element={<ChangeOrderView />} />
 
-
                   {/* <Route path="/payouts" element={<PayoutList />} /> */}
                   <Route path="/payouts" element={<PayoutDetails />} />
                   <Route path="/payouts-ledger" element={<PayoutLedger />} />
-
+                  <Route path="/payouts-vendor" element={<VendorBrandPayout />} />
                   <Route path="/notifications" element={<NotificationsPage />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/faq" element={<FAQ />} />

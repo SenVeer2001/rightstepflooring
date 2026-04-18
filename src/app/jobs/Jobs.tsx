@@ -2,7 +2,8 @@ import { useEffect, useState, useRef } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { 
   Search, Plus, Eye, Trash2, ChevronDown, LayoutGrid, List, 
-  Download, RefreshCcw, Tag, UserCog, CalendarClock, X, Check 
+  Download, RefreshCcw, Tag, UserCog, CalendarClock, X, Check,
+  Users, User, Filter
 } from "lucide-react"
 import { AddJobModal } from "../../components/AddJobModal"
 import { JobModal } from "../../components/jobPages/JobModal"
@@ -22,7 +23,7 @@ interface Job {
   phone: string
   service: string
   technician: string
-  status: JobStatus
+  status?: JobStatus
   amount: number
   address: string
   city: string
@@ -44,6 +45,7 @@ interface Job {
   projectDescription: string
   source: string
   createdDate: string
+  clientId: string  // 👈 NEW: Link jobs to clients
 }
 
 /* ===================== STATUS CONFIG ===================== */
@@ -111,6 +113,7 @@ const initialJobs: Job[] = [
     id: "1",
     jobNumber: "480",
     clientName: "Robin Stevens",
+    clientId: "client-1",
     companyName: "Stevens Flooring",
     phone: "(413) 275-4790",
     service: "Tile Install",
@@ -142,6 +145,7 @@ const initialJobs: Job[] = [
     id: "2",
     jobNumber: "507",
     clientName: "Teresa Lafoon",
+    clientId: "client-2",
     companyName: "Lafoon Interiors",
     phone: "(919) 259-3932",
     service: "Carpet",
@@ -173,6 +177,7 @@ const initialJobs: Job[] = [
     id: "3",
     jobNumber: "506",
     clientName: "Kristopher Decker",
+    clientId: "client-3",
     companyName: "Decker Homes",
     phone: "(847) 989-1986",
     service: "Repair",
@@ -204,6 +209,7 @@ const initialJobs: Job[] = [
     id: "4",
     jobNumber: "505",
     clientName: "William Chase",
+    clientId: "client-4",
     companyName: "Chase Properties",
     phone: "(919) 302-0824",
     service: "Repair",
@@ -234,17 +240,18 @@ const initialJobs: Job[] = [
   {
     id: "5",
     jobNumber: "508",
-    clientName: "Monica Johnson",
-    companyName: "Johnson Interiors",
-    phone: "(984) 209-0465",
+    clientName: "Robin Stevens",
+    clientId: "client-1",
+    companyName: "Stevens Flooring",
+    phone: "(413) 275-4790",
     service: "Laminate & LVP Install",
     technician: "Mike Johnson",
     status: "in-progress",
     amount: 3200.00,
-    address: "717 Obsidian Way, Durham",
-    city: "Durham",
-    state: "NC",
-    zip: "27701",
+    address: "2225 Charlotte Street",
+    city: "New York",
+    state: "NY",
+    zip: "10001",
     country: "United States",
     startDate: "2026-01-11",
     startTime: "08:30",
@@ -262,11 +269,394 @@ const initialJobs: Job[] = [
     source: "Referral",
     createdDate: "2026-01-04",
   },
+  {
+    id: "6",
+    jobNumber: "509",
+    clientName: "Robin Stevens",
+    clientId: "client-1",
+    companyName: "Stevens Flooring",
+    phone: "(413) 275-4790",
+    service: "Hardwood Install",
+    technician: "Lisa Brown",
+    status: "completed",
+    amount: 4500.00,
+    address: "2225 Charlotte Street",
+    city: "New York",
+    state: "NY",
+    zip: "10001",
+    country: "United States",
+    startDate: "2025-12-15",
+    startTime: "09:00",
+    endDate: "2025-12-15",
+    endTime: "17:00",
+    tags: ["Residential", "Returning"],
+    jobType: "Hardwood Install",
+    scheduled: "Completed",
+    techAssigned: true,
+    timeInSchedule: "Completed",
+    didYouComplete: true,
+    finalWalkthrough: true,
+    totalPrice: 4500.00,
+    projectDescription: "Install hardwood flooring in living room and dining room",
+    source: "Referral",
+    createdDate: "2025-12-01",
+  },
+  {
+    id: "7",
+    jobNumber: "510",
+    clientName: "Teresa Lafoon",
+    clientId: "client-2",
+    companyName: "Lafoon Interiors",
+    phone: "(919) 259-3932",
+    service: "Tile Install",
+    technician: "Tom Davis",
+    // @ts-ignore
+    status: "scheduled",
+    amount: 3800.00,
+    address: "215 Granger Rd, Charlotte",
+    city: "Charlotte",
+    state: "NC",
+    zip: "28202",
+    country: "United States",
+    startDate: "2026-02-01",
+    startTime: "08:00",
+    endDate: "2026-02-01",
+    endTime: "16:00",
+    tags: ["Commercial", "VIP", "Priority"],
+    jobType: "Tile Install",
+    scheduled: "Sat Feb 01, 2026 8:00 am",
+    techAssigned: true,
+    timeInSchedule: "25 DAYS",
+    didYouComplete: false,
+    finalWalkthrough: false,
+    totalPrice: 3800.00,
+    projectDescription: "Tile installation in office lobby",
+    source: "Returning Client",
+    createdDate: "2026-01-07",
+  },
+  {
+    id: "8",
+    jobNumber: "511",
+    clientName: "Teresa Lafoon",
+    clientId: "client-2",
+    companyName: "Lafoon Interiors",
+    phone: "(919) 259-3932",
+    service: "Carpet Removal",
+    technician: "Mike Johnson",
+    status: "pending",
+    amount: 1200.00,
+    address: "500 Trade St, Charlotte",
+    city: "Charlotte",
+    state: "NC",
+    zip: "28202",
+    country: "United States",
+    startDate: "2026-01-20",
+    startTime: "10:00",
+    endDate: "2026-01-20",
+    endTime: "14:00",
+    tags: ["Commercial", "Callback"],
+    jobType: "Carpet Removal",
+    scheduled: "Mon Jan 20, 2026 10:00 am",
+    techAssigned: true,
+    timeInSchedule: "13 DAYS",
+    didYouComplete: false,
+    finalWalkthrough: false,
+    totalPrice: 1200.00,
+    projectDescription: "Remove old carpet from second floor offices",
+    source: "Phone",
+    createdDate: "2026-01-06",
+  },
+  {
+    id: "9",
+    jobNumber: "512",
+    clientName: "Kristopher Decker",
+    clientId: "client-3",
+    companyName: "Decker Homes",
+    phone: "(847) 989-1986",
+    service: "Tile Install",
+    technician: "Lisa Brown",
+    status: "submitted",
+    amount: 5200.00,
+    address: "200 Oak Lane, Cary",
+    city: "Cary",
+    state: "NC",
+    zip: "27511",
+    country: "United States",
+    startDate: "2026-01-25",
+    startTime: "08:00",
+    endDate: "2026-01-25",
+    endTime: "17:00",
+    tags: ["Residential", "Priority", "Warranty"],
+    jobType: "Tile Install",
+    scheduled: "Sat Jan 25, 2026 8:00 am",
+    techAssigned: true,
+    timeInSchedule: "18 DAYS",
+    didYouComplete: false,
+    finalWalkthrough: false,
+    totalPrice: 5200.00,
+    projectDescription: "Kitchen backsplash and bathroom tile installation",
+    source: "Referral",
+    createdDate: "2026-01-05",
+  },
+  {
+    id: "10",
+    jobNumber: "513",
+    clientName: "William Chase",
+    clientId: "client-4",
+    companyName: "Chase Properties",
+    phone: "(919) 302-0824",
+    service: "Laminate Install",
+    technician: "Tom Davis",
+    status: "in-progress",
+    amount: 2800.00,
+    address: "7813 Nugget Lane, Raleigh",
+    city: "Raleigh",
+    state: "NC",
+    zip: "27603",
+    country: "United States",
+    startDate: "2026-01-09",
+    startTime: "09:00",
+    endDate: "2026-01-09",
+    endTime: "15:00",
+    tags: ["Commercial", "Urgent", "Follow Up"],
+    jobType: "Laminate Install",
+    scheduled: "Thu Jan 09, 2026 9:00 am",
+    techAssigned: true,
+    timeInSchedule: "2 DAYS",
+    didYouComplete: false,
+    finalWalkthrough: false,
+    totalPrice: 2800.00,
+    projectDescription: "Laminate flooring in commercial office spaces",
+    source: "Website",
+    createdDate: "2026-01-02",
+  },
 ]
 
 /* ===================== DROPDOWN TYPES ===================== */
 
-type ActiveDropdown = "status" | "tags" | null
+type ActiveDropdown = "status" | "tags" | "client" | null
+
+/* ===================== CLIENT FILTER COMPONENT ===================== */
+
+interface ClientInfo {
+  clientId: string
+  clientName: string
+  companyName: string
+  jobCount: number
+  totalAmount: number
+}
+
+function ClientFilterDropdown({
+  clients,
+  selectedClientId,
+  onSelectClient,
+  onClear,
+  isOpen,
+  onToggle,
+  dropdownRef,
+}: {
+  clients: ClientInfo[]
+  selectedClientId: string | null
+  onSelectClient: (clientId: string) => void
+  onClear: () => void
+  isOpen: boolean
+  onToggle: () => void
+  dropdownRef: React.RefObject<HTMLDivElement>
+}) {
+  const [clientSearchTerm, setClientSearchTerm] = useState("")
+
+  const filteredClients = clients.filter(client =>
+    client.clientName.toLowerCase().includes(clientSearchTerm.toLowerCase()) ||
+    client.companyName.toLowerCase().includes(clientSearchTerm.toLowerCase())
+  )
+
+  const selectedClient = clients.find(c => c.clientId === selectedClientId)
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      {/* Main Button */}
+      {selectedClientId && selectedClient ? (
+        <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 border border-primary/30 rounded-lg">
+          <User size={16} className="text-primary flex-shrink-0" />
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-primary leading-tight">
+              {selectedClient.clientName}
+            </span>
+            <span className="text-[11px] text-primary/70 leading-tight">
+              {selectedClient.jobCount} job{selectedClient.jobCount > 1 ? "s" : ""} • ${selectedClient.totalAmount.toLocaleString()}
+            </span>
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onClear()
+            }}
+            className="p-0.5 hover:bg-primary/20 rounded ml-1"
+          >
+            <X size={14} className="text-primary" />
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={onToggle}
+          className={`flex items-center gap-2 px-4 py-2.5 border rounded-lg text-sm font-medium transition-colors ${
+            isOpen
+              ? "border-primary bg-primary text-white"
+              : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+          }`}
+        >
+          <Users size={16} />
+          Filter by Client
+          <ChevronDown size={14} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        </button>
+      )}
+
+      {/* Dropdown */}
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+          {/* Header */}
+          <div className="px-4 py-3 border-b bg-gray-50">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Select Client
+              </p>
+              <span className="text-xs text-gray-400">
+                {clients.length} client{clients.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+            {/* Search within clients */}
+            <div className="relative">
+              {/* <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" /> */}
+              <input
+                type="text"
+                placeholder="Search clients..."
+                value={clientSearchTerm}
+                onChange={(e) => setClientSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none"
+                autoFocus
+              />
+            </div>
+          </div>
+
+          {/* Show All option */}
+          <button
+            onClick={() => {
+              onClear()
+              setClientSearchTerm("")
+            }}
+            className={`w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-3 border-b transition-colors ${
+              !selectedClientId ? "bg-primary/5 text-primary font-semibold" : "text-gray-700"
+            }`}
+          >
+            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+              <Users size={14} className="text-gray-500" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium">All Clients</p>
+              <p className="text-xs text-gray-400">Show all jobs</p>
+            </div>
+            {!selectedClientId && (
+              <Check size={16} className="text-primary flex-shrink-0" />
+            )}
+          </button>
+
+          {/* Client List */}
+          <div className="max-h-64 overflow-y-auto">
+            {filteredClients.length === 0 ? (
+              <div className="px-4 py-6 text-center text-sm text-gray-400">
+                No clients found
+              </div>
+            ) : (
+              filteredClients.map((client) => {
+                const isSelected = selectedClientId === client.clientId
+                // Generate initials
+                const initials = client.clientName
+                  .split(" ")
+                  .map(n => n[0])
+                  .join("")
+                  .toUpperCase()
+                  .slice(0, 2)
+
+                // Random but consistent color based on clientId
+                const colors = [
+                  "bg-blue-100 text-blue-600",
+                  "bg-green-100 text-green-600",
+                  "bg-purple-100 text-purple-600",
+                  "bg-orange-100 text-orange-600",
+                  "bg-pink-100 text-pink-600",
+                  "bg-teal-100 text-teal-600",
+                  "bg-indigo-100 text-indigo-600",
+                ]
+                const colorIndex = client.clientId.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length
+                const avatarColor = colors[colorIndex]
+
+                return (
+                  <button
+                    key={client.clientId}
+                    onClick={() => {
+                      onSelectClient(client.clientId)
+                      setClientSearchTerm("")
+                    }}
+                    className={`w-full px-4 py-3 text-left text-sm hover:bg-gray-50 flex items-center gap-3 border-b border-gray-50 transition-colors ${
+                      isSelected ? "bg-primary/5" : ""
+                    }`}
+                  >
+                    {/* Avatar */}
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs ${avatarColor}`}>
+                      {initials}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-semibold truncate ${isSelected ? "text-primary" : "text-gray-900"}`}>
+                        {client.clientName}
+                      </p>
+                      <p className="text-xs text-gray-400 truncate">
+                        {client.companyName}
+                      </p>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="flex flex-col items-end flex-shrink-0">
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                        isSelected 
+                          ? "bg-primary/10 text-primary" 
+                          : "bg-gray-100 text-gray-600"
+                      }`}>
+                        {client.jobCount} job{client.jobCount > 1 ? "s" : ""}
+                      </span>
+                      <span className="text-[10px] text-gray-400 mt-0.5">
+                        ${client.totalAmount.toLocaleString()}
+                      </span>
+                    </div>
+
+                    {/* Checkmark */}
+                    {isSelected && (
+                      <Check size={16} className="text-primary flex-shrink-0" />
+                    )}
+                  </button>
+                )
+              })
+            )}
+          </div>
+          {selectedClientId && (
+            <div className="px-4 py-2.5 border-t bg-gray-50">
+              <button
+                onClick={() => {
+                  onClear()
+                  setClientSearchTerm("")
+                }}
+                className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
+              >
+                ✕ Clear filter
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
 /* ===================== COMPONENT ===================== */
 
@@ -276,6 +666,7 @@ export function Jobs() {
   const [jobs, setJobs] = useState<Job[]>(initialJobs)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStatus, setSelectedStatus] = useState<"all" | JobStatus>("all")
+  const [selectedClientFilter, setSelectedClientFilter] = useState<string | null>(null)
   const [isJobModalOpen, setIsJobModalOpen] = useState(false)
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const [isJobDetailModalOpen, setIsJobDetailModalOpen] = useState(false)
@@ -289,6 +680,7 @@ export function Jobs() {
   const [activeDropdown, setActiveDropdown] = useState<ActiveDropdown>(null)
   const statusDropdownRef = useRef<HTMLDivElement>(null)
   const tagsDropdownRef = useRef<HTMLDivElement>(null)
+  const clientDropdownRef = useRef<HTMLDivElement>(null)
 
   // Check if any jobs are selected
   const hasSelection = selectedJobs.size > 0
@@ -296,19 +688,48 @@ export function Jobs() {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        statusDropdownRef.current && 
-        !statusDropdownRef.current.contains(event.target as Node) &&
-        tagsDropdownRef.current &&
-        !tagsDropdownRef.current.contains(event.target as Node)
-      ) {
+      const isOutsideStatus = statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)
+      const isOutsideTags = tagsDropdownRef.current && !tagsDropdownRef.current.contains(event.target as Node)
+      const isOutsideClient = clientDropdownRef.current && !clientDropdownRef.current.contains(event.target as Node)
+
+      if (activeDropdown === "status" && isOutsideStatus) {
+        setActiveDropdown(null)
+      } else if (activeDropdown === "tags" && isOutsideTags) {
+        setActiveDropdown(null)
+      } else if (activeDropdown === "client" && isOutsideClient) {
         setActiveDropdown(null)
       }
     }
 
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  }, [activeDropdown])
+
+  /* ===================== DERIVE UNIQUE CLIENTS ===================== */
+
+  const uniqueClients: ClientInfo[] = (() => {
+    const clientMap = new Map<string, ClientInfo>()
+
+    jobs.forEach(job => {
+      if (clientMap.has(job.clientId)) {
+        const existing = clientMap.get(job.clientId)!
+        existing.jobCount += 1
+        existing.totalAmount += job.totalPrice
+      } else {
+        clientMap.set(job.clientId, {
+          clientId: job.clientId,
+          clientName: job.clientName,
+          companyName: job.companyName,
+          jobCount: 1,
+          totalAmount: job.totalPrice,
+        })
+      }
+    })
+
+    return Array.from(clientMap.values()).sort((a, b) => 
+      a.clientName.localeCompare(b.clientName)
+    )
+  })()
 
   /* ===================== TABS ===================== */
 
@@ -320,9 +741,19 @@ export function Jobs() {
     })),
   ]
 
+  // Count should reflect client filter too
+  const getFilteredJobsForCounts = () => {
+    return jobs.filter(job => {
+      const matchesClient = !selectedClientFilter || job.clientId === selectedClientFilter
+      return matchesClient
+    })
+  }
+
+  const countBase = getFilteredJobsForCounts()
   const jobStatusCounts: Record<string, number> = {
-    all: jobs.length,
-    ...jobs.reduce<Record<string, number>>((accumulator, job) => {
+    all: countBase.length,
+    ...countBase.reduce<Record<string, number>>((accumulator, job) => {
+      // @ts-ignore
       accumulator[job.status] = (accumulator[job.status] || 0) + 1
       return accumulator
     }, {}),
@@ -347,7 +778,9 @@ export function Jobs() {
 
     const matchesUnpaid = !showUnpaidJobs || job.amount > 0
 
-    return matchesSearch && matchesStatus && matchesUnpaid
+    const matchesClient = !selectedClientFilter || job.clientId === selectedClientFilter
+
+    return matchesSearch && matchesStatus && matchesUnpaid && matchesClient
   })
 
   const totalRows = filteredJobs.length
@@ -360,7 +793,7 @@ export function Jobs() {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchTerm, selectedStatus])
+  }, [searchTerm, selectedStatus, selectedClientFilter])
 
   /* ===================== HANDLERS ===================== */
 
@@ -400,7 +833,6 @@ export function Jobs() {
 
   /* ===================== BULK ACTIONS ===================== */
 
-  // Bulk status change
   const handleBulkStatusChange = (newStatus: JobStatus) => {
     setJobs(previousJobs =>
       previousJobs.map(job =>
@@ -410,7 +842,6 @@ export function Jobs() {
     setActiveDropdown(null)
   }
 
-  // Bulk add tag
   const handleBulkAddTag = (tagLabel: string) => {
     setJobs(previousJobs =>
       previousJobs.map(job => {
@@ -426,7 +857,6 @@ export function Jobs() {
     setActiveDropdown(null)
   }
 
-  // Bulk remove tag
   const handleBulkRemoveTag = (tagLabel: string) => {
     setJobs(previousJobs =>
       previousJobs.map(job => {
@@ -439,12 +869,10 @@ export function Jobs() {
     )
   }
 
-  // Clear selection
   const handleClearSelection = () => {
     setSelectedJobs(new Set())
   }
 
-  // Get selected jobs' common tags
   const getSelectedJobsTags = () => {
     const selectedJobsList = jobs.filter(job => selectedJobs.has(job.id))
     const allTags = selectedJobsList.flatMap(job => job.tags || [])
@@ -454,6 +882,27 @@ export function Jobs() {
   const handleViewJob = (jobId: string) => {
     navigate(`/client/jobs/${jobId}`)
   }
+
+  /* ===================== CLIENT FILTER HANDLERS ===================== */
+
+  const handleSelectClient = (clientId: string) => {
+    setSelectedClientFilter(clientId)
+    setActiveDropdown(null)
+  }
+
+  const handleClearClientFilter = () => {
+    setSelectedClientFilter(null)
+    setActiveDropdown(null)
+  }
+
+  /* ===================== ACTIVE FILTERS COUNT ===================== */
+
+  const activeFiltersCount = [
+    selectedClientFilter,
+    selectedStatus !== "all" ? selectedStatus : null,
+    showUnpaidJobs ? "unpaid" : null,
+    searchTerm ? "search" : null,
+  ].filter(Boolean).length
 
   return (
     <div className="space-y-6 p-4 min-h-screen">
@@ -514,6 +963,36 @@ export function Jobs() {
 
       {viewMode === 'table' && (
         <>
+          {/* Active Client Filter Banner */}
+          {/* {selectedClientFilter && (
+            <div className="bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User size={20} className="text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Showing jobs for</p>
+                    <p className="text-lg font-bold text-gray-900">
+                      {uniqueClients.find(c => c.clientId === selectedClientFilter)?.clientName}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {uniqueClients.find(c => c.clientId === selectedClientFilter)?.companyName} • {" "}
+                      {filteredJobs.length} job{filteredJobs.length !== 1 ? "s" : ""} found
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleClearClientFilter}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+                >
+                  <X size={14} />
+                  Clear Filter
+                </button>
+              </div>
+            </div>
+          )} */}
+
           {/* Status Tabs */}
           <div className="flex gap-3 overflow-x-auto pb-2 thin-scrollbar">
             {jobStatusTabs.map((tab) => {
@@ -562,7 +1041,7 @@ export function Jobs() {
             </div>
 
             {/* Quick Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {hasSelection && (
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-lg mr-2">
                   <span className="text-sm font-medium text-primary">
@@ -576,6 +1055,17 @@ export function Jobs() {
                   </button>
                 </div>
               )}
+
+              {/* Client Filter Dropdown */}
+              <ClientFilterDropdown
+                clients={uniqueClients}
+                selectedClientId={selectedClientFilter}
+                onSelectClient={handleSelectClient}
+                onClear={handleClearClientFilter}
+                isOpen={activeDropdown === "client"}
+                onToggle={() => setActiveDropdown(activeDropdown === "client" ? null : "client")}
+                dropdownRef={clientDropdownRef as React.RefObject<HTMLDivElement>}
+              />
 
               <div className="flex items-center gap-1 bg-white border border-gray-300 rounded-lg px-2 py-1">
                 {/* Change Status Button */}
@@ -604,7 +1094,6 @@ export function Jobs() {
                     </button>
                   )}
 
-                  {/* Status Dropdown */}
                   {activeDropdown === "status" && hasSelection && (
                     <div className="absolute top-full left-0 mt-2 w-56 bg-white border rounded-xl shadow-lg z-50 py-2 max-h-72 overflow-y-auto">
                       <div className="px-3 py-2 border-b">
@@ -651,7 +1140,6 @@ export function Jobs() {
                     </button>
                   )}
 
-                  {/* Tags Dropdown */}
                   {activeDropdown === "tags" && hasSelection && (
                     <div className="absolute top-full left-0 mt-2 w-64 bg-white border rounded-xl shadow-lg z-50 py-2 max-h-80 overflow-y-auto">
                       <div className="px-3 py-2 border-b">
@@ -678,7 +1166,6 @@ export function Jobs() {
                         )
                       })}
 
-                      {/* Current tags on selected jobs */}
                       {getSelectedJobsTags().length > 0 && (
                         <>
                           <div className="px-3 py-2 border-t border-b mt-2">
@@ -764,6 +1251,22 @@ export function Jobs() {
               <button className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-primary bg-gray-200 font-semibold hover:bg-primary hover:text-white transition">
                 <Download size={16} /> Export
               </button>
+
+              {/* Active filters indicator */}
+              {activeFiltersCount > 0 && (
+                <button
+                  onClick={() => {
+                    setSelectedClientFilter(null)
+                    setSelectedStatus("all")
+                    setShowUnpaidJobs(false)
+                    setSearchTerm("")
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg text-red-600 bg-red-50 border border-red-200 font-medium hover:bg-red-100 transition"
+                >
+                  <X size={14} />
+                  Clear all ({activeFiltersCount})
+                </button>
+              )}
             </div>
           </div>
         </>
@@ -771,6 +1274,7 @@ export function Jobs() {
 
       {viewMode === "kanban" && (
         <JobKanbanBoard
+        // @ts-ignore
           jobs={jobs}
           // @ts-ignore
           onJobsUpdate={setJobs}
@@ -798,7 +1302,14 @@ export function Jobs() {
                         key={heading}
                         className="px-4 py-3 text-left font-semibold whitespace-nowrap"
                       >
-                        {heading}
+                        {heading === "Client" && selectedClientFilter ? (
+                          <span className="flex items-center gap-1.5">
+                            {heading}
+                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                          </span>
+                        ) : (
+                          heading
+                        )}
                       </th>
                     )
                   )}
@@ -809,7 +1320,25 @@ export function Jobs() {
                 {paginatedJobs.length === 0 ? (
                   <tr>
                     <td colSpan={13} className="p-8 text-center text-gray-500">
-                      No jobs found
+                      <div className="flex flex-col items-center gap-2">
+                        <Search size={32} className="text-gray-300" />
+                        <p className="font-medium">No jobs found</p>
+                        {selectedClientFilter && (
+                          <p className="text-sm text-gray-400">
+                            No jobs for this client with current filters.{" "}
+                            <button
+                              onClick={() => {
+                                setSelectedStatus("all")
+                                setShowUnpaidJobs(false)
+                                setSearchTerm("")
+                              }}
+                              className="text-primary hover:underline"
+                            >
+                              Reset other filters
+                            </button>
+                          </p>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -845,6 +1374,7 @@ export function Jobs() {
                         <select
                           value={job.status}
                           onChange={(e) => handleStatusChange(job.id, e.target.value as JobStatus)}
+                          // @ts-ignore
                           className={`px-2 py-1 rounded-md text-xs font-semibold border cursor-pointer outline-none ${statusStyles[job.status]}`}
                         >
                           {Object.entries(JOB_STATUS_LABELS).map(([statusKey, statusLabel]) => (
@@ -855,7 +1385,7 @@ export function Jobs() {
                         </select>
                       </td>
 
-                      {/* Tags Column with Colors */}
+                      {/* Tags */}
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1 min-w-[200px]">
                           {(job.tags ?? []).length > 0 ? (
@@ -873,15 +1403,28 @@ export function Jobs() {
                         </div>
                       </td>
 
-                      {/* Client */}
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => navigate(`/client/${job.id}`)}
-                          className="flex flex-col text-left text-primary border-none hover:text-blue-600"
-                        >
-                          <div className="font-semibold text-nowrap">{job.clientName}</div>
-                          <div className="text-xs text-gray-500 text-nowrap">{job.companyName}</div>
-                        </button>
+                      {/* Client - with filter button */}
+                      <td className="px-4 py-3 ">
+                        <div className="flex items-center gap-1.5 group">
+                          <button
+                            onClick={() => navigate(`/client/${job.id}`)} //${job.clientId} -> navigate to client profile
+                            className="flex flex-col text-left text-primary border-none hover:text-blue-600"
+                          >
+                            <div className="font-semibold text-nowrap">{job.clientName}</div>
+                            <div className="text-xs text-gray-500 text-nowrap">{job.companyName}</div>
+                          </button>
+                          {/* Quick filter by this client */}
+                          {!selectedClientFilter && (
+                            <button
+                              onClick={() => handleSelectClient(job.clientId)}
+                              data-tooltip-id="action-tooltip"
+                              data-tooltip-content={`Filter by ${job.clientName}`}
+                              className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-primary/10 text-primary transition-all"
+                            >
+                              <Filter size={12} />
+                            </button>
+                          )}
+                        </div>
                       </td>
 
                       {/* Job Type */}
@@ -959,6 +1502,11 @@ export function Jobs() {
                 </span>
                 {" of "}
                 <span className="font-semibold">{totalRows}</span>
+                {selectedClientFilter && (
+                  <span className="text-primary ml-1">
+                    (filtered by client)
+                  </span>
+                )}
               </p>
 
               <div className="flex items-center gap-1">
@@ -1021,13 +1569,24 @@ export function Jobs() {
                     <Link to={`/jobs/${job.id}`} className="font-semibold text-primary hover:text-blue-600">
                       #{job.jobNumber}
                     </Link>
-                    <div className="text-sm font-medium">{job.clientName}</div>
+                    <div className="text-sm font-medium flex items-center gap-1.5">
+                      {job.clientName}
+                      {!selectedClientFilter && (
+                        <button
+                          onClick={() => handleSelectClient(job.clientId)}
+                          className="p-0.5 rounded hover:bg-primary/10 text-primary"
+                        >
+                          <Filter size={10} />
+                        </button>
+                      )}
+                    </div>
                     <div className="text-sm text-gray-500">{job.phone}</div>
                   </div>
                 </div>
                 <select
                   value={job.status}
                   onChange={(e) => handleStatusChange(job.id, e.target.value as JobStatus)}
+                  // @ts-ignore
                   className={`px-2 py-1 rounded-md text-xs font-semibold border cursor-pointer outline-none ${statusStyles[job.status]}`}
                 >
                   {Object.entries(JOB_STATUS_LABELS).map(([statusKey, statusLabel]) => (

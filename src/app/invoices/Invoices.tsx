@@ -302,7 +302,7 @@ export function Invoices() {
       </div>
 
       {/* STATS BOXES - ROW 1: Dollar Amounts */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
         {/* $Pending$ */}
         <div className="bg-white rounded-xl border p-5 shadow-sm hover:shadow-md transition">
           <div className="flex items-center justify-between">
@@ -387,7 +387,7 @@ export function Invoices() {
             </div>
           </div>
         </div>
-         <div className="bg-gradient-to-br from-purple-50 to-white rounded-xl border p-5 shadow-sm hover:shadow-md transition">
+         {/* <div className="bg-gradient-to-br from-purple-50 to-white rounded-xl border p-5 shadow-sm hover:shadow-md transition">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500">Avg. Time to Estimate</p>
@@ -402,10 +402,10 @@ export function Invoices() {
           <p className="mt-2 text-xs text-gray-500">
             From appointment to estimate sent
           </p>
-        </div>
+        </div> */}
 
         {/* Estimate-to-close rate */}
-        <div className="bg-gradient-to-br from-teal-50 to-white rounded-xl border p-5 shadow-sm hover:shadow-md transition">
+        {/* <div className="bg-gradient-to-br from-teal-50 to-white rounded-xl border p-5 shadow-sm hover:shadow-md transition">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-500">Estimate-to-Close Rate</p>
@@ -420,7 +420,7 @@ export function Invoices() {
           <p className="mt-2 text-xs text-gray-500">
             Approved / (Approved + Declined)
           </p>
-        </div>
+        </div> */}
 
         {/* Average # of Follow up */}
         {/* <div className="bg-gradient-to-br from-orange-50 to-white rounded-xl border p-5 shadow-sm hover:shadow-md transition">
@@ -438,7 +438,7 @@ export function Invoices() {
           <p className="mt-2 text-xs text-gray-500">
             Per invoice on average
           </p>
-        </div> */}
+        </div> */}  
       </div>
 
     

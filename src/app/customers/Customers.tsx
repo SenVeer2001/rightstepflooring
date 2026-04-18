@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from "react"
-import { 
-  Search, Filter, Plus, RefreshCcw, Tag, X, Check, 
+import {
+  Search, Filter, Plus, RefreshCcw, Tag, X, Check,
   Eye, Trash2, Download, UserCog, Mail, Phone, ShoppingCart, FileText,
-  ShoppingBag
+  ShoppingBag, Briefcase, ChevronDown, ChevronUp
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { CreateClientModal } from "../../components/customerPages/CreateClientModal"
- // 👈 NEW IMPORT
 import { Tooltip } from "react-tooltip"
 import "react-tooltip/dist/react-tooltip.css"
 import { ShoppingListModal } from "./ShoppingListModal"
@@ -15,6 +14,16 @@ import { PriceBookModal } from "../../components/PriceBookModal"
 /* ===================== TYPES ===================== */
 
 type CustomerStatus = "active" | "inactive" | "pending" | "vip"
+
+type JobStatus = "in-progress" | "completed" | "scheduled" | "cancelled" | "on-hold"
+
+interface AssignedJob {
+  jobId: string
+  title: string
+  status: JobStatus
+  scheduledDate: string
+  amount: number
+}
 
 interface Customer {
   id: string
@@ -32,6 +41,7 @@ interface Customer {
   status: CustomerStatus
   tags: string[]
   joinDate: string
+  assignedJobs: AssignedJob[]
 }
 
 interface PriceBookItem {
@@ -72,6 +82,24 @@ const statusStyles: Record<CustomerStatus, string> = {
   inactive: "bg-gray-100 text-gray-800 border-gray-300",
   pending: "bg-yellow-100 text-yellow-800 border-yellow-300",
   vip: "bg-purple-100 text-purple-800 border-purple-300",
+}
+
+/* ===================== JOB STATUS CONFIG ===================== */
+
+const JOB_STATUS_LABELS: Record<JobStatus, string> = {
+  "in-progress": "In Progress",
+  "completed": "Completed",
+  "scheduled": "Scheduled",
+  "cancelled": "Cancelled",
+  "on-hold": "On Hold",
+}
+
+const jobStatusStyles: Record<JobStatus, string> = {
+  "in-progress": "bg-blue-100 text-blue-800 border-blue-300",
+  "completed": "bg-green-100 text-green-800 border-green-300",
+  "scheduled": "bg-orange-100 text-orange-800 border-orange-300",
+  "cancelled": "bg-red-100 text-red-800 border-red-300",
+  "on-hold": "bg-yellow-100 text-yellow-800 border-yellow-300",
 }
 
 /* ===================== AVAILABLE TAGS ===================== */
@@ -180,6 +208,29 @@ const customersData: Customer[] = [
     status: "active",
     tags: ["Priority", "Commercial"],
     joinDate: "2025-06-15",
+    assignedJobs: [
+      {
+        jobId: "JOB-480",
+        title: "HVAC System Installation",
+        status: "in-progress",
+        scheduledDate: "2025-07-10",
+        amount: 4500,
+      },
+      {
+        jobId: "JOB-481",
+        title: "Furnace Repair",
+        status: "scheduled",
+        scheduledDate: "2025-07-15",
+        amount: 1200,
+      },
+      {
+        jobId: "JOB-482",
+        title: "Duct Cleaning",
+        status: "completed",
+        scheduledDate: "2025-06-20",
+        amount: 800,
+      },
+    ],
   },
   {
     id: "2",
@@ -197,6 +248,43 @@ const customersData: Customer[] = [
     status: "vip",
     tags: ["VIP", "High Value", "Returning"],
     joinDate: "2024-03-20",
+    assignedJobs: [
+      {
+        jobId: "JOB-398",
+        title: "Electrical Panel Upgrade",
+        status: "in-progress",
+        scheduledDate: "2025-07-05",
+        amount: 3200,
+      },
+      {
+        jobId: "JOB-399",
+        title: "Whole House Rewiring",
+        status: "scheduled",
+        scheduledDate: "2025-08-01",
+        amount: 8500,
+      },
+      {
+        jobId: "JOB-400",
+        title: "Outdoor Lighting Installation",
+        status: "completed",
+        scheduledDate: "2025-06-10",
+        amount: 2100,
+      },
+      {
+        jobId: "JOB-401",
+        title: "EV Charger Installation",
+        status: "completed",
+        scheduledDate: "2025-05-15",
+        amount: 1800,
+      },
+      {
+        jobId: "JOB-402",
+        title: "Generator Hook-up",
+        status: "on-hold",
+        scheduledDate: "2025-09-01",
+        amount: 4200,
+      },
+    ],
   },
   {
     id: "3",
@@ -214,6 +302,22 @@ const customersData: Customer[] = [
     status: "active",
     tags: ["Residential", "Referral"],
     joinDate: "2025-01-10",
+    assignedJobs: [
+      {
+        jobId: "JOB-490",
+        title: "Lawn Renovation",
+        status: "in-progress",
+        scheduledDate: "2025-07-08",
+        amount: 2800,
+      },
+      {
+        jobId: "JOB-491",
+        title: "Patio Paver Installation",
+        status: "scheduled",
+        scheduledDate: "2025-07-20",
+        amount: 5500,
+      },
+    ],
   },
   {
     id: "4",
@@ -231,6 +335,15 @@ const customersData: Customer[] = [
     status: "inactive",
     tags: ["Follow Up"],
     joinDate: "2023-11-05",
+    assignedJobs: [
+      {
+        jobId: "JOB-890",
+        title: "Interior Painting - Living Room",
+        status: "completed",
+        scheduledDate: "2025-04-15",
+        amount: 2200,
+      },
+    ],
   },
   {
     id: "5",
@@ -248,12 +361,103 @@ const customersData: Customer[] = [
     status: "pending",
     tags: ["New Customer"],
     joinDate: "2025-06-01",
+    assignedJobs: [],
   },
 ]
 
 /* ===================== DROPDOWN TYPES ===================== */
 
 type ActiveDropdown = "status" | "tags" | null
+
+/* ===================== ASSIGNED JOBS CELL COMPONENT ===================== */
+
+function AssignedJobsCell({ jobs, navigate }: { jobs: AssignedJob[]; navigate: (path: string) => void }) {
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  if (jobs.length === 0) {
+    return (
+      <span className="text-gray-400 text-xs italic">No jobs assigned</span>
+    )
+  }
+
+  const visibleJobs = isExpanded ? jobs : jobs.slice(0, 2)
+  const hasMore = jobs.length > 2
+
+  return (
+    <div className="space-y-1.5 min-w-[220px]">
+      {visibleJobs.map((job) => (
+        <div
+          key={job.jobId}
+          className="flex items-center gap-2 p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors group"
+        >
+          <div className="flex-shrink-0">
+            <Briefcase size={14} className="text-gray-400 group-hover:text-primary transition-colors" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => navigate(`/jobs/${job.jobId}`)}
+                className="text-xs font-semibold text-primary hover:text-blue-600 hover:underline truncate"
+              >
+                {job.jobId}
+              </button>
+              <span
+                className={`px-1.5 py-0.5 text-[10px] font-semibold rounded border whitespace-nowrap ${jobStatusStyles[job.status]
+                  }`}
+              >
+                {JOB_STATUS_LABELS[job.status]}
+              </span>
+            </div>
+            <p className="text-[11px] text-gray-500 truncate" title={job.title}>
+              {job.title}
+            </p>
+          </div>
+          <div className="flex-shrink-0 text-right">
+            <p className="text-xs font-semibold text-gray-700">
+              ${job.amount.toLocaleString()}
+            </p>
+            <p className="text-[10px] text-gray-400">
+              {new Date(job.scheduledDate).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              })}
+            </p>
+          </div>
+        </div>
+      ))}
+
+      {hasMore && (
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center gap-1 text-xs text-primary hover:text-blue-600 font-medium px-1.5 py-0.5 rounded hover:bg-primary/5 transition-colors w-full"
+        >
+          {isExpanded ? (
+            <>
+              <ChevronUp size={12} />
+              Show less
+            </>
+          ) : (
+            <>
+              <ChevronDown size={12} />
+              +{jobs.length - 2} more job{jobs.length - 2 > 1 ? "s" : ""}
+            </>
+          )}
+        </button>
+      )}
+
+      {/* Job count summary */}
+      <div className="flex items-center gap-2 px-1.5 pt-1 border-t border-gray-100">
+        <span className="text-[10px] text-gray-400 font-medium">
+          Total: {jobs.length} job{jobs.length > 1 ? "s" : ""}
+        </span>
+        <span className="text-[10px] text-gray-300">•</span>
+        <span className="text-[10px] font-semibold text-gray-500">
+          ${jobs.reduce((sum, j) => sum + j.amount, 0).toLocaleString()}
+        </span>
+      </div>
+    </div>
+  )
+}
 
 /* ===================== COMPONENT ===================== */
 
@@ -279,7 +483,6 @@ export function Customers() {
   // Shopping List State
   const [shoppingListItems, setShoppingListItems] = useState<ShoppingListItem[]>([])
 
-
   const [isShoppingListViewOpen, setIsShoppingListViewOpen] = useState(false)
   const [selectedClientForView, setSelectedClientForView] = useState<Customer | null>(null)
 
@@ -288,6 +491,7 @@ export function Customers() {
     name: true,
     status: true,
     tags: true,
+    assignedJobs: true,
     company: true,
     address: true,
     phone: true,
@@ -300,7 +504,7 @@ export function Customers() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        statusDropdownRef.current && 
+        statusDropdownRef.current &&
         !statusDropdownRef.current.contains(event.target as Node) &&
         tagsDropdownRef.current &&
         !tagsDropdownRef.current.contains(event.target as Node)
@@ -341,7 +545,6 @@ export function Customers() {
 
   /* ===================== VIEW SHOPPING LIST HANDLER ===================== */
 
-  // 👇 NEW: Open Shopping List View for a specific client
   const handleViewShoppingList = (customer: Customer) => {
     setSelectedClientForView(customer)
     setIsShoppingListViewOpen(true)
@@ -376,7 +579,11 @@ export function Customers() {
       customer.name.toLowerCase().includes(search) ||
       customer.email.toLowerCase().includes(search) ||
       phone.includes(search.replace(/\D/g, "")) ||
-      customer.company?.toLowerCase().includes(search)
+      customer.company?.toLowerCase().includes(search) ||
+      customer.assignedJobs.some(job =>
+        job.jobId.toLowerCase().includes(search) ||
+        job.title.toLowerCase().includes(search)
+      )
 
     const matchesStatus =
       filterStatus === "all" || customer.status === filterStatus
@@ -390,7 +597,7 @@ export function Customers() {
     filteredCustomers.length > 0 &&
     filteredCustomers.every(c => selectedIds.has(c.id))
 
-  const isSomeSelected = 
+  const isSomeSelected =
     filteredCustomers.some(c => selectedIds.has(c.id)) && !isAllSelected
 
   const toggleSelectAll = () => {
@@ -507,7 +714,7 @@ export function Customers() {
         </div>
 
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={() => setIsPriceBookOpen(true)}
             className="flex text-sm items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
           >
@@ -515,7 +722,7 @@ export function Customers() {
             Client Shopping List
           </button>
 
-          <button 
+          <button
             onClick={() => setOpenCreateClient(true)}
             className="flex text-sm items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
           >
@@ -551,13 +758,13 @@ export function Customers() {
 
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {shoppingListItems.map((item) => (
-              <div 
-                key={item.id} 
+              <div
+                key={item.id}
                 className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
               >
                 <div className="flex items-center gap-3">
-                  <img 
-                    src={item.image} 
+                  <img
+                    src={item.image}
                     alt={item.name}
                     className="w-12 h-12 object-cover rounded-lg"
                   />
@@ -649,7 +856,7 @@ export function Customers() {
         <div className="relative flex-1 min-w-[300px]">
           <input
             type="text"
-            placeholder="Search by name, email, phone, or company..."
+            placeholder="Search by name, email, phone, company, or job..."
             className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
@@ -679,11 +886,10 @@ export function Customers() {
                   onClick={() => setActiveDropdown(activeDropdown === "status" ? null : "status")}
                   data-tooltip-id="quick-actions-tooltip"
                   data-tooltip-content="Change Status"
-                  className={`p-2 rounded transition-colors ${
-                    activeDropdown === "status" 
-                      ? "bg-primary text-white" 
+                  className={`p-2 rounded transition-colors ${activeDropdown === "status"
+                      ? "bg-primary text-white"
                       : "hover:bg-primary hover:text-white text-gray-700"
-                  }`}
+                    }`}
                 >
                   <RefreshCcw size={20} />
                 </button>
@@ -725,11 +931,10 @@ export function Customers() {
                   onClick={() => setActiveDropdown(activeDropdown === "tags" ? null : "tags")}
                   data-tooltip-id="quick-actions-tooltip"
                   data-tooltip-content="Modify Tags"
-                  className={`p-2 rounded transition-colors ${
-                    activeDropdown === "tags" 
-                      ? "bg-primary text-white" 
+                  className={`p-2 rounded transition-colors ${activeDropdown === "tags"
+                      ? "bg-primary text-white"
                       : "hover:bg-primary hover:text-white text-gray-700"
-                  }`}
+                    }`}
                 >
                   <Tag size={20} />
                 </button>
@@ -749,11 +954,11 @@ export function Customers() {
                   <div className="px-3 py-2 border-b">
                     <p className="text-xs font-semibold text-gray-500 uppercase">Add Tags</p>
                   </div>
-                  
+
                   {availableTags.map((tag) => {
                     const selectedTags = getSelectedCustomersTags()
                     const isApplied = selectedTags.includes(tag.label)
-                    
+
                     return (
                       <button
                         key={tag.id}
@@ -873,7 +1078,9 @@ export function Customers() {
                       }
                       className="accent-primary"
                     />
-                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                    {key === "assignedJobs"
+                      ? "Assigned Jobs"
+                      : key.charAt(0).toUpperCase() + key.slice(1)}
                   </label>
                 ))}
               </div>
@@ -883,189 +1090,256 @@ export function Customers() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white border rounded-lg shadow-sm overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-100 border-b">
-            <tr>
-              <th className="px-4 py-3 w-12">
+     <div className="bg-white border rounded-lg shadow-sm overflow-x-auto">
+  <table className="w-full text-sm">
+    <thead className="bg-gray-100 border-b">
+      <tr>
+        <th className="px-4 py-3 w-12">
+          <input
+            type="checkbox"
+            checked={isAllSelected}
+            ref={input => {
+              if (input) {
+                input.indeterminate = isSomeSelected
+              }
+            }}
+            onChange={toggleSelectAll}
+            className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-primary"
+          />
+        </th>
+
+        {visibleColumns.id && (
+          <th className="px-4 py-3 text-left font-semibold">Client ID</th>
+        )}
+        {visibleColumns.name && (
+          <th className="px-4 py-3 text-left font-semibold">Client Info</th>
+        )}
+        {visibleColumns.status && (
+          <th className="px-4 py-3 text-left font-semibold">Status</th>
+        )}
+        {visibleColumns.tags && (
+          <th className="px-4 py-3 text-left font-semibold">Tags</th>
+        )}
+        {visibleColumns.company && (
+          <th className="px-4 py-3 text-left font-semibold">Company</th>
+        )}
+        {visibleColumns.assignedJobs && (
+          <th className="px-4 py-3 text-left font-semibold">
+            <div className="flex items-center gap-1.5">
+              <Briefcase size={14} />
+              Assigned Jobs
+            </div>
+          </th>
+        )}
+        {visibleColumns.created && (
+          <th className="px-4 py-3 text-left font-semibold">Created</th>
+        )}
+        {visibleColumns.action && (
+          <th className="px-4 py-3 text-left font-semibold">Action</th>
+        )}
+      </tr>
+    </thead>
+
+    <tbody>
+      {filteredCustomers.length === 0 ? (
+        <tr>
+          <td colSpan={9} className="text-center py-10 text-gray-500">
+            No clients found
+          </td>
+        </tr>
+      ) : (
+        filteredCustomers.map(customer => {
+          const isSelected = selectedIds.has(customer.id)
+          return (
+            <tr
+              key={customer.id}
+              className={`border-b hover:bg-gray-50 transition-colors ${
+                isSelected ? "bg-blue-50" : ""
+              }`}
+            >
+             
+              <td className="px-4 py-3">
                 <input
                   type="checkbox"
-                  checked={isAllSelected}
-                  ref={input => {
-                    if (input) {
-                      input.indeterminate = isSomeSelected
-                    }
-                  }}
-                  onChange={toggleSelectAll}
+                  checked={isSelected}
+                  onChange={() => toggleSelect(customer.id)}
                   className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-primary"
                 />
-              </th>
-              
-              {visibleColumns.id && <th className="px-4 py-3 text-left font-semibold">Client ID</th>}
-              {visibleColumns.name && <th className="px-4 py-3 text-left font-semibold">Name</th>}
-              {visibleColumns.status && <th className="px-4 py-3 text-left font-semibold">Status</th>}
-              {visibleColumns.tags && <th className="px-4 py-3 text-left font-semibold">Tags</th>}
-              {visibleColumns.company && <th className="px-4 py-3 text-left font-semibold">Company</th>}
-              {visibleColumns.address && <th className="px-4 py-3 text-left font-semibold">Address</th>}
-              {visibleColumns.phone && <th className="px-4 py-3 text-left font-semibold">Phone</th>}
-              {visibleColumns.created && <th className="px-4 py-3 text-left font-semibold">Created</th>}
-              {visibleColumns.action && <th className="px-4 py-3 text-left font-semibold">Action</th>}
-            </tr>
-          </thead>
+              </td>
 
-          <tbody>
-            {filteredCustomers.length === 0 ? (
-              <tr>
-                <td colSpan={10} className="text-center py-10 text-gray-500">
-                  No clients found
-                </td>
-              </tr>
-            ) : (
-              filteredCustomers.map(customer => {
-                const isSelected = selectedIds.has(customer.id)
-
-                return (
-                  <tr 
-                    key={customer.id} 
-                    className={`border-b hover:bg-gray-50 transition-colors ${
-                      isSelected ? "bg-blue-50" : ""
-                    }`}
+              {/* Client ID */}
+              {visibleColumns.id && (
+                <td className="px-4 py-3">
+                  <button
+                    onClick={() => navigate(`/client/${customer.id}`)}
+                    className="font-semibold text-primary hover:text-blue-600 hover:underline"
                   >
-                    <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleSelect(customer.id)}
-                        className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-primary"
+                    #{customer.id}
+                  </button>
+                </td>
+              )}
+
+              {/* ✅ Client Info - Name + Email + Phone + Address combined */}
+              {visibleColumns.name && (
+                <td className="px-4 py-3">
+                  <div className="flex items-start gap-2.5 min-w-[240px]">
+                    {/* Avatar */}
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-xs font-bold text-primary">
+                        {customer.name
+                          .split(" ")
+                          .map((n: string) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2)}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col gap-0.5">
+                      {/* Name */}
+                      <button
+                        onClick={() => navigate(`/client/${customer.id}`)}
+                        className="font-semibold text-primary hover:text-blue-600 hover:underline text-left text-sm leading-tight"
+                      >
+                        {customer.name}
+                      </button>
+
+                      {/* Email */}
+                      <a
+                        href={`mailto:${customer.email}`}
+                        className="text-xs text-blue-500 hover:underline leading-tight"
+                      >
+                        {customer.email}
+                      </a>
+
+                      {/* Phone */}
+                      <a
+                        href={`tel:${customer.phone}`}
+                        className="text-xs text-gray-500 hover:text-primary transition-colors leading-tight"
+                      >
+                        {customer.phone}
+                      </a>
+
+                      {/* Address */}
+                      <p className="text-xs text-gray-400 leading-tight">
+                        {customer.address}, {customer.city}, {customer.state} {customer.zip}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+              )}
+
+              {/* Status */}
+              {visibleColumns.status && (
+                <td className="px-4 py-3 min-w-[150px]">
+                  <select
+                    value={customer.status}
+                    onChange={(e) =>
+                      handleStatusChange(customer.id, e.target.value as CustomerStatus)
+                    }
+                    className={`px-2 py-1 rounded-md text-xs font-semibold border cursor-pointer outline-none ${statusStyles[customer.status]}`}
+                  >
+                    {Object.entries(CUSTOMER_STATUS_LABELS).map(([statusKey, statusLabel]) => (
+                      <option key={statusKey} value={statusKey}>
+                        {statusLabel}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+              )}
+
+              {/* Tags */}
+              {visibleColumns.tags && (
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap gap-1 max-w-[200px]">
+                    {(customer.tags ?? []).length > 0 ? (
+                      (customer.tags ?? []).map(tag => (
+                        <span
+                          key={tag}
+                          className={`px-2 py-0.5 text-xs font-medium rounded ${getTagColor(tag)}`}
+                        >
+                          {tag}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-400 text-xs italic">No tags</span>
+                    )}
+                  </div>
+                </td>
+              )}
+
+              {/* Company */}
+              {visibleColumns.company && (
+                <td className="px-4 py-3 text-gray-700">
+                  {customer.company || "-"}
+                </td>
+              )}
+
+              {/* ✅ Assigned Jobs - with outer border */}
+              {visibleColumns.assignedJobs && (
+                <td className="px-4 py-3 align-top">
+                  {customer.assignedJobs && customer.assignedJobs.length > 0 ? (
+                    <div className="border border-gray-200 rounded-xl p-2 bg-gray-50 min-w-[230px] shadow-sm">
+                      <AssignedJobsCell
+                        jobs={customer.assignedJobs}
+                        navigate={navigate}
                       />
-                    </td>
+                    </div>
+                  ) : (
+                    <div className="border border-dashed border-gray-200 rounded-xl p-3 min-w-[230px] flex items-center justify-center">
+                      <span className="text-gray-400 text-xs italic">No jobs assigned</span>
+                    </div>
+                  )}
+                </td>
+              )}
 
-                    {visibleColumns.id && (
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => navigate(`/client/${customer.id}`)}
-                          className="font-semibold text-primary hover:text-blue-600 hover:underline"
-                        >
-                          #{customer.id}
-                        </button>
-                      </td>
-                    )}
+              {/* Created */}
+              {visibleColumns.created && (
+                <td className="px-4 py-3 text-nowrap text-gray-500">
+                  {new Date(customer.joinDate).toLocaleDateString()}
+                </td>
+              )}
 
-                    {visibleColumns.name && (
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => navigate(`/client/${customer.id}`)}
-                          className="flex flex-col text-left text-primary border-none hover:text-blue-600"
-                        >
-                          <div className="font-semibold text-nowrap">{customer.name}</div>
-                          <div className="text-xs text-gray-500 text-nowrap">{customer.email}</div>
-                        </button>
-                      </td>
-                    )}
+              {/* Action */}
+              {visibleColumns.action && (
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleViewShoppingList(customer)}
+                      data-tooltip-id="action-tooltip"
+                      data-tooltip-content="View Shopping List"
+                      className="p-1.5 rounded hover:bg-emerald-100 text-emerald-600 transition-colors"
+                    >
+                      <ShoppingBag size={16} />
+                    </button>
 
-                    {visibleColumns.status && (
-                      <td className="px-4 py-3 min-w-[150px]">
-                        <select
-                          value={customer.status}
-                          onChange={(e) => handleStatusChange(customer.id, e.target.value as CustomerStatus)}
-                          className={`px-2 py-1 rounded-md text-xs font-semibold border cursor-pointer outline-none ${statusStyles[customer.status]}`}
-                        >
-                          {Object.entries(CUSTOMER_STATUS_LABELS).map(([statusKey, statusLabel]) => (
-                            <option key={statusKey} value={statusKey}>
-                              {statusLabel}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                    )}
-                    {visibleColumns.tags && (
-                      <td className="px-4 py-3">
-                        <div className="flex flex-wrap gap-1 max-w-[200px]">
-                          {(customer.tags ?? []).length > 0 ? (
-                            (customer.tags ?? []).map(tag => (
-                              <span
-                                key={tag}
-                                className={`px-2 py-0.5 text-xs font-medium rounded ${getTagColor(tag)}`}
-                              >
-                                {tag}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-gray-400 text-xs italic">No tags</span>
-                          )}
-                        </div>
-                      </td>
-                    )}
+                    <button
+                      onClick={() => navigate(`/client/${customer.id}`)}
+                      data-tooltip-id="action-tooltip"
+                      data-tooltip-content="View Client"
+                      className="p-1.5 rounded hover:bg-primary/10 text-primary transition-colors"
+                    >
+                      <Eye size={16} />
+                    </button>
 
-                    {visibleColumns.company && (
-                      <td className="px-4 py-3">{customer.company || "-"}</td>
-                    )}
-
-                    {visibleColumns.address && (
-                      <td className="px-4 py-3 text-nowrap">
-                        {customer.address}, {customer.city}
-                      </td>
-                    )}
-
-                    {visibleColumns.phone && (
-                      <td className="px-4 py-3">
-                        <a 
-                          href={`tel:${customer.phone}`} 
-                          className="text-primary hover:underline text-nowrap"
-                        >
-                          {customer.phone}
-                        </a>
-                      </td>
-                    )}
-
-                    {visibleColumns.created && (
-                      <td className="px-4 py-3 text-nowrap">
-                        {new Date(customer.joinDate).toLocaleDateString()}
-                      </td>
-                    )}
-
-                   
-                    {visibleColumns.action && (
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          {/* View Client Details */}
-
-                           <button
-                            onClick={() => handleViewShoppingList(customer)}
-                            data-tooltip-id="action-tooltip"
-                            data-tooltip-content="View Shopping List"
-                            className="p-1.5 rounded hover:bg-emerald-100 text-emerald-600 transition-colors"
-                          >
-                            <ShoppingBag size={16} />
-                          </button>
-
-                          <button
-                            onClick={() => navigate(`/client/${customer.id}`)}
-                            data-tooltip-id="action-tooltip"
-                            data-tooltip-content="View Client"
-                            className="p-1.5 rounded hover:bg-primary/10 text-primary transition-colors"
-                          >
-                            <Eye size={16} />
-                          </button>
-                         
-                          <button
-                            onClick={() => handleDelete(customer.id)}
-                            data-tooltip-id="action-tooltip"
-                            data-tooltip-content="Delete Client"
-                            className="p-1.5 rounded hover:bg-red-100 text-red-600 transition-colors"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    )}
-                  </tr>
-                )
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                    <button
+                      onClick={() => handleDelete(customer.id)}
+                      data-tooltip-id="action-tooltip"
+                      data-tooltip-content="Delete Client"
+                      className="p-1.5 rounded hover:bg-red-100 text-red-600 transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              )}
+            </tr>
+          )
+        })
+      )}
+    </tbody>
+  </table>
+</div>
 
       {/* MOBILE CARDS */}
       <div className="md:hidden space-y-4">
@@ -1075,9 +1349,8 @@ export function Customers() {
           return (
             <div
               key={customer.id}
-              className={`bg-white border rounded-xl p-4 shadow-sm ${
-                isSelected ? "ring-2 ring-primary bg-blue-50" : ""
-              }`}
+              className={`bg-white border rounded-xl p-4 shadow-sm ${isSelected ? "ring-2 ring-primary bg-blue-50" : ""
+                }`}
             >
               <div className="flex items-start gap-3">
                 <input
@@ -1122,21 +1395,62 @@ export function Customers() {
                     ))}
                   </div>
 
+                  
+                  {customer.assignedJobs.length > 0 && (
+                    <div className="mt-3 p-2 bg-gray-50 rounded-lg">
+                      <p className="text-xs font-semibold text-gray-500 uppercase mb-1.5 flex items-center gap-1">
+                        <Briefcase size={12} />
+                        Assigned Jobs ({customer.assignedJobs.length})
+                      </p>
+                      <div className="space-y-1.5">
+                        {customer.assignedJobs.slice(0, 3).map((job) => (
+                          <div
+                            key={job.jobId}
+                            className="flex items-center justify-between bg-white rounded p-1.5"
+                          >
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => navigate(`/jobs/${job.jobId}`)}
+                                className="text-xs font-semibold text-primary hover:underline"
+                              >
+                                {job.jobId}
+                              </button>
+                              <span
+                                className={`px-1.5 py-0.5 text-[10px] font-semibold rounded border ${jobStatusStyles[job.status]
+                                  }`}
+                              >
+                                {JOB_STATUS_LABELS[job.status]}
+                              </span>
+                            </div>
+                            <span className="text-xs font-semibold text-gray-700">
+                              ${job.amount.toLocaleString()}
+                            </span>
+                          </div>
+                        ))}
+                        {customer.assignedJobs.length > 3 && (
+                          <p className="text-xs text-primary font-medium px-1.5">
+                            +{customer.assignedJobs.length - 3} more jobs
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="mt-3 text-sm text-gray-600">
                     <p>{customer.company}</p>
                     <p>{customer.address}, {customer.city}</p>
                   </div>
 
                   <div className="mt-3 flex items-center justify-between">
-                    <a 
-                      href={`tel:${customer.phone}`} 
+                    <a
+                      href={`tel:${customer.phone}`}
                       className="text-primary text-sm font-medium flex items-center gap-1"
                     >
                       <Phone size={14} />
                       {customer.phone}
                     </a>
                     <div className="flex gap-2">
-                       <button
+                      <button
                         onClick={() => handleViewShoppingList(customer)}
                         className="p-2 hover:bg-gray-100 rounded-lg text-emerald-600"
                       >
@@ -1148,8 +1462,6 @@ export function Customers() {
                       >
                         <Eye size={16} />
                       </button>
-                     
-                     
                       <button
                         onClick={() => handleDelete(customer.id)}
                         className="p-2 hover:bg-gray-100 rounded-lg text-red-600"
@@ -1170,7 +1482,7 @@ export function Customers() {
         isOpen={openCreateClient}
         onClose={() => setOpenCreateClient(false)}
         onSave={(data) => {
-          console.log("CLIENT DATA", data)
+          // console.log("CLIENT DATA", data)
           setOpenCreateClient(false)
         }}
       />
@@ -1183,7 +1495,7 @@ export function Customers() {
         onAddToEstimate={handleAddToShoppingList}
       />
 
-      {/* 👇 NEW: SHOPPING LIST VIEW MODAL */}
+      {/* SHOPPING LIST VIEW MODAL */}
       <ShoppingListModal
         isOpen={isShoppingListViewOpen}
         onClose={() => {
@@ -1201,18 +1513,18 @@ export function Customers() {
       />
 
       {/* TOOLTIPS */}
-      <Tooltip 
-        id="quick-actions-tooltip" 
+      <Tooltip
+        id="quick-actions-tooltip"
         place="top"
         className="!bg-gray-800 !text-white !text-xs !px-2 !py-1 !rounded"
       />
-      <Tooltip 
-        id="action-tooltip" 
+      <Tooltip
+        id="action-tooltip"
         place="top"
         className="!bg-gray-800 !text-white !text-xs !px-2 !py-1 !rounded"
       />
-      <Tooltip 
-        id="disabled-tooltip" 
+      <Tooltip
+        id="disabled-tooltip"
         place="top"
         className="!bg-red-600 !text-white !text-xs !px-2 !py-1 !rounded"
       />
@@ -1220,7 +1532,6 @@ export function Customers() {
   )
 }
 
-/* ===================== STAT CARD ===================== */
 
 function StatCard({
   label,

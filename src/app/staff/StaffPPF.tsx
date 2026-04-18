@@ -795,7 +795,7 @@ export default function StaffPPF() {
                         )}
                       </td>
 
-                      {/* PPF Status */}
+                      
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${statusConfig.bg} ${statusConfig.text}`}>
                           <statusConfig.icon size={12} />
@@ -840,7 +840,7 @@ export default function StaffPPF() {
           </table>
         </div>
 
-        {/* Pagination */}
+        
         {filteredStaff.length > 0 && (
           <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
             <p className="text-sm text-gray-600">

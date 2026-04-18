@@ -444,6 +444,7 @@ const CommunicationHub: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition"
             />
+            
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}

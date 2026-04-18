@@ -37,6 +37,7 @@ import {
   BookOpenCheck,
   MessagesSquare,
   Goal,
+  BadgeDollarSign,
 } from "lucide-react"
 import { useAuth } from "../../context/AuthContext"
 
@@ -74,14 +75,9 @@ const navItems: NavItem[] = [
   { name: "Payments", path: "/payments", icon: CreditCard, section: "CRM" },
   { name: "Client", path: "/client", icon: Users, section: "CRM" },
   { name: "Client Feedback", path: "/client-feedback", icon: MessagesSquare, section: "CRM" },
-
   { name: "CRM Calls", path: "/phone", icon: Phone, section: "CRM" },
-
-  // Delivery
   { name: "Jobs", path: "/jobs", icon: Calendar, section: "Delivery" },
   { name: "Change Order", path: "/change-orders", icon:ListOrdered, section: "Delivery" },
-
-  
    { 
     name: "Orders", 
     path: "/orders", 
@@ -99,16 +95,12 @@ const navItems: NavItem[] = [
   { name: "Map View", path: "/map", icon: MapPinned, section: "Delivery" },
   { name: "Price Book", path: "/products", icon: Notebook, section: "Delivery" },
   { name: "Payout", path: "/payouts", icon: HandCoins, section: "Delivery" },
+  { name: "Vendor Payout", path: "/payouts-vendor", icon: BadgeDollarSign, section: "Delivery" },
   { name: "Payout Ledger", path: "/payouts-ledger", icon: Wallet, section: "Delivery" },
   { name: "Subcontractors", path: "/subcontractors", icon: Contact, section: "Delivery" },
   { name: "Staff", path: "/staff", icon:BookUser, section: "Delivery" },
   { name: "Staff Assessment", path: "/staff-assessment", icon:BookOpenCheck, section: "Delivery" },
   { name: "Staff PPF", path: "/staff-ppf", icon:Goal, section: "Delivery" },
-
-
-
-  
-
    { 
     name: "Support Ticket", 
     path: "/support", 
@@ -121,15 +113,9 @@ const navItems: NavItem[] = [
       // { name: "Close  Ticket", path: "/support/manage-ticket/close", icon: TicketX},
     ]
   },
-
-
-
-  // Master
   { name: "Document Vault", path: "/document-vault", icon: FileSearch, section: "Master" },
   { name: "Team", path: "/team", icon: UserPen, section: "Master" },
   { name: "Training Courses", path: "/training/courses", icon: BookOpen, section: "Master" },
-
-  // Report
   { name: "Report", path: "/reports", icon: BarChart3, section: "Report" },
   { name: "Advanced Report", path: "/advanced-report", icon: BarChart3, section: "Report" },
 ]

@@ -42,7 +42,7 @@ function WorkOrderChoiceModel({
             <span className="text-sm font-medium">Create new work order</span>
           </label>
 
-          {/* EDIT */}
+          
           <label className="flex items-center gap-3">
             <input
               type="radio"
@@ -53,7 +53,6 @@ function WorkOrderChoiceModel({
             <span className="text-sm font-medium">Edit existing work order</span>
           </label>
 
-          {/* 👇 DROPDOWN ONLY FOR EDIT */}
           {mode === "edit" && (
             <select
               className="w-full border rounded-md px-3 py-2 text-sm"
