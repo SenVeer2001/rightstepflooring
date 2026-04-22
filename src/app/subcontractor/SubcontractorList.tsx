@@ -40,6 +40,7 @@ import {
   tradeOptions,
   serviceAreaOptions,
 } from "../../types/subcontractor";
+import AddSubcontractorForm from "./AddSubcontractorForm";
 
 // Status config
 const statusConfig: Record<SubcontractorStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
@@ -118,13 +119,12 @@ const StarRating = ({ rating, size = 16 }: { rating: number; size?: number }) =>
         <Star
           key={star}
           size={size}
-          className={`${
-            star <= rating
-              ? "text-yellow-400 fill-yellow-400"
-              : star - 0.5 <= rating
+          className={`${star <= rating
+            ? "text-yellow-400 fill-yellow-400"
+            : star - 0.5 <= rating
               ? "text-yellow-400 fill-yellow-400/50"
               : "text-gray-300"
-          }`}
+            }`}
         />
       ))}
     </div>
@@ -148,7 +148,7 @@ const RatingPopup = ({ isOpen, onClose, subcontractor }: RatingPopupProps) => {
   const formatDate = (date: Date) => {
     const now = new Date();
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Yesterday";
     if (diffDays < 7) return `${diffDays} days ago`;
@@ -312,11 +312,12 @@ export default function SubcontractorList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [statusDropdown, setStatusDropdown] = useState<string | null>(null);
-  
+  const [addFormOpen, setAddFormOpen] = useState(false);
+
   // NEW: Rating popup state
   const [ratingPopupOpen, setRatingPopupOpen] = useState(false);
   const [selectedSubcontractor, setSelectedSubcontractor] = useState<Subcontractor | null>(null);
-  
+
   const navigate = useNavigate();
   const rowsPerPage = 10;
 
@@ -368,6 +369,26 @@ export default function SubcontractorList() {
     setStatusDropdown(null);
   };
 
+  const handleAddSubcontractor = (data: any) => {
+    const newSub: Subcontractor = {
+      id: `sub-${Date.now()}`,
+      name: data.companyName,
+      email: data.email,
+      phone: `+${data.phone}`,
+      trade: data.primaryTrade,
+      trades: [data.primaryTrade, ...data.additionalTrades],
+      serviceAreas: data.serviceAreas,
+      status: data.status,
+      insuranceStatus: data.insuranceStatus,
+      rating: 0,
+      completedJobs: 0,
+      totalJobs: 0,
+      avatar: data.avatar,
+      lastJobDate: undefined,
+    };
+    setSubcontractors((prev) => [newSub, ...prev]);
+  };
+
   const handleCloseDropdown = () => {
     setActiveDropdown(null);
     setStatusDropdown(null);
@@ -387,7 +408,10 @@ export default function SubcontractorList() {
             </p>
           </div>
 
-          <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition shadow-sm">
+          <button
+            onClick={() => setAddFormOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition shadow-sm"
+          >
             <UserPlus size={16} />
             Add Subcontractor
           </button>
@@ -553,12 +577,12 @@ export default function SubcontractorList() {
                   paginatedSubcontractors.map((sub) => {
                     const statusInfo = statusConfig[sub.status];
                     const insuranceInfo = insuranceConfig[sub.insuranceStatus];
-                    
+
                     if (!statusInfo || !insuranceInfo) {
                       console.error("Missing config for:", sub.status, sub.insuranceStatus);
                       return null;
                     }
-                    
+
                     const StatusIcon = statusInfo.icon;
                     const InsuranceIcon = insuranceInfo.icon;
 
@@ -668,9 +692,8 @@ export default function SubcontractorList() {
                                         handleStatusChange(sub.id, status);
                                       }}
                                       disabled={isCurrentStatus}
-                                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${
-                                        isCurrentStatus ? 'bg-gray-50 cursor-not-allowed opacity-60' : ''
-                                      }`}
+                                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${isCurrentStatus ? 'bg-gray-50 cursor-not-allowed opacity-60' : ''
+                                        }`}
                                     >
                                       <Icon size={14} className={config.color} />
                                       <span className={config.color}>{config.label}</span>
@@ -714,7 +737,7 @@ export default function SubcontractorList() {
                             </button>
 
                             {activeDropdown === sub.id && (
-                              <div 
+                              <div
                                 className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10"
                                 onClick={(e) => e.stopPropagation()}
                               >
@@ -803,6 +826,11 @@ export default function SubcontractorList() {
         id="sub-tooltip"
         place="top"
         className="!bg-gray-800 !text-white !text-[10px] !px-2 !py-1 !rounded"
+      />
+      <AddSubcontractorForm
+        isOpen={addFormOpen}
+        onClose={() => setAddFormOpen(false)}
+        onSubmit={handleAddSubcontractor}
       />
 
       {/* Rating Popup */}

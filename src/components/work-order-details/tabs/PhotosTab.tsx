@@ -400,9 +400,7 @@ export default function PhotosTab({ onPhotoClick, onStatusChange }: Props) {
     selectedPhotos.size === filteredPhotos.length && filteredPhotos.length > 0
   const hasSelection = selectedPhotos.size > 0
 
-  /* ══════════════════════════════════════════════
-      NOTIFY POPUP
-  ══════════════════════════════════════════════ */
+  
   const NotifyPopup = () => {
     if (!showNotifyPopup) return null
     return (
@@ -442,7 +440,6 @@ export default function PhotosTab({ onPhotoClick, onStatusChange }: Props) {
               {/* Body */}
               <div className="p-5 space-y-4">
 
-                {/* Type */}
                 <div>
                   <label className="text-xs font-semibold text-gray-600 mb-2 block">
                     Update Type
@@ -486,7 +483,7 @@ export default function PhotosTab({ onPhotoClick, onStatusChange }: Props) {
                   />
                 </div>
 
-                {/* Notes */}
+              
                 <div>
                   <label className="text-xs font-semibold text-gray-600 mb-1.5 block">
                     Notes{" "}
@@ -566,9 +563,7 @@ export default function PhotosTab({ onPhotoClick, onStatusChange }: Props) {
     )
   }
 
-  /* ══════════════════════════════════════════════
-      DATE STATUS POPUP
-  ══════════════════════════════════════════════ */
+  
   const DateStatusPopup = () => {
     if (!showDateStatusPopup || !selectedDateForStatus) return null
     const dateGroup = getDateGroupStatus(selectedDateForStatus)
@@ -700,9 +695,7 @@ export default function PhotosTab({ onPhotoClick, onStatusChange }: Props) {
     )
   }
 
-  /* ══════════════════════════════════════════════
-      MAIN RENDER
-  ══════════════════════════════════════════════ */
+
   return (
     <div className="space-y-4">
       {/* ── HEADER ── */}

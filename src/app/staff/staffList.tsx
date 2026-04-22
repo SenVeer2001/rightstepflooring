@@ -38,6 +38,7 @@ import {
   type StaffRole,
   mockStaff,
 } from "../../types/staff";
+import AddStaffForm from "./AddStaffForm";
 
 // Status config
 const statusConfig: Record<StaffStatus, { label: string; color: string; bg: string; icon: React.ElementType; dot: string }> = {
@@ -124,13 +125,12 @@ const StarRating = ({ rating, size = 16 }: { rating: number; size?: number }) =>
         <Star
           key={star}
           size={size}
-          className={`${
-            star <= rating
+          className={`${star <= rating
               ? "text-yellow-400 fill-yellow-400"
               : star - 0.5 <= rating
-              ? "text-yellow-400 fill-yellow-400/50"
-              : "text-gray-300"
-          }`}
+                ? "text-yellow-400 fill-yellow-400/50"
+                : "text-gray-300"
+            }`}
         />
       ))}
     </div>
@@ -154,7 +154,7 @@ const RatingPopup = ({ isOpen, onClose, staff }: RatingPopupProps) => {
   const formatDate = (date: Date) => {
     const now = new Date();
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Yesterday";
     if (diffDays < 7) return `${diffDays} days ago`;
@@ -351,9 +351,8 @@ const StaffCard = ({
                         onStatusChange(member.id, status);
                       }}
                       disabled={isCurrentStatus}
-                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${
-                        isCurrentStatus ? 'bg-gray-50 cursor-not-allowed opacity-60' : ''
-                      }`}
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${isCurrentStatus ? 'bg-gray-50 cursor-not-allowed opacity-60' : ''
+                        }`}
                     >
                       <Icon size={14} className={config.color} />
                       <span className={config.color}>{config.label}</span>
@@ -382,7 +381,7 @@ const StaffCard = ({
             </button>
 
             {activeDropdown === member.id && (
-              <div 
+              <div
                 className="absolute left-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20"
                 onClick={(e) => e.stopPropagation()}
               >
@@ -557,11 +556,12 @@ export default function StaffList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [statusDropdown, setStatusDropdown] = useState<string | null>(null);
-  
+  const [addFormOpen, setAddFormOpen] = useState(false);
+
   // Rating popup state
   const [ratingPopupOpen, setRatingPopupOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
-  
+
   const navigate = useNavigate();
   const rowsPerPage = 12; // Changed to 12 for better grid layout (3x4 or 4x3)
 
@@ -619,6 +619,27 @@ export default function StaffList() {
     setActiveDropdown(null);
   };
 
+
+  const handleAddStaff = (data: StaffFormData) => {
+    const newMember: Staff = {
+      id: `staff-${Date.now()}`,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phone: data.phone,
+      role: data.role as StaffRole,
+      department: data.department,
+      status: data.status,
+      employeeId: data.employeeId,
+      hireDate: new Date(data.hireDate),
+      rating: 0,
+      completedJobs: 0,
+      totalJobs: 0,
+      avatar: undefined,
+    };
+    setStaff((prev) => [newMember, ...prev]);
+  };
+
   const handleCloseDropdown = () => {
     setActiveDropdown(null);
     setStatusDropdown(null);
@@ -638,7 +659,10 @@ export default function StaffList() {
             </p>
           </div>
 
-          <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition shadow-sm">
+          <button
+            onClick={() => setAddFormOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition shadow-sm"
+          >
             <UserPlus size={16} />
             Add Staff Member
           </button>
@@ -722,7 +746,7 @@ export default function StaffList() {
               </select>
             </div>
 
-          
+
             <div className="relative">
               <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <select
@@ -736,7 +760,7 @@ export default function StaffList() {
               </select>
             </div>
 
-           
+
             <div className="relative">
               <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <select
@@ -752,7 +776,7 @@ export default function StaffList() {
               </select>
             </div>
 
-           
+
             <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
               <Download size={14} />
               Export
@@ -760,7 +784,7 @@ export default function StaffList() {
           </div>
         </div>
 
-       
+
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-500">
             Showing <span className="font-medium text-gray-900">{filteredStaff.length}</span> staff members
@@ -847,6 +871,11 @@ export default function StaffList() {
         isOpen={ratingPopupOpen}
         onClose={() => setRatingPopupOpen(false)}
         staff={selectedStaff}
+      />
+      <AddStaffForm
+        isOpen={addFormOpen}
+        onClose={() => setAddFormOpen(false)}
+        onSubmit={handleAddStaff}
       />
     </div>
   );
