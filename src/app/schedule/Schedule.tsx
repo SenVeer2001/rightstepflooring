@@ -8,7 +8,10 @@ import {
   MapPin,
   User,
 } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import AddScheduleEventPopup, {
+  type ScheduleEventFormData,
+} from "./AddScheduleEventPopup"
 
 interface ScheduleEvent {
   id: string
@@ -20,7 +23,7 @@ interface ScheduleEvent {
   status: "scheduled" | "in-progress" | "completed"
 }
 
-const scheduleData: ScheduleEvent[] = [
+const initialScheduleData: ScheduleEvent[] = [
   {
     id: "1",
     title: "Flooring Installation",
@@ -76,8 +79,10 @@ const statusStyles: Record<
 }
 
 export function Schedule() {
+  const [events, setEvents] = useState<ScheduleEvent[]>(initialScheduleData)
   const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 10))
   const [viewType, setViewType] = useState<"month" | "week" | "day">("month")
+  const [addEventOpen, setAddEventOpen] = useState(false)
 
   const getDaysInMonth = (date: Date) =>
     new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
@@ -90,6 +95,27 @@ export function Schedule() {
 
   const handleNextMonth = () =>
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))
+
+  const handleAddEvent = (data: Omit<ScheduleEvent, "id">) => {
+    const newEvent: ScheduleEvent = {
+      id: `event-${Date.now()}`,
+      ...data,
+    }
+
+    setEvents((prev) =>
+      [...prev, newEvent].sort((a, b) => {
+        if (a.date === b.date) return a.time.localeCompare(b.time)
+        return a.date.localeCompare(b.date)
+      })
+    )
+  }
+
+  const defaultPopupDate = useMemo(() => {
+    const year = currentDate.getFullYear()
+    const month = String(currentDate.getMonth() + 1).padStart(2, "0")
+    const day = String(currentDate.getDate()).padStart(2, "0")
+    return `${year}-${month}-${day}`
+  }, [currentDate])
 
   const renderCalendarDays = () => {
     const daysInMonth = getDaysInMonth(currentDate)
@@ -110,7 +136,7 @@ export function Schedule() {
         currentDate.getMonth() + 1
       ).padStart(2, "0")}-${String(day).padStart(2, "0")}`
 
-      const dayEvents = scheduleData.filter(e => e.date === dateStr)
+      const dayEvents = events.filter((e) => e.date === dateStr)
       const isToday =
         new Date().toDateString() ===
         new Date(
@@ -122,25 +148,26 @@ export function Schedule() {
       cells.push(
         <div
           key={day}
-          className={`h-28 rounded-lg border p-2 text-sm transition
-            ${isToday
+          className={`h-28 rounded-lg border p-2 text-sm transition ${
+            isToday
               ? "border-primary bg-primary/5"
               : "border-gray-200 hover:bg-gray-50"
-            }`}
+          }`}
         >
           <div
-            className={`mb-1 text-xs font-semibold ${isToday ? "text-primary" : "text-gray-700"
-              }`}
+            className={`mb-1 text-xs font-semibold ${
+              isToday ? "text-primary" : "text-gray-700"
+            }`}
           >
             {day}
           </div>
 
           <div className="space-y-1">
-            {dayEvents.slice(0, 3).map(event => (
+            {dayEvents.slice(0, 3).map((event) => (
               <div
                 key={event.id}
                 className="rounded bg-primary text-white px-2 py-0.5 text-[11px] truncate"
-                title={event.title}
+                title={`${event.title} - ${event.time}`}
               >
                 {event.time}
               </div>
@@ -153,11 +180,17 @@ export function Schedule() {
     return cells
   }
 
-  const upcomingEvents = scheduleData.slice(0, 4)
+  const upcomingEvents = useMemo(() => {
+    return [...events]
+      .sort((a, b) => {
+        if (a.date === b.date) return a.time.localeCompare(b.time)
+        return a.date.localeCompare(b.date)
+      })
+      .slice(0, 4)
+  }, [events])
 
   return (
     <div className="p-6 space-y-8">
-
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div>
@@ -167,7 +200,10 @@ export function Schedule() {
           </p>
         </div>
 
-        <button className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold">
+        <button
+          onClick={() => setAddEventOpen(true)}
+          className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary/90 transition"
+        >
           <Plus size={16} />
           Add Event
         </button>
@@ -175,21 +211,20 @@ export function Schedule() {
 
       {/* VIEW SWITCH */}
       <div className="inline-flex rounded-lg border bg-white p-1">
-        {["month", "week", "day"].map(type => (
+        {["month", "week", "day"].map((type) => (
           <button
             key={type}
-            onClick={() => setViewType(type as any)}
-            className={`px-4 py-2 text-[12px] font-semibold rounded-md transition
-              ${viewType === type
+            onClick={() => setViewType(type as "month" | "week" | "day")}
+            className={`px-4 py-2 text-[12px] font-semibold rounded-md transition ${
+              viewType === type
                 ? "bg-primary text-white"
                 : "text-gray-600 hover:bg-gray-100"
-              }`}
+            }`}
           >
             {type.toUpperCase()}
           </button>
         ))}
       </div>
-
 
       {/* UPCOMING EVENTS */}
       <div className="bg-white border rounded-xl p-6">
@@ -198,7 +233,7 @@ export function Schedule() {
         </h3>
 
         <div className="space-y-3">
-          {upcomingEvents.map(event => (
+          {upcomingEvents.map((event) => (
             <div
               key={event.id}
               className="flex items-start justify-between border rounded-lg p-4 hover:bg-gray-50"
@@ -219,27 +254,27 @@ export function Schedule() {
               </div>
 
               <span
-                className={`text-xs px-3 py-1 rounded-full font-semibold capitalize
-    ${statusStyles[event.status]}
-  `}
+                className={`text-xs px-3 py-1 rounded-full font-semibold capitalize ${statusStyles[event.status]}`}
               >
                 {event.status.replace("-", " ")}
               </span>
-
             </div>
           ))}
         </div>
       </div>
+
       {/* CALENDAR */}
       <div className="bg-white border rounded-xl p-6 space-y-4">
-
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">
             {monthsOfYear[currentDate.getMonth()]} {currentDate.getFullYear()}
           </h2>
 
           <div className="flex gap-2">
-            <button onClick={handlePrevMonth} className="p-2 hover:bg-gray-100 rounded-lg">
+            <button
+              onClick={handlePrevMonth}
+              className="p-2 hover:bg-gray-100 rounded-lg"
+            >
               <ChevronLeft size={18} />
             </button>
             <button
@@ -248,26 +283,33 @@ export function Schedule() {
             >
               Today
             </button>
-            <button onClick={handleNextMonth} className="p-2 hover:bg-gray-100 rounded-lg">
+            <button
+              onClick={handleNextMonth}
+              className="p-2 hover:bg-gray-100 rounded-lg"
+            >
               <ChevronRight size={18} />
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-7 gap-3 text-xs font-semibold text-gray-500">
-          {daysOfWeek.map(day => (
+          {daysOfWeek.map((day) => (
             <div key={day} className="text-center">
               {day}
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-3">
-          {renderCalendarDays()}
-        </div>
+        <div className="grid grid-cols-7 gap-3">{renderCalendarDays()}</div>
       </div>
 
-
+      {/* Add Event Popup */}
+      <AddScheduleEventPopup
+        isOpen={addEventOpen}
+        onClose={() => setAddEventOpen(false)}
+        onSubmit={handleAddEvent}
+        defaultDate={defaultPopupDate}
+      />
     </div>
   )
 }

@@ -19,7 +19,6 @@ import {
   Download,
   ChevronDown,
   X,
-  ThumbsUp,
   Lock,
   Briefcase,
   Award,
@@ -40,7 +39,7 @@ import {
 } from "../../types/staff";
 import AddStaffForm from "./AddStaffForm";
 
-// Status config
+
 const statusConfig: Record<StaffStatus, { label: string; color: string; bg: string; icon: React.ElementType; dot: string }> = {
   active: { label: "Active", color: "text-green-700", bg: "bg-green-100", icon: CheckCircle, dot: "bg-green-500" },
   inactive: { label: "Inactive", color: "text-gray-600", bg: "bg-gray-100", icon: XCircle, dot: "bg-gray-400" },
@@ -48,7 +47,6 @@ const statusConfig: Record<StaffStatus, { label: string; color: string; bg: stri
   terminated: { label: "Terminated", color: "text-red-700", bg: "bg-red-100", icon: Lock, dot: "bg-red-500" },
 };
 
-// Role config
 const roleConfig: Record<StaffRole, { label: string; color: string; bg: string; icon: React.ElementType; gradient: string }> = {
   admin: { label: "Admin", color: "text-purple-700", bg: "bg-purple-100", icon: Award, gradient: "from-purple-500 to-purple-600" },
   manager: { label: "Manager", color: "text-blue-700", bg: "bg-blue-100", icon: Briefcase, gradient: "from-blue-500 to-blue-600" },
@@ -137,7 +135,6 @@ const StarRating = ({ rating, size = 16 }: { rating: number; size?: number }) =>
   );
 };
 
-// Rating Popup Component
 interface RatingPopupProps {
   isOpen: boolean;
   onClose: () => void;
@@ -202,19 +199,19 @@ const RatingPopup = ({ isOpen, onClose, staff }: RatingPopupProps) => {
           </button>
         </div>
 
-        {/* Content */}
+     
         <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
-          {/* Rating Summary */}
+         
           <div className="px-6 py-6 bg-gradient-to-br from-gray-50 to-white border-b border-gray-100">
             <div className="flex flex-col md:flex-row gap-6">
-              {/* Overall Rating */}
+             
               <div className="flex flex-col items-center justify-center">
                 <div className="text-5xl font-bold text-gray-900">{staff.rating}</div>
                 <StarRating rating={staff.rating} size={24} />
                 <p className="text-sm text-gray-500 mt-2">{totalReviews} reviews</p>
               </div>
 
-              {/* Rating Breakdown */}
+              
               <div className="flex-1 space-y-2">
                 {[5, 4, 3, 2, 1].map((star) => {
                   const count = breakdown[star as keyof typeof breakdown];
@@ -238,7 +235,7 @@ const RatingPopup = ({ isOpen, onClose, staff }: RatingPopupProps) => {
             </div>
           </div>
 
-          {/* Reviews List */}
+        
           <div className="px-6 py-4">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Recent Reviews</h3>
             <div className="space-y-4">
@@ -265,7 +262,7 @@ const RatingPopup = ({ isOpen, onClose, staff }: RatingPopupProps) => {
                     </div>
                   </div>
 
-                  {/* Review Content */}
+                  
                   <p className="mt-3 text-sm text-gray-700 leading-relaxed">{review.comment}</p>
                 </div>
               ))}
@@ -619,8 +616,9 @@ export default function StaffList() {
     setActiveDropdown(null);
   };
 
-
+// @ts-ignore
   const handleAddStaff = (data: StaffFormData) => {
+    // @ts-ignore
     const newMember: Staff = {
       id: `staff-${Date.now()}`,
       firstName: data.firstName,
@@ -648,7 +646,7 @@ export default function StaffList() {
   return (
     <div className="min-h-screen p-4 md:p-4" onClick={handleCloseDropdown}>
       <div className="max-w-8xl mx-auto space-y-5">
-        {/* Header */}
+       
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-xl md:text-3xl font-bold text-gray-900 flex items-center gap-2">
@@ -668,7 +666,7 @@ export default function StaffList() {
           </button>
         </div>
 
-        {/* Quick Stats Cards */}
+        
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <div className="flex items-center gap-3">

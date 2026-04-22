@@ -153,7 +153,7 @@ export default function WorkOrderDetailsPage() {
           <WorkOrderLeftPanel />
         </div>
 
-        {/* RIGHT FIXED/STICKY */}
+        
         <div className="w-[380px] border-l bg-white overflow-y-auto">
           <div className="sticky top-0">
             <WorkOrderRightPanel />

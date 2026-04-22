@@ -370,6 +370,7 @@ export default function SubcontractorList() {
   };
 
   const handleAddSubcontractor = (data: any) => {
+      // @ts-ignore
     const newSub: Subcontractor = {
       id: `sub-${Date.now()}`,
       name: data.companyName,
